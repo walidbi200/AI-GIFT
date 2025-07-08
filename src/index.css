@@ -35,3 +35,11 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+@keyframes giftLid {
+  0%, 100% { transform: translate(-50%, 0) rotate(-5deg); }
+  50% { transform: translate(-50%, -10px) rotate(5deg); }
+}
+.animate-gift-lid {
+  animation: giftLid 1.2s ease-in-out infinite;
+}
