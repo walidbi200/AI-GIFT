@@ -125,10 +125,44 @@ function HomePage() {
     setTimeout(() => handleSubmit(), 0);
   };
   
-  const copyToClipboard = async () => { /* ... implementation ... */ };
-  const clearForm = () => { /* ... implementation ... */ };
-  const handleSelectRecentSearch = (search: any) => { /* ... implementation ... */ };
-  const handleFeedbackSubmit = async (rating: number, feedback: string) => { /* ... implementation ... */ };
+  const copyToClipboard = async () => { 
+      try {
+      const text = suggestions.map((s: GiftSuggestion) => `${s.name} – ${s.description}`).join('\n');
+      await navigator.clipboard.writeText(text);
+      showToastMessage('Gift list copied to clipboard!', 'success');
+    } catch (error) {
+      showToastMessage('Failed to copy to clipboard', 'error');
+    }
+  };
+  const clearForm = () => { 
+    setAge(25);
+    setOccasion('');
+    setInterests([]);
+    setCurrentInterest('');
+    setBudget('');
+    setRelationship('');
+    setNegativeKeywords('');
+    setSuggestions([]);
+    setErrors({});
+    setIsUsingMockData(false);
+    setHasGeneratedSuggestions(false);
+  };
+  const handleSelectRecentSearch = (search: any) => { 
+    setAge(search.age);
+    setRelationship(search.relationship || '');
+    setOccasion(search.occasion);
+    setInterests(search.interests.split(', ').filter(Boolean));
+    setBudget(search.budget);
+    setNegativeKeywords(search.negativeKeywords || '');
+    setErrors({});
+   };
+  const handleFeedbackSubmit = async (rating: number, feedback: string) => { 
+    try {
+      showToastMessage('Thank you for your feedback!', 'success');
+    } catch (error) {
+      showToastMessage('Failed to submit feedback', 'error');
+    }
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
