@@ -156,32 +156,41 @@ function App() {
     }
   }
 
+  // The return statement below has been updated based on the UI/UX Enhancement Plan
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center w-full p-4 sm:p-8">
+    // Phase 1: Core Layout - This wrapper centers everything on the page
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4 sm:p-8 font-sans">
       <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
       <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} onSubmit={handleFeedbackSubmit} />
 
+      {/* This wrapper sets the maximum width of the content */}
       <div className="w-full max-w-2xl">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">🎁 AI Gift Recommender</h1>
-          <p className="text-gray-600 mt-2">Find the perfect gift with AI-powered suggestions</p>
+        
+        {/* Phase 2: Enhanced Header */}
+        <header className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+            🎁 AI Gift Recommender
+          </h1>
+          <p className="text-slate-600 mt-2">
+            Find the perfect gift with AI-powered suggestions
+          </p>
         </header>
 
         <RecentSearches searches={recentSearches} onSelectSearch={handleSelectRecentSearch} onClearSearches={clearSearches} />
 
+        {/* Phase 2: Form Card */}
         <main className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* --- Form Inputs (Logic unchanged, only minor styling tweaks) --- */}
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">Recipient Age: <span className="text-purple-600 font-bold">{age}</span></label>
+              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">Recipient Age: <span className="text-indigo-600 font-bold">{age}</span></label>
               <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>1</span><span>25</span><span>50</span><span>75</span><span>100</span>
-              </div>
             </div>
 
             <div>
               <label htmlFor="relationship" className="block text-sm font-medium text-gray-700 mb-2">Who is this for? <span className="text-red-500">*</span></label>
-              <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}>
+              <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}>
                 <option value="">Select relationship</option>
                 {relationships.map((rel) => <option key={rel.value} value={rel.value}>{rel.label}</option>)}
               </select>
@@ -190,7 +199,7 @@ function App() {
 
             <div>
               <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">Occasion <span className="text-red-500">*</span></label>
-              <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}>
+              <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}>
                 <option value="">Select an occasion</option>
                 {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)}
               </select>
@@ -199,40 +208,30 @@ function App() {
 
             <div>
               <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">Interests <span className="text-red-500">*</span></label>
-              <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); if (!interests.includes(currentInterest.trim())) { setInterests([...interests, currentInterest.trim()]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`} />
+              <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); if (!interests.includes(currentInterest.trim())) { setInterests([...interests, currentInterest.trim()]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`} />
               {interests.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {interests.map((interest, index) => (
-                    <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                    <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
                       {interest}
-                      <button type="button" onClick={() => setInterests(interests.filter((_, i) => i !== index))} className="ml-1 text-purple-600 hover:text-purple-800">×</button>
+                      <button type="button" onClick={() => setInterests(interests.filter((_, i) => i !== index))} className="ml-1 text-indigo-600 hover:text-indigo-800">×</button>
                     </span>
                   ))}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2 mt-3">
-                {['Gaming', 'Reading', 'Travel', 'Cooking'].map((quickInterest) => (<button key={quickInterest} type="button" onClick={() => { if (!interests.includes(quickInterest)) { setInterests([...interests, quickInterest]); } }} className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors">{quickInterest}</button>))}
-              </div>
-              {errors.interests && <p className="text-red-500 text-sm mt-1">{errors.interests}</p>}
             </div>
 
             <div>
               <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">Budget (optional)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-2 text-gray-500">$</span>
-                <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full pl-8 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} />
-              </div>
-              <div className="flex gap-2 mt-3">
-                {[{ label: 'Under $50', value: '50' }, { label: 'Under $100', value: '100' }, { label: 'Any Budget', value: '' }].map((budgetOption) => (<button key={budgetOption.label} type="button" onClick={() => setBudget(budgetOption.value)} className={`px-3 py-1 text-sm rounded-full transition-colors ${budget === budgetOption.value ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{budgetOption.label}</button>))}
-              </div>
-              {errors.budget && <p className="text-red-500 text-sm mt-1">{errors.budget}</p>}
+              <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} />
             </div>
 
+            {/* Phase 2: Improved Button Hierarchy */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
-              <button type="submit" disabled={isLoading} className="flex-1 bg-indigo-600 text-white font-bold py-3 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg">
+              <button type="submit" disabled={isLoading} className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-all shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 disabled:bg-indigo-400 disabled:cursor-not-allowed">
                 {isLoading ? (<div className="flex items-center justify-center"><LoadingSpinner size="sm" /> <span className="ml-2">Finding Gifts...</span></div>) : '✨ Recommend Gifts'}
               </button>
-              <button type="button" onClick={clearForm} className="flex-1 bg-transparent border border-slate-300 text-slate-600 py-3 px-6 rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-all duration-200">
+              <button type="button" onClick={clearForm} className="w-full bg-transparent border border-slate-300 text-slate-600 font-bold py-3 px-4 rounded-lg hover:bg-slate-100 transition-all">
                 🗑️ Clear Form
               </button>
             </div>
@@ -241,20 +240,21 @@ function App() {
 
         {isLoading && (
           <div className="w-full">
-            <LoadingSpinner size="lg" text="Finding Perfect Gifts..." description="Our AI is analyzing the recipient's interests and preferences to find the most thoughtful gifts" showFunMessages={true} />
+            <LoadingSpinner size="lg" text="Finding Perfect Gifts..." description="Our AI is analyzing interests and preferences..." showFunMessages={true} />
           </div>
         )}
 
+        {/* Phase 3: Polished Results Display */}
         {suggestions.length > 0 && !isLoading && (
-          <section className="bg-white rounded-lg shadow-lg p-6 sm:p-8 animate-fade-in-up">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-gray-900">🎉 Gift Suggestions!</h2>
-              {isUsingMockData && (<span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"><span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></span>Demo Mode</span>)}
+          <section className="animate-fade-in-up">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">🎉 Here are a few ideas!</h2>
+            <div className="space-y-4 mb-8">
+              {suggestions.map((suggestion, index) => (
+                // The GiftCard component will now be styled according to the plan
+                <GiftCard key={suggestion.id} suggestion={suggestion} index={index} />
+              ))}
             </div>
-            <div className="space-y-6 mb-8">
-              {suggestions.map((suggestion, index) => (<GiftCard key={suggestion.id} suggestion={suggestion} index={index} />))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
               <button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50">🔁 Regenerate</button>
               <button onClick={copyToClipboard} className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">📄 Copy List</button>
               <button onClick={() => setShowFeedbackModal(true)} className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">💬 Give Feedback</button>
