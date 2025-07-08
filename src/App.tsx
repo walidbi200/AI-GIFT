@@ -156,88 +156,166 @@ function App() {
     }
   }
 
-  // The return statement below has been updated based on the UI/UX Enhancement Plan
   return (
-    // Phase 1: Core Layout - This wrapper centers everything on the page
+    // Phase 1: Core Layout - Main container with centered, responsive design
     <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4 sm:p-8 font-sans">
       <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
       <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} onSubmit={handleFeedbackSubmit} />
 
-      {/* This wrapper sets the maximum width of the content */}
+      {/* Content wrapper with maximum width for readability */}
       <div className="w-full max-w-2xl">
         
-        {/* Phase 2: Enhanced Header */}
+        {/* Phase 2: Enhanced Header with improved typography */}
         <header className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-3">
             🎁 AI Gift Recommender
           </h1>
-          <p className="text-slate-600 mt-2">
+          <p className="text-lg text-slate-600">
             Find the perfect gift with AI-powered suggestions
           </p>
         </header>
 
         <RecentSearches searches={recentSearches} onSelectSearch={handleSelectRecentSearch} onClearSearches={clearSearches} />
 
-        {/* Phase 2: Form Card */}
+        {/* Phase 2: Form Card with modern styling */}
         <main className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* --- Form Inputs (Logic unchanged, only minor styling tweaks) --- */}
+            {/* Age Slider */}
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">Recipient Age: <span className="text-indigo-600 font-bold">{age}</span></label>
-              <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" />
+              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">
+                Recipient Age: <span className="text-indigo-600 font-bold">{age}</span>
+              </label>
+              <input 
+                type="range" 
+                id="age" 
+                min="1" 
+                max="100" 
+                value={age} 
+                onChange={(e) => setAge(parseInt(e.target.value))} 
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider" 
+              />
             </div>
 
+            {/* Relationship Select */}
             <div>
-              <label htmlFor="relationship" className="block text-sm font-medium text-gray-700 mb-2">Who is this for? <span className="text-red-500">*</span></label>
-              <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}>
+              <label htmlFor="relationship" className="block text-sm font-medium text-gray-700 mb-2">
+                Who is this for? <span className="text-red-500">*</span>
+              </label>
+              <select 
+                id="relationship" 
+                value={relationship} 
+                onChange={(e) => setRelationship(e.target.value)} 
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}
+              >
                 <option value="">Select relationship</option>
                 {relationships.map((rel) => <option key={rel.value} value={rel.value}>{rel.label}</option>)}
               </select>
               {errors.relationship && <p className="text-red-500 text-sm mt-1">{errors.relationship}</p>}
             </div>
 
+            {/* Occasion Select */}
             <div>
-              <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">Occasion <span className="text-red-500">*</span></label>
-              <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}>
+              <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">
+                Occasion <span className="text-red-500">*</span>
+              </label>
+              <select 
+                id="occasion" 
+                value={occasion} 
+                onChange={(e) => setOccasion(e.target.value)} 
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}
+              >
                 <option value="">Select an occasion</option>
                 {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)}
               </select>
               {errors.occasion && <p className="text-red-500 text-sm mt-1">{errors.occasion}</p>}
             </div>
 
+            {/* Interests Input */}
             <div>
-              <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">Interests <span className="text-red-500">*</span></label>
-              <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); if (!interests.includes(currentInterest.trim())) { setInterests([...interests, currentInterest.trim()]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`} />
+              <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">
+                Interests <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="interests" 
+                value={currentInterest} 
+                onChange={(e) => setCurrentInterest(e.target.value)} 
+                onKeyDown={(e) => { 
+                  if (e.key === 'Enter' && currentInterest.trim()) { 
+                    e.preventDefault(); 
+                    if (!interests.includes(currentInterest.trim())) { 
+                      setInterests([...interests, currentInterest.trim()]); 
+                    } 
+                    setCurrentInterest(''); 
+                  } 
+                }} 
+                placeholder="Type an interest and press Enter" 
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`} 
+              />
               {interests.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {interests.map((interest, index) => (
                     <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
                       {interest}
-                      <button type="button" onClick={() => setInterests(interests.filter((_, i) => i !== index))} className="ml-1 text-indigo-600 hover:text-indigo-800">×</button>
+                      <button 
+                        type="button" 
+                        onClick={() => setInterests(interests.filter((_, i) => i !== index))} 
+                        className="ml-1 text-indigo-600 hover:text-indigo-800"
+                      >
+                        ×
+                      </button>
                     </span>
                   ))}
                 </div>
               )}
+              {errors.interests && <p className="text-red-500 text-sm mt-1">{errors.interests}</p>}
             </div>
 
+            {/* Budget Input */}
             <div>
-              <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">Budget (optional)</label>
-              <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} />
+              <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
+                Budget (optional)
+              </label>
+              <input 
+                type="number" 
+                id="budget" 
+                value={budget} 
+                onChange={(e) => setBudget(e.target.value)} 
+                placeholder="Enter maximum budget" 
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} 
+              />
+              {errors.budget && <p className="text-red-500 text-sm mt-1">{errors.budget}</p>}
             </div>
 
             {/* Phase 2: Improved Button Hierarchy */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
-              <button type="submit" disabled={isLoading} className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-all shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 disabled:bg-indigo-400 disabled:cursor-not-allowed">
-                {isLoading ? (<div className="flex items-center justify-center"><LoadingSpinner size="sm" /> <span className="ml-2">Finding Gifts...</span></div>) : '✨ Recommend Gifts'}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="flex-1 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 disabled:bg-indigo-400 disabled:cursor-not-allowed transform hover:scale-105"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <LoadingSpinner size="sm" /> 
+                    <span className="ml-2">Finding Gifts...</span>
+                  </div>
+                ) : (
+                  '✨ Recommend Gifts'
+                )}
               </button>
-              <button type="button" onClick={clearForm} className="w-full bg-transparent border border-slate-300 text-slate-600 font-bold py-3 px-4 rounded-lg hover:bg-slate-100 transition-all">
+              <button 
+                type="button" 
+                onClick={clearForm} 
+                className="flex-1 bg-transparent border border-slate-300 text-slate-600 font-bold py-3 px-6 rounded-lg hover:bg-slate-100 transition-all duration-200"
+              >
                 🗑️ Clear Form
               </button>
             </div>
           </form>
         </main>
 
+        {/* Loading State */}
         {isLoading && (
           <div className="w-full">
             <LoadingSpinner size="lg" text="Finding Perfect Gifts..." description="Our AI is analyzing interests and preferences..." showFunMessages={true} />
@@ -247,17 +325,36 @@ function App() {
         {/* Phase 3: Polished Results Display */}
         {suggestions.length > 0 && !isLoading && (
           <section className="animate-fade-in-up">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">🎉 Here are a few ideas!</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+              🎉 Here are a few ideas!
+            </h2>
             <div className="space-y-4 mb-8">
               {suggestions.map((suggestion, index) => (
-                // The GiftCard component will now be styled according to the plan
                 <GiftCard key={suggestion.id} suggestion={suggestion} index={index} />
               ))}
             </div>
-             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
-              <button onClick={handleSubmit} disabled={isLoading} className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50">🔁 Regenerate</button>
-              <button onClick={copyToClipboard} className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">📄 Copy List</button>
-              <button onClick={() => setShowFeedbackModal(true)} className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">💬 Give Feedback</button>
+            
+            {/* Action Buttons for Results */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+              <button 
+                onClick={handleSubmit} 
+                disabled={isLoading} 
+                className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50"
+              >
+                🔁 Regenerate
+              </button>
+              <button 
+                onClick={copyToClipboard} 
+                className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
+              >
+                📄 Copy List
+              </button>
+              <button 
+                onClick={() => setShowFeedbackModal(true)} 
+                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105"
+              >
+                💬 Give Feedback
+              </button>
             </div>
           </section>
         )}
