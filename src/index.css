@@ -1,30 +1,11 @@
+/* FILE: src/index.css */
+/* This version removes the conflicting default styles. */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Custom animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -36,276 +17,21 @@
   }
 }
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes bounceIn {
-  from {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Animation classes */
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.animate-slide-in {
-  animation: slideIn 0.4s ease-out;
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out;
-}
-
-.animate-bounce-in {
-  animation: bounceIn 0.6s ease-out;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Custom slider styles */
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  background: linear-gradient(to right, #0ea5e9 0%, #0ea5e9 50%, #e5e7eb 50%, #e5e7eb 100%);
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #0ea5e9;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
-
-.slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #0ea5e9;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
-
-.slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Dark mode slider */
-.dark .slider {
-  background: linear-gradient(to right, #0ea5e9 0%, #0ea5e9 50%, #374151 50%, #374151 100%);
-}
-
-.dark .slider::-webkit-slider-thumb {
-  background: #0ea5e9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.dark .slider::-moz-range-thumb {
-  background: #0ea5e9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-/* Custom focus styles */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-}
-
-/* Custom button hover effects */
-.btn-hover {
-  @apply transition-all duration-200 transform hover:scale-105 active:scale-95;
-}
-
-/* Custom card hover effects */
-.card-hover {
-  @apply transition-all duration-200 hover:shadow-large hover:-translate-y-1;
 }
 
 /* Loading spinner */
 .spinner {
   border: 2px solid #f3f4f6;
-  border-top: 2px solid #0ea5e9;
+  border-top: 2px solid #818cf8; /* indigo-400 */
   border-radius: 50%;
   width: 20px;
   height: 20px;
   animation: spin 1s linear infinite;
 }
 
-.dark .spinner {
-  border: 2px solid #374151;
-  border-top: 2px solid #0ea5e9;
-}
-
-/* Toast animations */
-.toast-enter {
-  animation: slideIn 0.3s ease-out;
-}
-
-.toast-exit {
-  animation: slideIn 0.3s ease-out reverse;
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-/* Base styles */
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Dark mode transitions */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-/* Mobile optimizations */
-@media (max-width: 640px) {
-  .slider::-webkit-slider-thumb {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .slider::-webkit-slider-thumb {
-    border: 2px solid #000;
-  }
-  
-  .slider::-moz-range-thumb {
-    border: 2px solid #000;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  
-  .animate-float {
-    animation: none;
-  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
