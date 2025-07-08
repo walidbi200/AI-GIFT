@@ -11,8 +11,9 @@ export default async function handler(
     return response.status(405).json({ message: 'Only POST requests are allowed' });
   }
 
-  const { age, relationship, occasion, interests, budget } = request.body;
+  const { age, relationship, occasion, interests, budget, negativeKeywords } = request.body;
   const apiKey = process.env.OPENAI_API_KEY;
+  const affiliateTag = process.env.AMAZON_AFFILIATE_TAG || 'walidgifts-20';
 
   if (!apiKey) {
     return response.status(500).json({ message: 'OpenAI API key is not configured.' });
@@ -20,7 +21,8 @@ export default async function handler(
 
   const prompt = `
     You are an expert gift recommender. Generate 5 unique and thoughtful gift suggestions based on the following details.
-    For each suggestion, provide a "name" (with a relevant emoji), a short "description" (around 15-20 words), and a "link".
+    For each suggestion, provide a "name" (with a relevant emoji) and a short "description" (around 15-20 words).
+    Do NOT include any links. Avoid the following things: ${negativeKeywords || 'none'}.
     The response MUST be a valid JSON array of objects, and nothing else. Do not include any text before or after the JSON array.
 
     Details:
@@ -32,8 +34,8 @@ export default async function handler(
 
     Example Output Format:
     [
-      { "id": "1", "name": "🎁 Example Gift", "description": "This is an example description.", "link": "https://www.amazon.com/s?k=Example+Gift" },
-      { "id": "2", "name": "✨ Another Gift", "description": "This is another example description.", "link": "https://www.google.com/search?q=Another+Gift" }
+      { "id": "1", "name": "🎁 Example Gift", "description": "This is an example description." },
+      { "id": "2", "name": "✨ Another Gift", "description": "This is another example description." }
     ]
   `;
 
@@ -77,7 +79,12 @@ export default async function handler(
     const jsonString = suggestionsText.substring(jsonStartIndex, jsonEndIndex + 1);
 
     try {
-      const suggestions = JSON.parse(jsonString);
+      let suggestions = JSON.parse(jsonString);
+      // Add affiliate links
+      suggestions = suggestions.map((suggestion: any) => ({
+        ...suggestion,
+        link: `https://www.amazon.com/s?k=${encodeURIComponent(suggestion.name)}&tag=${affiliateTag}`
+      }));
       return response.status(200).json(suggestions);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError, '--- Original Text:', jsonString);
