@@ -2,7 +2,7 @@
 // This is the final, corrected version that properly structures the router
 // and the page components to ensure everything displays correctly.
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react'; // Fixed: Added useEffect to the import
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 
