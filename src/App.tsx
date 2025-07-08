@@ -1,8 +1,9 @@
 // FILE: src/App.tsx
 // This is the full, unabridged version with all necessary imports and features,
-// including the enhanced "Interests" section and Vercel Analytics.
+// including the enhanced "Interests" section and Vercel Analytics, plus routing.
 
 import { useState, useEffect, useMemo } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import GiftCard from './components/GiftCard';
 import GiftCardSkeleton from './components/GiftCardSkeleton';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -16,6 +17,9 @@ import { Analytics } from '@vercel/analytics/react';
 import Button from './components/Button';
 import GiftBoxLoader from './components/GiftBoxLoader';
 import Footer from './components/Footer';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 const REFINE_OPTIONS = [
   { label: 'More Fun', value: 'fun' },
@@ -39,7 +43,8 @@ const POPULAR_TAGS = [
   'gardening', 'diy crafts', 'hiking', 'makeup', 'science', 'lego', 'baking', 'jazz', 'astronomy', 'gardening', 'photography', 'diy', 'tools', 'lego', 'clothes', 'flowers', 'books', 'socks', 'mugs', 'tools', 'clothes', 'flowers', 'books', 'socks', 'mugs'
 ];
 
-function App() {
+function HomePage() {
+  const { trackGiftGeneration } = useGoogleAnalytics();
   const [age, setAge] = useState(25);
   const [occasion, setOccasion] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
@@ -154,6 +159,8 @@ function App() {
       if (Array.isArray(generatedSuggestions)) {
         setSuggestions(generatedSuggestions);
         showToastMessage(`🎉 Found ${generatedSuggestions.length} gift suggestions!`, 'success');
+        // Track successful gift generation
+        trackGiftGeneration(occasion, relationship, interests.length);
       } else {
         throw new Error('Invalid data format received from API.');
       }
@@ -447,8 +454,58 @@ function App() {
         )}
       </div>
       <Footer />
-      <Analytics />
     </div>
+  );
+}
+
+function App() {
+  // Initialize Google Analytics tracking
+  useGoogleAnalytics();
+
+  return (
+    <Router>
+      <div className="min-h-screen bg-slate-50">
+        {/* Navigation Header */}
+        <nav className="bg-white shadow-sm border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <Link to="/" className="flex items-center space-x-2">
+                <span className="text-2xl">🎁</span>
+                <span className="text-xl font-bold text-slate-900">Smart Gift Finder</span>
+              </Link>
+              <div className="flex items-center space-x-8">
+                <Link 
+                  to="/" 
+                  className="text-slate-600 hover:text-indigo-600 transition-colors font-medium"
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="text-slate-600 hover:text-indigo-600 transition-colors font-medium"
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className="text-slate-600 hover:text-indigo-600 transition-colors font-medium"
+                >
+                  Contact
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </div>
+      <Analytics />
+    </Router>
   );
 }
 
