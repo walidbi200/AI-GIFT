@@ -193,9 +193,78 @@ function HomePage() {
             <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}> <option value="">Select an occasion</option> {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)} </select>
           </div>
           <div>
-            <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">Interests <span className="text-red-500">*</span></label>
-            <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); if (!interests.includes(currentInterest.trim().toLowerCase())) { setInterests([...interests, currentInterest.trim().toLowerCase()]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`} />
-            <div className="mt-4"><p className="text-xs text-gray-500 mb-2">Or select from popular interests:</p><div className="flex flex-wrap gap-2">{POPULAR_TAGS.map((quickInterest) => (<button key={quickInterest} type="button" onClick={() => { const lowerCaseInterest = quickInterest.toLowerCase(); if (!interests.includes(lowerCaseInterest)) { setInterests([...interests, lowerCaseInterest]); } }} className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 hover:text-slate-900 transition-colors font-medium">{quickInterest}</button>))}</div></div>
+            <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">
+              Interests <span className="text-red-500">*</span>
+            </label>
+            
+            {/* Text input for custom interests */}
+            <input
+              type="text"
+              id="interests"
+              value={currentInterest}
+              onChange={(e) => setCurrentInterest(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && currentInterest.trim()) {
+                  e.preventDefault();
+                  const newInterest = currentInterest.trim().toLowerCase();
+                  if (!interests.includes(newInterest)) {
+                    setInterests([...interests, newInterest]);
+                  }
+                  setCurrentInterest('');
+                }
+              }}
+              placeholder="Type an interest and press Enter"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`}
+            />
+
+            {/* Display the currently selected interest tags */}
+            {interests.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {interests.map((interest, index) => (
+                  <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-semibold capitalize">
+                    {interest}
+                    <button
+                      type="button"
+                      onClick={() => setInterests(interests.filter((_, i) => i !== index))}
+                      className="ml-1 text-indigo-600 hover:text-indigo-800 focus:outline-none"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* --- CORRECTED: Clickable interest suggestions --- */}
+            <div className="mt-4">
+              <p className="text-xs text-gray-500 mb-2">Or select from popular interests:</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'Tech', 'Gaming', 'Reading', 'Cooking', 'Travel', 'Movies',
+                  'Music', 'Sports', 'Fitness', 'Fashion', 'Art', 'Photography',
+                  'Gardening', 'DIY Crafts', 'Hiking', 'Makeup'
+                ].map((quickInterest) => (
+                  <button
+                    key={quickInterest}
+                    type="button"
+                    onClick={() => {
+                      const lowerCaseInterest = quickInterest.toLowerCase();
+                      if (!interests.includes(lowerCaseInterest)) {
+                        setInterests([...interests, lowerCaseInterest]);
+                      }
+                    }}
+                    className="px-3 py-1.5 text-sm bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 hover:text-slate-900 transition-colors font-medium"
+                  >
+                    {quickInterest}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Display validation errors if any */}
+            {errors.interests && (
+              <p className="text-red-500 text-sm mt-1">{errors.interests}</p>
+            )}
           </div>
           <div>
             <label htmlFor="negativeKeywords" className="block text-sm font-medium text-gray-700 mb-2">Things to avoid <span className="text-gray-400">(optional)</span></label>
