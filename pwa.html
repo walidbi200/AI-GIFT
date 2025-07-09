@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Icon Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 flex flex-col items-center justify-center min-h-screen p-8">
+
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold">PWA Icons for Smart Gift Finder</h1>
+        <p class="text-slate-600 mt-2">Click on each image to download it.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Icon 1: 192x192 -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 class="text-xl font-semibold mb-4">pwa-192x192.png</h2>
+            <div class="flex justify-center">
+                <a id="download192" href="#" download="pwa-192x192.png" class="cursor-pointer">
+                    <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg" id="svg192">
+                        <rect width="192" height="192" fill="#8b5cf6"/>
+                        <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="128" fill="white">🎁</text>
+                    </svg>
+                </a>
+            </div>
+            <p class="text-sm text-slate-500 mt-4">Click the icon to download `pwa-192x192.png`</p>
+        </div>
+
+        <!-- Icon 2: 512x512 -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 class="text-xl font-semibold mb-4">pwa-512x512.png</h2>
+            <div class="flex justify-center">
+                 <a id="download512" href="#" download="pwa-512x512.png" class="cursor-pointer">
+                    <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" id="svg512">
+                        <rect width="512" height="512" fill="#8b5cf6"/>
+                        <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="340" fill="white">🎁</text>
+                    </svg>
+                </a>
+            </div>
+            <p class="text-sm text-slate-500 mt-4">Click the icon to download `pwa-512x512.png`</p>
+        </div>
+
+    </div>
+
+    <div class="mt-12 text-center max-w-2xl">
+        <h3 class="text-lg font-semibold">Next Steps</h3>
+        <p class="text-slate-600 mt-2">
+            After downloading both images, place them inside the `public` folder in your VS Code project. Once the files are there, you can push the changes to GitHub to finalize your PWA setup.
+        </p>
+    </div>
+
+    <script>
+        // This script converts the SVG elements into downloadable links.
+        function setDownloadLink(svgId, linkId) {
+            const svg = document.getElementById(svgId);
+            const link = document.getElementById(linkId);
+            
+            // Serialize the SVG to a string
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svg);
+
+            // Add the xmlns attribute if it's missing
+            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+
+            // Convert to a data URL
+            const url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+            
+            // Set the href of the link
+            link.href = url;
+        }
+
+        // Set up the download links when the page loads
+        window.onload = function() {
+            setDownloadLink('svg192', 'download192');
+            setDownloadLink('svg512', 'download512');
+        };
+    </script>
+
+</body>
+</html>

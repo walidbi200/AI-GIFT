@@ -1,24 +1,24 @@
 {
-  "name": "AI Gift Recommender",
-  "short_name": "Gift AI",
-  "description": "Discover personalized gift recommendations powered by artificial intelligence. Get thoughtful, unique gift ideas for any occasion.",
+  "name": "Smart Gift Finder",
+  "short_name": "GiftFinder",
+  "description": "An AI-powered tool to find the perfect gift for any occasion.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#0ea5e9",
+  "background_color": "#f8fafc",
+  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
   "categories": ["lifestyle", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/pwa-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
@@ -37,7 +37,7 @@
       "url": "/",
       "icons": [
         {
-          "src": "/icon-192x192.png",
+          "src": "/pwa-192x192.png",
           "sizes": "192x192"
         }
       ]
