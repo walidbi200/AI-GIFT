@@ -18,9 +18,9 @@ const Footer: React.FC = () => {
           Contact
         </Link>
         <span className="text-slate-400">|</span>
-        <a href="#" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+        <Link to="/privacy-policy" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
           Privacy Policy
-        </a>
+        </Link>
       </div>
     </footer>
   );

@@ -16,6 +16,7 @@ import RecentSearches from './components/RecentSearches';
 import Button from './components/Button';
 import GiftBoxLoader from './components/GiftBoxLoader';
 import Footer from './components/Footer';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import('./pages/About'));
@@ -370,6 +371,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             </Routes>
           </Suspense>
         </main>
