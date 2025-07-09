@@ -2,7 +2,7 @@
 // This is the final, complete, and unabridged version of your application's
 // main component, with all features and correct routing.
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -16,8 +16,10 @@ import RecentSearches from './components/RecentSearches';
 import Button from './components/Button';
 import GiftBoxLoader from './components/GiftBoxLoader';
 import Footer from './components/Footer';
-import About from './pages/About';
-import Contact from './pages/Contact';
+
+// --- Lazy-loaded Components ---
+const About = React.lazy(() => import('./pages/About'));
+const Contact = React.lazy(() => import('./pages/Contact'));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from './types';
@@ -168,7 +170,7 @@ function HomePage() {
     <div className="w-full max-w-2xl mx-auto">
       <header className="text-center mb-10">
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
-          🎁 Smart Gift Finder
+          <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
         </h1>
         <p className="text-slate-600 mt-2">
           Find the perfect gift with AI-powered suggestions
@@ -178,7 +180,7 @@ function HomePage() {
       <RecentSearches searches={recentSearches} onSelectSearch={handleSelectRecentSearch} onClearSearches={clearSearches} />
 
       <main className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" role="search" aria-label="Gift recommendation form">
           {/* All your form fields go here, this is the full version */}
           <div>
             <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">Recipient Age: <span className="text-indigo-600 font-bold">{age}</span></label>
@@ -186,11 +188,35 @@ function HomePage() {
           </div>
           <div>
             <label htmlFor="relationship" className="block text-sm font-medium text-gray-700 mb-2">Who is this for? <span className="text-red-500">*</span></label>
-            <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}> <option value="">Select relationship</option> {relationships.map((rel) => <option key={rel.value} value={rel.value}>{rel.label}</option>)} </select>
+            <select 
+              id="relationship" 
+              value={relationship} 
+              onChange={(e) => setRelationship(e.target.value)} 
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-300'}`}
+              aria-describedby={errors.relationship ? 'relationship-error' : undefined}
+            > 
+              <option value="">Select relationship</option> 
+              {relationships.map((rel) => <option key={rel.value} value={rel.value}>{rel.label}</option>)} 
+            </select>
+            {errors.relationship && (
+              <p id="relationship-error" className="text-red-500 text-sm mt-1" role="alert">{errors.relationship}</p>
+            )}
           </div>
           <div>
             <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">Occasion <span className="text-red-500">*</span></label>
-            <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}> <option value="">Select an occasion</option> {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)} </select>
+            <select 
+              id="occasion" 
+              value={occasion} 
+              onChange={(e) => setOccasion(e.target.value)} 
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-300'}`}
+              aria-describedby={errors.occasion ? 'occasion-error' : undefined}
+            > 
+              <option value="">Select an occasion</option> 
+              {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)} 
+            </select>
+            {errors.occasion && (
+              <p id="occasion-error" className="text-red-500 text-sm mt-1" role="alert">{errors.occasion}</p>
+            )}
           </div>
           <div>
             <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">
@@ -215,6 +241,7 @@ function HomePage() {
               }}
               placeholder="Type an interest and press Enter"
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-300'}`}
+              aria-describedby={errors.interests ? 'interests-error' : undefined}
             />
 
             {/* Display the currently selected interest tags */}
@@ -227,6 +254,7 @@ function HomePage() {
                       type="button"
                       onClick={() => setInterests(interests.filter((_, i) => i !== index))}
                       className="ml-1 text-indigo-600 hover:text-indigo-800 focus:outline-none"
+                      aria-label={`Remove ${interest} interest`}
                     >
                       &times;
                     </button>
@@ -263,7 +291,7 @@ function HomePage() {
             
             {/* Display validation errors if any */}
             {errors.interests && (
-              <p className="text-red-500 text-sm mt-1">{errors.interests}</p>
+              <p id="interests-error" className="text-red-500 text-sm mt-1" role="alert">{errors.interests}</p>
             )}
           </div>
           <div>
@@ -272,7 +300,18 @@ function HomePage() {
           </div>
           <div>
             <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">Budget (optional)</label>
-            <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} />
+            <input 
+              type="number" 
+              id="budget" 
+              value={budget} 
+              onChange={(e) => setBudget(e.target.value)} 
+              placeholder="Enter maximum budget" 
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`}
+              aria-describedby={errors.budget ? 'budget-error' : undefined}
+            />
+            {errors.budget && (
+              <p id="budget-error" className="text-red-500 text-sm mt-1" role="alert">{errors.budget}</p>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
             <Button type="submit" disabled={isLoading} variant="primary" fullWidth className="font-bold">{isLoading ? (<div className="flex items-center justify-center"><LoadingSpinner size="sm" /> <span className="ml-2">Finding Gifts...</span></div>) : '✨ Recommend Gifts'}</Button>
@@ -302,28 +341,37 @@ function App() {
   return (
     <>
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        <nav className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <nav className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <Link to="/" className="flex items-center space-x-2">
-                <span className="text-2xl">🎁</span>
+              <Link to="/" className="flex items-center space-x-2" aria-label="Smart Gift Finder - Go to homepage">
+                <span className="text-2xl" role="img" aria-label="Gift box icon">🎁</span>
                 <span className="text-xl font-bold text-slate-900">Smart Gift Finder</span>
               </Link>
-              <div className="flex items-center space-x-8">
-                <Link to="/" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">Home</Link>
-                <Link to="/about" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
-                <Link to="/contact" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
+              <div className="flex items-center space-x-8" role="menubar">
+                <Link to="/" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium" role="menuitem">Home</Link>
+                <Link to="/about" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium" role="menuitem">About</Link>
+                <Link to="/contact" className="text-slate-600 hover:text-indigo-600 transition-colors font-medium" role="menuitem">Contact</Link>
               </div>
             </div>
           </div>
         </nav>
 
-        <main className="flex-grow container mx-auto py-8 px-4">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
+        <main className="flex-grow container mx-auto py-8 px-4" role="main">
+          <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading page...</p>
+              </div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+            </Routes>
+          </Suspense>
         </main>
         
         <Footer />
