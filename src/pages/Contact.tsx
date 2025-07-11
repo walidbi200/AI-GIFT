@@ -88,10 +88,10 @@ const Contact: React.FC = () => {
 
       // Send email using EmailJS
       await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+        'service_yg87i1d', // Replace with your EmailJS service ID
+        'template_1xiami9', // Replace with your EmailJS template ID
         templateParams,
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+        'U51V8_krvZwm5Zd4A' // Replace with your EmailJS public key
       );
 
       showToastMessage('Thank you for your message! We\'ll get back to you soon.', 'success');
