@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.smartgiftfinder.xyz/sitemap.xml 
+Sitemap: https://smartgiftfinder.xyz/sitemap.xml 
