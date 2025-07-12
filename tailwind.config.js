@@ -24,6 +24,9 @@ export default {
         '6xl': ['3.75rem', { lineHeight: '1' }],
       },
       colors: {
+        'brand-dark': '#111111',
+        'brand-purple': '#a855f7',
+        'brand-pink': '#ec4899',
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
