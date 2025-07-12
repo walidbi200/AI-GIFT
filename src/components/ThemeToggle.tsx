@@ -1,10 +1,12 @@
+// FILE: src/components/ThemeToggle.tsx
+// This version has an increased z-index to ensure it appears above the navigation bar.
+
 import { useState, useEffect } from 'react';
 
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
@@ -33,13 +35,14 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="fixed top-4 right-4 z-50 p-3 rounded-full bg-light-surface dark:bg-dark-surface shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-light-primary dark:focus:ring-dark-primary focus:ring-opacity-50 border border-light-border dark:border-dark-border"
+      // The z-index has been increased from z-50 to z-[60] to sit above the nav bar
+      className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50"
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDark ? (
-        // Sun icon for dark mode
+        // Sun icon for dark mode - uses accent color
         <svg
-          className="w-6 h-6 text-light-accent dark:text-dark-accent transition-transform duration-300 hover:rotate-90"
+          className="w-6 h-6 text-dark-accent transition-transform duration-300 hover:rotate-90"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -52,9 +55,9 @@ const ThemeToggle = () => {
           />
         </svg>
       ) : (
-        // Moon icon for light mode
+        // Moon icon for light mode - uses muted text color
         <svg
-          className="w-6 h-6 text-light-text-primary dark:text-dark-text-primary transition-transform duration-300 hover:rotate-12"
+          className="w-6 h-6 text-light-text-muted transition-transform duration-300 hover:rotate-12"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
