@@ -1,11 +1,11 @@
 // FILE: src/components/Button.tsx
-// This version is updated to use the new semantic color palette for all variants.
+// This is the final, robust version with explicit theme classes to fix the light mode visibility issue.
 
 import React from 'react';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit' | 'reset';
@@ -29,12 +29,12 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false
 }) => {
   const baseClasses = `
-    inline-flex items-center justify-center font-semibold rounded-lg
+    inline-flex items-center justify-center font-display font-bold rounded-lg
     transition-all duration-200
     focus:outline-none focus:ring-4
-    disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+    disabled:cursor-not-allowed
     ${fullWidth ? 'w-full' : ''}
-    min-h-[48px] min-w-[48px] select-none
+    min-h-[48px] select-none
   `;
 
   const sizeClasses = {
@@ -44,19 +44,19 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const variantClasses = {
+    // Corrected Primary Button
     primary: `
       bg-light-primary text-white
-      dark:bg-dark-primary dark:text-light-text-primary
+      dark:bg-dark-primary dark:text-dark-text-primary
       hover:opacity-90
       focus:ring-light-primary/50 dark:focus:ring-dark-primary/50
-      transform hover:scale-105 active:scale-97
+      disabled:bg-light-border dark:disabled:bg-dark-border disabled:text-light-text-muted dark:disabled:text-dark-text-muted
     `,
     secondary: `
-      bg-light-text-primary text-white
-      dark:bg-dark-surface dark:text-dark-text-primary dark:border dark:border-dark-border
-      hover:opacity-90
+      bg-light-surface text-light-text-primary border border-light-border
+      dark:bg-dark-surface dark:text-dark-text-primary dark:border-dark-border
+      hover:bg-light-border dark:hover:bg-dark-border
       focus:ring-gray-500/50
-      transform hover:scale-105 active:scale-97
     `,
     outline: `
       bg-transparent border-2 border-light-border text-light-text-muted
@@ -64,20 +64,6 @@ const Button: React.FC<ButtonProps> = ({
       hover:bg-light-surface hover:text-light-text-primary
       dark:hover:bg-dark-surface dark:hover:text-dark-text-primary
       focus:ring-gray-500/50
-      transform hover:scale-105 active:scale-97
-    `,
-    ghost: `
-      bg-transparent text-light-text-muted hover:bg-light-surface
-      dark:text-dark-text-muted dark:hover:bg-dark-surface
-      focus:ring-gray-500/50
-      transform hover:scale-105 active:scale-97
-    `,
-    danger: `
-      bg-error text-white
-      dark:bg-dark-error
-      hover:opacity-90
-      focus:ring-error/50 dark:focus:ring-dark-error/50
-      transform hover:scale-105 active:scale-97
     `
   };
 
@@ -96,7 +82,7 @@ const Button: React.FC<ButtonProps> = ({
       className={classes}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      {loading && (
+      {loading ? (
         <svg
           className="animate-spin -ml-1 mr-2 h-4 w-4"
           fill="none"
@@ -116,8 +102,7 @@ const Button: React.FC<ButtonProps> = ({
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-      )}
-      {icon && !loading && <span className="mr-2">{icon}</span>}
+      ) : icon}
       {children}
     </button>
   );
