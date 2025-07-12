@@ -1,5 +1,5 @@
 // FILE: src/components/ThemeToggle.tsx
-// This version has an increased z-index to ensure it appears above the navigation bar.
+// This is the final, corrected version with proper z-index and theme-aware colors.
 
 import { useState, useEffect } from 'react';
 
@@ -7,6 +7,7 @@ const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    // On component mount, set the theme based on localStorage or system preference
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
@@ -20,29 +21,29 @@ const ThemeToggle = () => {
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    setIsDark(prevIsDark => {
+      const newIsDark = !prevIsDark;
+      if (newIsDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return newIsDark;
+    });
   };
 
   return (
     <button
       onClick={toggleTheme}
-      // The z-index has been increased from z-50 to z-[60] to sit above the nav bar
-      className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50"
+      className="fixed top-4 right-4 z-[60] p-2 rounded-full bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50"
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {isDark ? (
-        // Sun icon for dark mode - uses accent color
+      <div className="w-6 h-6 relative">
+        {/* Sun Icon */}
         <svg
-          className="w-6 h-6 text-dark-accent transition-transform duration-300 hover:rotate-90"
+          className={`absolute inset-0 w-6 h-6 text-light-accent transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -54,10 +55,10 @@ const ThemeToggle = () => {
             d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
           />
         </svg>
-      ) : (
-        // Moon icon for light mode - uses muted text color
+
+        {/* Moon Icon */}
         <svg
-          className="w-6 h-6 text-light-text-muted transition-transform duration-300 hover:rotate-12"
+          className={`absolute inset-0 w-6 h-6 text-dark-primary transition-all duration-300 ${isDark ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -69,7 +70,7 @@ const ThemeToggle = () => {
             d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
           />
         </svg>
-      )}
+      </div>
     </button>
   );
 };
