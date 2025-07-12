@@ -17,6 +17,7 @@ import Button from './components/Button';
 import GiftBoxLoader from './components/GiftBoxLoader';
 import Footer from './components/Footer';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ThemeToggle from './components/ThemeToggle';
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import('./pages/About'));
@@ -169,73 +170,58 @@ function HomePage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <header className="text-center mb-12">
-        <div className="flex justify-center items-center mb-6">
-          <div className="inline-flex items-center gap-4 rounded-full bg-gray-800 border border-gray-700 px-4 py-2 shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
-        </div>
-        <h1 className="text-5xl sm:text-6xl font-bold text-gradient">
-          Smart Gift Finder
+      <header className="text-center mb-10">
+        <h1 className="text-4xl sm:text-5xl font-display font-bold text-light-text-primary dark:text-dark-text-primary">
+          <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
         </h1>
-        <p className="text-slate-400 mt-4 text-lg">
+        <p className="text-light-text-muted dark:text-dark-text-muted mt-2">
           Find the perfect gift with AI-powered suggestions
         </p>
-        <div className="inline-flex items-center gap-2 bg-gray-800 text-slate-300 text-sm px-3 py-1 rounded-full mt-6 border border-gray-700">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            Powered by advanced AI
-        </div>
       </header>
 
-      <main className="bg-gray-900 rounded-lg shadow-lg p-6 sm:p-8 mb-8 border border-gray-700">
+      <RecentSearches searches={recentSearches} onSelectSearch={handleSelectRecentSearch} onClearSearches={clearSearches} />
+
+      <main className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg p-6 sm:p-8 mb-8 border border-light-border dark:border-dark-border">
         <form onSubmit={handleSubmit} className="space-y-6" role="search" aria-label="Gift recommendation form">
           <div>
-            <label htmlFor="age" className="block text-sm font-medium text-gray-300 mb-2">Recipient Age: <span className="text-indigo-400 font-bold">{age}</span></label>
-            <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+            <label htmlFor="age" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Recipient Age: <span className="text-light-primary dark:text-dark-primary font-bold">{age}</span></label>
+            <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
           </div>
           <div>
-            <label htmlFor="relationship" className="block text-sm font-medium text-gray-300 mb-2">Who is this for? <span className="text-red-500">*</span></label>
+            <label htmlFor="relationship" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Who is this for? <span className="text-error dark:text-dark-error">*</span></label>
             <select 
               id="relationship" 
               value={relationship} 
               onChange={(e) => setRelationship(e.target.value)} 
-              className={`w-full px-3 py-2 border rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.relationship ? 'border-red-500' : 'border-gray-600'}`}
+              className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.relationship ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
               aria-describedby={errors.relationship ? 'relationship-error' : undefined}
             > 
               <option value="">Select relationship</option> 
               {relationships.map((rel) => <option key={rel.value} value={rel.value}>{rel.label}</option>)} 
             </select>
             {errors.relationship && (
-              <p id="relationship-error" className="text-red-500 text-sm mt-1" role="alert">{errors.relationship}</p>
+              <p id="relationship-error" className="text-error dark:text-dark-error text-sm mt-1" role="alert">{errors.relationship}</p>
             )}
           </div>
           <div>
-            <label htmlFor="occasion" className="block text-sm font-medium text-gray-300 mb-2">Occasion <span className="text-red-500">*</span></label>
+            <label htmlFor="occasion" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Occasion <span className="text-error dark:text-dark-error">*</span></label>
             <select 
               id="occasion" 
               value={occasion} 
               onChange={(e) => setOccasion(e.target.value)} 
-              className={`w-full px-3 py-2 border rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.occasion ? 'border-red-500' : 'border-gray-600'}`}
+              className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.occasion ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
               aria-describedby={errors.occasion ? 'occasion-error' : undefined}
             > 
               <option value="">Select an occasion</option> 
               {occasions.map((occ) => <option key={occ.value} value={occ.value}>{occ.label}</option>)} 
             </select>
             {errors.occasion && (
-              <p id="occasion-error" className="text-red-500 text-sm mt-1" role="alert">{errors.occasion}</p>
+              <p id="occasion-error" className="text-error dark:text-dark-error text-sm mt-1" role="alert">{errors.occasion}</p>
             )}
           </div>
           <div>
-            <label htmlFor="interests" className="block text-sm font-medium text-gray-300 mb-2">
-              Interests <span className="text-red-500">*</span>
+            <label htmlFor="interests" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">
+              Interests <span className="text-error dark:text-dark-error">*</span>
             </label>
             <input
               type="text"
@@ -253,18 +239,18 @@ function HomePage() {
                 }
               }}
               placeholder="Type an interest and press Enter"
-              className={`w-full px-3 py-2 border rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.interests ? 'border-red-500' : 'border-gray-600'}`}
+              className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.interests ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
               aria-describedby={errors.interests ? 'interests-error' : undefined}
             />
             {interests.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {interests.map((interest, index) => (
-                  <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-900 text-indigo-300 rounded-full text-sm font-semibold capitalize">
+                  <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-light-primary/10 dark:bg-dark-primary/20 text-light-primary dark:text-dark-primary rounded-full text-sm font-semibold capitalize">
                     {interest}
                     <button
                       type="button"
                       onClick={() => setInterests(interests.filter((_, i) => i !== index))}
-                      className="ml-1 text-indigo-400 hover:text-indigo-200 focus:outline-none"
+                      className="ml-1 text-light-primary dark:text-dark-primary hover:opacity-70 focus:outline-none"
                       aria-label={`Remove ${interest} interest`}
                     >
                       &times;
@@ -274,7 +260,7 @@ function HomePage() {
               </div>
             )}
             <div className="mt-4">
-              <p className="text-xs text-gray-400 mb-2">Or select from popular interests:</p>
+              <p className="text-xs text-light-text-muted dark:text-dark-text-muted mb-2">Or select from popular interests:</p>
               <div className="flex flex-wrap gap-2">
                 {[
                   'Tech', 'Gaming', 'Reading', 'Cooking', 'Travel', 'Movies',
@@ -290,7 +276,7 @@ function HomePage() {
                         setInterests([...interests, lowerCaseInterest]);
                       }
                     }}
-                    className="px-3 py-1.5 text-sm bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 hover:text-white transition-colors font-medium"
+                    className="px-3 py-1.5 text-sm bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border text-light-text-muted dark:text-dark-text-muted rounded-full hover:bg-light-primary/5 dark:hover:bg-dark-primary/10 hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium"
                   >
                     {quickInterest}
                   </button>
@@ -298,29 +284,29 @@ function HomePage() {
               </div>
             </div>
             {errors.interests && (
-              <p id="interests-error" className="text-red-500 text-sm mt-1" role="alert">{errors.interests}</p>
+              <p id="interests-error" className="text-error dark:text-dark-error text-sm mt-1" role="alert">{errors.interests}</p>
             )}
           </div>
           <div>
-            <label htmlFor="negativeKeywords" className="block text-sm font-medium text-gray-300 mb-2">Things to avoid <span className="text-gray-500">(optional)</span></label>
-            <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full px-3 py-2 border rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors border-gray-600" />
+            <label htmlFor="negativeKeywords" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Things to avoid <span className="text-light-text-muted dark:text-dark-text-muted">(optional)</span></label>
+            <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors border-light-border dark:border-dark-border" />
           </div>
           <div>
-            <label htmlFor="budget" className="block text-sm font-medium text-gray-300 mb-2">Budget (optional)</label>
+            <label htmlFor="budget" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Budget (optional)</label>
             <input 
               type="number" 
               id="budget" 
               value={budget} 
               onChange={(e) => setBudget(e.target.value)} 
               placeholder="Enter maximum budget" 
-              className={`w-full px-3 py-2 border rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-600'}`}
+              className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.budget ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
               aria-describedby={errors.budget ? 'budget-error' : undefined}
             />
             {errors.budget && (
-              <p id="budget-error" className="text-red-500 text-sm mt-1" role="alert">{errors.budget}</p>
+              <p id="budget-error" className="text-error dark:text-dark-error text-sm mt-1" role="alert">{errors.budget}</p>
             )}
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-700">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-light-border dark:border-dark-border">
             <Button type="submit" disabled={isLoading} variant="primary" fullWidth className="font-bold">{isLoading ? (<div className="flex items-center justify-center"><LoadingSpinner size="sm" /> <span className="ml-2">Finding Gifts...</span></div>) : '✨ Recommend Gifts'}</Button>
             <Button type="button" onClick={clearForm} variant="outline" fullWidth className="font-bold">🗑️ Clear Form</Button>
             <Button type="button" onClick={handleSurpriseMe} variant="secondary" fullWidth className="font-bold">🎲 Surprise Me</Button>
@@ -331,10 +317,10 @@ function HomePage() {
       {isLoading && <GiftBoxLoader />}
       {suggestions.length > 0 && !isLoading && (
         <section className="animate-fade-in-up w-full">
-          <h2 className="text-2xl font-bold text-slate-100 mb-4 text-center">🎉 Here are a few ideas!</h2>
+          <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4 text-center">🎉 Here are a few ideas!</h2>
           <div className="flex flex-wrap gap-2 justify-center mb-6">{REFINE_OPTIONS.map((option) => (<Button key={option.value} variant="outline" size="sm" onClick={() => handleRefine(option.label)}>{option.label}</Button>))}</div>
           <div className="space-y-4 mb-8">{suggestions.map((suggestion, index) => (<GiftCard key={suggestion.id} suggestion={suggestion} index={index} />))}</div>
-          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-700"><Button onClick={() => handleSubmit()} disabled={isLoading} variant="secondary" fullWidth className="font-bold">🔁 Regenerate</Button><Button onClick={copyToClipboard} variant="primary" fullWidth className="font-bold">📄 Copy List</Button><Button onClick={() => setShowFeedbackModal(true)} variant="outline" fullWidth className="font-bold">💬 Give Feedback</Button></div>
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-light-border dark:border-dark-border"><Button onClick={() => handleSubmit()} disabled={isLoading} variant="secondary" fullWidth className="font-bold">🔁 Regenerate</Button><Button onClick={copyToClipboard} variant="primary" fullWidth className="font-bold">📄 Copy List</Button><Button onClick={() => setShowFeedbackModal(true)} variant="outline" fullWidth className="font-bold">💬 Give Feedback</Button></div>
         </section>
       )}
     </div>
@@ -347,18 +333,23 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-brand-dark text-white flex flex-col">
-        <nav className="bg-gray-900 shadow-sm border-b border-gray-800 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
+      {/* Apply new background and text colors */}
+      <div className="min-h-screen bg-light-background dark:bg-dark-background text-light-text-primary dark:text-dark-text-primary flex flex-col">
+        
+        {/* Add the ThemeToggle component here */}
+        <ThemeToggle />
+
+        <nav className="bg-light-surface dark:bg-dark-surface/80 backdrop-blur-sm shadow-sm border-b border-light-border dark:border-dark-border sticky top-0 z-50" role="navigation" aria-label="Main navigation">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <Link to="/" className="flex items-center space-x-2" aria-label="Smart Gift Finder - Go to homepage">
                 <span className="text-2xl" role="img" aria-label="Gift box icon">🎁</span>
-                <span className="text-xl font-bold text-slate-100">Smart Gift Finder</span>
+                <span className="text-xl font-display font-bold">Smart Gift Finder</span>
               </Link>
               <div className="flex items-center space-x-8" role="menubar">
-                <Link to="/" className="text-slate-300 hover:text-indigo-400 transition-colors font-medium" role="menuitem">Home</Link>
-                <Link to="/about" className="text-slate-300 hover:text-indigo-400 transition-colors font-medium" role="menuitem">About</Link>
-                <Link to="/contact" className="text-slate-300 hover:text-indigo-400 transition-colors font-medium" role="menuitem">Contact</Link>
+                <Link to="/" className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium" role="menuitem">Home</Link>
+                <Link to="/about" className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium" role="menuitem">About</Link>
+                <Link to="/contact" className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium" role="menuitem">Contact</Link>
               </div>
             </div>
           </div>
@@ -368,8 +359,8 @@ function App() {
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
-                <p className="text-gray-400">Loading page...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
+                <p className="text-light-text-muted dark:text-dark-text-muted">Loading page...</p>
               </div>
             </div>
           }>
