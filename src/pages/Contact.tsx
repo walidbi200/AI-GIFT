@@ -70,15 +70,26 @@ const Contact: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
 
+    // Get credentials from environment variables
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !publicKey) {
+      console.error('EmailJS credentials are not configured in .env file.');
+      showToastMessage('Contact form is not configured. Please contact us directly.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // EmailJS configuration
       const templateParams = {
         from_name: formData.name,
         from_email: formData.email,
@@ -86,18 +97,17 @@ const Contact: React.FC = () => {
         to_email: 'Bichriwalid1@gmail.com'
       };
 
-      // Send email using EmailJS
+      // Send email using EmailJS with environment variables
       await emailjs.send(
-        'service_yg87i1d', // Replace with your EmailJS service ID
-        'template_1xiami9', // Replace with your EmailJS template ID
+        serviceId,
+        templateId,
         templateParams,
-        'U51V8_krvZwm5Zd4A' // Replace with your EmailJS public key
+        publicKey
       );
 
       showToastMessage('Thank you for your message! We\'ll get back to you soon.', 'success');
       setIsSubmitted(true);
       setFormData({ name: '', email: '', message: '' });
-      // Track successful contact form submission
       trackFormSubmission('contact');
     } catch (error) {
       console.error('Email sending failed:', error);
