@@ -319,7 +319,7 @@ function HomePage() {
               <p id="budget-error" className="text-error dark:text-dark-error text-sm mt-1" role="alert">{errors.budget}</p>
             )}
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-light-border dark:border-dark-border sticky bottom-0 left-0 right-0 bg-light-surface/80 dark:bg-dark-surface/80 z-20 px-4 py-3 sm:static sm:bg-transparent sm:dark:bg-transparent">
+          <div className="sm:static fixed bottom-0 left-0 right-0 z-50 flex flex-col sm:flex-row gap-4 bg-light-surface/90 dark:bg-dark-surface/90 backdrop-blur-sm p-4 sm:p-0 sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none border-t border-light-border dark:border-dark-border sm:border-t-0">
             <Button type="submit" disabled={isLoading} variant="primary" fullWidth className="font-bold">
               {isLoading ? (
                 <div className="flex items-center justify-center">
