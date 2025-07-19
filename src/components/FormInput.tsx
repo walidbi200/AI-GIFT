@@ -56,6 +56,7 @@ const FormInput: React.FC<FormInputProps> = ({
               id={inputId}
               value={value as string}
               onChange={(e) => handleChange(e.target.value)}
+              aria-label={label}
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
@@ -117,6 +118,7 @@ const FormInput: React.FC<FormInputProps> = ({
               onChange={(e) => handleChange(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder={placeholder}
+              aria-label={label}
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent

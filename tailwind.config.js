@@ -22,8 +22,8 @@ export default {
         'light-border': '#E5E7EB',
 
         // Dark Mode Colors
-        'dark-background': '#001117',
-        'dark-surface': '#161B22',
+        'dark-background': '#1A1A1A',
+        'dark-surface': '#2A2A2A',
         'dark-primary': '#818CF8',
         'dark-accent': '#FBBF24',
         'dark-text-primary': '#F9FAFB',
@@ -35,6 +35,12 @@ export default {
         'dark-success': '#34D399',
         'error': '#EF4444',
         'dark-error': '#F87171',
+
+        // Custom Button Colors
+        'find-gift': '#4C8BF5',
+        'surprise-me': '#4B5EAA',
+        'button-hover': '#F28C38',
+        'button-text': '#E0E0E0',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',

@@ -5,6 +5,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply text-base;
+  }
+  html.dark body {
+    color: #E0E0E0;
+    background-color: #1A1A1A;
+    font-size: 16px;
+  }
+  html.dark h1, html.dark h2, html.dark h3 {
+    color: #FFFFFF;
+    font-size: 18px;
+  }
+}
+
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent;

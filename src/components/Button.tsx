@@ -34,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
     focus:outline-none focus:ring-4
     disabled:cursor-not-allowed
     ${fullWidth ? 'w-full' : ''}
-    min-h-[48px] select-none
+    min-h-[44px] min-w-[44px] px-4 select-none
   `;
 
   const sizeClasses = {
@@ -44,18 +44,19 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const variantClasses = {
-    // Corrected Primary Button
     primary: `
-      bg-light-primary text-white
-      dark:bg-dark-primary dark:text-dark-text-primary
-      hover:opacity-90
-      focus:ring-light-primary/50 dark:focus:ring-dark-primary/50
+      bg-find-gift text-button-text
+      hover:bg-button-hover hover:scale-105
+      dark:bg-find-gift dark:text-button-text
+      dark:hover:bg-button-hover
+      focus:ring-find-gift/50 dark:focus:ring-find-gift/50
       disabled:bg-light-border dark:disabled:bg-dark-border disabled:text-light-text-muted dark:disabled:text-dark-text-muted
     `,
     secondary: `
-      bg-light-surface text-light-text-primary border border-light-border
-      dark:bg-dark-surface dark:text-dark-text-primary dark:border-dark-border
-      hover:bg-light-border dark:hover:bg-dark-border
+      bg-surprise-me text-button-text border border-light-border
+      hover:bg-button-hover hover:scale-105
+      dark:bg-surprise-me dark:text-button-text dark:border-dark-border
+      dark:hover:bg-button-hover
       focus:ring-gray-500/50
     `,
     outline: `
