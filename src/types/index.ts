@@ -1,8 +1,10 @@
+// FILE: src/types/index.ts
 export interface GiftSuggestion {
   id: number
   name: string
   description: string
   link: string
+  reason: string // Add this line
 }
 
 export interface FormErrors {
@@ -20,4 +22,4 @@ export interface FormData {
   budget: string
 }
 
-export type ToastType = 'success' | 'error' 
+export type ToastType = 'success' | 'error'

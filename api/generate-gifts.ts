@@ -21,8 +21,9 @@ export default async function handler(
 
   const prompt = `
     You are an expert gift recommender. Generate 5 unique and thoughtful gift suggestions based on the following details.
-    For each suggestion, provide a "name" (with a relevant emoji) and a short "description" (around 15-20 words).
-    Do NOT include any links. Avoid the following things: ${negativeKeywords || 'none'}.
+    For each suggestion, provide a "name" (with a relevant emoji), a short "description" (around 15-20 words), and a "reason" (a sentence explaining why it's a great choice).
+    Instead of a generic search, find a highly-rated, specific product on Amazon and provide its URL in the "link" field.
+    Avoid the following things: ${negativeKeywords || 'none'}.
     The response MUST be a valid JSON array of objects, and nothing else. Do not include any text before or after the JSON array.
 
     Details:
@@ -34,8 +35,8 @@ export default async function handler(
 
     Example Output Format:
     [
-      { "id": "1", "name": "🎁 Example Gift", "description": "This is an example description." },
-      { "id": "2", "name": "✨ Another Gift", "description": "This is another example description." }
+      { "id": "1", "name": "🎁 Example Gift", "description": "This is an example description.", "link": "https://www.amazon.com/dp/example", "reason": "This is a great gift because..." },
+      { "id": "2", "name": "✨ Another Gift", "description": "This is another example description.", "link": "https://www.amazon.com/dp/another-example", "reason": "We love this because..." }
     ]
   `;
 
@@ -50,7 +51,7 @@ export default async function handler(
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.8,
-        max_tokens: 500,
+        max_tokens: 800, // Increased max_tokens to allow for longer responses
       }),
     });
 
@@ -80,10 +81,10 @@ export default async function handler(
 
     try {
       let suggestions = JSON.parse(jsonString);
-      // Add affiliate links
+      // Add affiliate tag to the links provided by the AI
       suggestions = suggestions.map((suggestion: any) => ({
         ...suggestion,
-        link: `https://www.amazon.com/s?k=${encodeURIComponent(suggestion.name)}&tag=${affiliateTag}`
+        link: suggestion.link ? `${suggestion.link}?tag=${affiliateTag}` : `https://www.amazon.com/s?k=${encodeURIComponent(suggestion.name)}&tag=${affiliateTag}`
       }));
       return response.status(200).json(suggestions);
     } catch (parseError) {
