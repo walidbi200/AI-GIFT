@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // --- Your Actual Component Imports ---
 import GiftCard from './components/GiftCard';
@@ -376,6 +377,7 @@ function App() {
         <Footer />
       </div>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
