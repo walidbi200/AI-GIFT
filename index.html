@@ -1,307 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SmartGiftFinder - AI Gift Recommendations</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="Discover personalized gifts with AI in 30 seconds! Trusted by thousands.">
-  <meta name="theme-color" content="#471396" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png" />
-  <link rel="apple-touch-icon" href="icon-512x512.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-  <script defer src="sw.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
-      });
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Smart Gift Finder - Find Perfect Gifts with Artificial Intelligence</title>
+    <meta name="title" content="Smart Gift Finder - Find Perfect Gifts with Artificial Intelligence">
+    <meta name="description" content="Discover personalized gift recommendations powered by AI. Get thoughtful, unique gift ideas for birthdays, holidays, and special occasions. Free, instant, and intelligent gift suggestions.">
+    <meta name="keywords" content="gift finder, AI gifts, personalized gifts, gift ideas, birthday gifts, holiday gifts, artificial intelligence, smart gift finder">
+    <meta name="author" content="Smart Gift Finder">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://smartgiftfinder.xyz/">
+    <meta property="og:title" content="Smart Gift Finder - Find Perfect Gifts with Artificial Intelligence">
+    <meta property="og:description" content="Discover personalized gift recommendations powered by AI. Get thoughtful, unique gift ideas for birthdays, holidays, and special occasions.">
+    <meta property="og:image" content="https://smartgiftfinder.xyz/og-image.jpg">
+    <meta property="og:site_name" content="Smart Gift Finder">
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://smartgiftfinder.xyz/">
+    <meta property="twitter:title" content="Smart Gift Finder - Find Perfect Gifts with Artificial Intelligence">
+    <meta property="twitter:description" content="Discover personalized gift recommendations powered by AI. Get thoughtful, unique gift ideas for birthdays, holidays, and special occasions.">
+    <meta property="twitter:image" content="https://smartgiftfinder.xyz/og-image.jpg">
+    
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Smart Gift Finder">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Smart Gift Finder",
+      "url": "https://www.smartgiftfinder.xyz",
+      "description": "Instantly find the perfect gift with our AI-powered recommender. Get personalized and thoughtful gift ideas for any age, occasion, and interest.",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      }
     }
-  </script>
-</head>
-<body>
-  <div id="app"></div>
-  <noscript>
-    <div class="no-js">Please enable JavaScript to use SmartGiftFinder.</div>
-  </noscript>
-  <!-- React, ReactDOM, Babel -->
-  <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
-  <script type="text/babel">
-    // --- Color Palette ---
-    const COLORS = {
-      bg: "#090040",
-      text: "#B13BFF",
-      accent: "#FFCC00",
-      button: "#471396",
-      buttonHover: "#5A1CAA",
-      cardBorder: "#FFCC00",
-      cardBg: "#090040",
-      trust: "#FFCC00",
-      error: "#B13BFF"
-    };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5VXMXKEYEV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-    // --- Utility: Haptic Feedback ---
-    const haptic = () => { if (navigator.vibrate) navigator.vibrate([50]); };
-
-    // --- Custom Button ---
-    function AppButton({ children, onClick, style = {}, ...props }) {
-      return (
-        <button
-          {...props}
-          style={{
-            background: COLORS.button,
-            color: COLORS.accent,
-            minWidth: 48,
-            minHeight: 48,
-            padding: "0.5rem 1.5rem",
-            borderRadius: 4,
-            fontWeight: 700,
-            fontSize: "1rem",
-            border: "none",
-            outline: "none",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s, background 0.2s",
-            ...style
-          }}
-          className="app-btn"
-          onClick={e => { haptic(); onClick && onClick(e); }}
-          onMouseDown={e => e.currentTarget.style.transform = "scale(1.05)"}
-          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-        >
-          {children}
-        </button>
-      );
-    }
-
-    // --- Gift Card ---
-    function GiftCard({ gift, onSwipe, onSave, onShare }) {
-      const cardRef = React.useRef();
-      React.useEffect(() => {
-        if (!cardRef.current) return;
-        const hammer = new window.Hammer(cardRef.current);
-        hammer.on("swipeleft", () => onSwipe && onSwipe("left", gift));
-        hammer.on("swiperight", () => onSwipe && onSwipe("right", gift));
-        return () => hammer.destroy();
-      }, [gift, onSwipe]);
-      return (
-        <div
-          ref={cardRef}
-          className="gift-card fade-in"
-          tabIndex={0}
-          aria-label={`Gift: ${gift.title}`}
-        >
-          <img
-            src={gift.image}
-            alt={gift.alt}
-            loading="lazy"
-            width="200"
-            height="200"
-            style={{ borderRadius: 8, marginBottom: 12, width: "100%", background: "#1a1040" }}
-          />
-          <h3 style={{ color: COLORS.accent, fontSize: "1.25rem", fontWeight: 700 }}>{gift.title}</h3>
-          <p style={{ color: COLORS.text, margin: "0.5rem 0" }}>{gift.description}</p>
-          <div className="gift-card-actions">
-            <AppButton
-              style={{ background: COLORS.button, color: COLORS.accent, marginRight: 8 }}
-              aria-label="Save gift"
-              onClick={() => onSave && onSave(gift)}
-            >Save</AppButton>
-            <AppButton
-              style={{ background: COLORS.button, color: COLORS.accent }}
-              aria-label="Share gift"
-              onClick={() => onShare && onShare(gift)}
-            >Share</AppButton>
-          </div>
-        </div>
-      );
-    }
-
-    // --- Multi-step Form ---
-    function GiftForm({ onComplete }) {
-      const steps = [
-        { label: "What's the occasion?", key: "occasion", options: ["Birthday", "Anniversary", "Graduation", "Holiday"] },
-        { label: "Who is the gift for?", key: "recipient", options: ["Friend", "Partner", "Parent", "Child"] },
-        { label: "What's your budget?", key: "budget", options: ["<$25", "$25-$50", "$50-$100", "$100+"] }
-      ];
-      const [step, setStep] = React.useState(0);
-      const [answers, setAnswers] = React.useState(() => JSON.parse(localStorage.getItem("sgf-answers") || "{}"));
-      const handleSelect = (option) => {
-        const newAnswers = { ...answers, [steps[step].key]: option };
-        setAnswers(newAnswers);
-        localStorage.setItem("sgf-answers", JSON.stringify(newAnswers));
-        if (step < steps.length - 1) setStep(step + 1);
-        else onComplete(newAnswers);
-      };
-      return (
-        <div className="form-modal">
-          <div className="progress-bar" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
-          <h2 style={{ color: COLORS.accent, fontSize: "1.25rem", margin: "1rem 0" }}>{steps[step].label}</h2>
-          <div className="form-options">
-            {steps[step].options.map(opt => (
-              <AppButton key={opt} onClick={() => handleSelect(opt)}>{opt}</AppButton>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    // --- Main App ---
-    function App() {
-      const [showForm, setShowForm] = React.useState(false);
-      const [gifts, setGifts] = React.useState([]);
-      const [saved, setSaved] = React.useState(() => JSON.parse(localStorage.getItem("sgf-saved") || "[]"));
-      const [showExit, setShowExit] = React.useState(false);
-      const [showA2HS, setShowA2HS] = React.useState(false);
-      const [sampleGift] = React.useState({
-        title: "Personalized Coffee Mug",
-        description: "A custom mug for birthdays, perfect for coffee lovers.",
-        image: "https://dummyimage.com/200x200/471396/ffcc00&text=Mug",
-        alt: "Personalized coffee mug for birthdays"
-      });
-      // Onboarding: show sample gift
-      React.useEffect(() => {
-        window.addEventListener("beforeunload", (e) => {
-          setShowExit(true);
-          e.preventDefault();
-          e.returnValue = "";
-        });
-        // A2HS
-        let deferredPrompt;
-        window.addEventListener("beforeinstallprompt", (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          setShowA2HS(true);
-          window._a2hsPrompt = deferredPrompt;
-        });
-        return () => {
-          window.removeEventListener("beforeunload", () => {});
-        };
-      }, []);
-      // Save gifts
-      React.useEffect(() => {
-        localStorage.setItem("sgf-saved", JSON.stringify(saved));
-      }, [saved]);
-      // Simulate API
-      const fetchGifts = (params) => {
-        setTimeout(() => {
-          setGifts([
-            {
-              title: "Bluetooth Speaker",
-              description: "Portable, waterproof, and perfect for music lovers.",
-              image: "https://dummyimage.com/200x200/471396/ffcc00&text=Speaker",
-              alt: "Bluetooth speaker for music lovers"
-            },
-            {
-              title: "Custom Photo Book",
-              description: "Cherish memories with a personalized photo book.",
-              image: "https://dummyimage.com/200x200/471396/ffcc00&text=Photo+Book",
-              alt: "Custom photo book for memories"
-            }
-          ]);
-        }, 800);
-      };
-      // Share
-      const handleShare = (gift) => {
-        if (navigator.share) {
-          navigator.share({
-            title: gift.title,
-            text: gift.description,
-            url: window.location.href
-          });
-        } else {
-          alert("Sharing not supported on this device.");
-        }
-      };
-      // Save
-      const handleSave = (gift) => {
-        setSaved((prev) => [...prev, gift]);
-      };
-      // Swipe
-      const handleSwipe = (dir, gift) => {
-        if (dir === "right") handleSave(gift);
-      };
-      // Form complete
-      const handleFormComplete = (answers) => {
-        setShowForm(false);
-        fetchGifts(answers);
-      };
-      // Add to Home Screen
-      const handleA2HS = () => {
-        if (window._a2hsPrompt) {
-          window._a2hsPrompt.prompt();
-          setShowA2HS(false);
-        }
-      };
-      // Exit intent
-      const handleExitClose = () => setShowExit(false);
-
-      return (
-        <div className="container">
-          <header>
-            <h1 className="heading">SmartGiftFinder</h1>
-            <p className="subtitle">Discover personalized gifts with AI in 30 seconds!</p>
-            <div className="trust-badge">🎁 Trusted by thousands</div>
-          </header>
-          <main>
-            <section className="hero">
-              <AppButton
-                style={{ margin: "1rem 0", width: "100%" }}
-                onClick={() => setShowForm(true)}
-                aria-label="Find My Gift Now"
-              >
-                Find My Gift Now
-              </AppButton>
-              <div className="sample-gift">
-                <h2 style={{ color: COLORS.accent, fontSize: "1.1rem" }}>Sample Gift Idea</h2>
-                <GiftCard gift={sampleGift} onSwipe={handleSwipe} onSave={handleSave} onShare={handleShare} />
-              </div>
-            </section>
-            <section className="gift-section">
-              <h2 className="section-title">Your Gift Suggestions</h2>
-              <div className="gift-list">
-                {gifts.length === 0 ? (
-                  <div className="empty-state">Start the quiz to get personalized gifts!</div>
-                ) : (
-                  gifts.map((gift, i) => (
-                    <GiftCard
-                      key={i}
-                      gift={gift}
-                      onSwipe={handleSwipe}
-                      onSave={handleSave}
-                      onShare={handleShare}
-                    />
-                  ))
-                )}
-              </div>
-            </section>
-          </main>
-          <footer>
-            <a href="#privacy" className="privacy-link">Privacy Policy</a>
-            <span className="trust-badge">Trusted by thousands</span>
-          </footer>
-          {showForm && <GiftForm onComplete={handleFormComplete} />}
-          {showA2HS && (
-            <div className="a2hs-popup">
-              <AppButton onClick={handleA2HS}>Add to Home Screen</AppButton>
-            </div>
-          )}
-          {showExit && (
-            <div className="exit-popup">
-              <div>One more gift idea before you go?</div>
-              <AppButton onClick={handleExitClose}>Show Me!</AppButton>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    ReactDOM.render(<App />, document.getElementById("app"));
-  </script>
-</body>
+      gtag('config', 'G-5VXMXKEYEV');
+    </script>
+  </body>
 </html>
