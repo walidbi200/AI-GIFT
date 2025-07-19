@@ -202,7 +202,7 @@ function HomePage() {
               id="relationship" 
               value={relationship} 
               onChange={(e) => setRelationship(e.target.value)} 
-              className={`w-full px-3 py-2 min-h-[40px] border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.relationship ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
+              className={`w-full p-2 min-h-[40px] border rounded-md bg-[#2A2A2A] border-[#FFCC00] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#FFCC00] placeholder-[#A0A0A0] text-base ${errors.relationship ? 'border-error dark:border-dark-error' : ''}`}
               aria-describedby={errors.relationship ? 'relationship-error' : undefined}
             > 
               <option value="">Select relationship</option> 
@@ -218,7 +218,7 @@ function HomePage() {
               id="occasion" 
               value={occasion} 
               onChange={(e) => setOccasion(e.target.value)} 
-              className={`w-full px-3 py-2 min-h-[40px] border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.occasion ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
+              className={`w-full p-2 min-h-[40px] border rounded-md bg-[#2A2A2A] border-[#FFCC00] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#FFCC00] placeholder-[#A0A0A0] text-base ${errors.occasion ? 'border-error dark:border-dark-error' : ''}`}
               aria-describedby={errors.occasion ? 'occasion-error' : undefined}
             > 
               <option value="">Select an occasion</option> 
@@ -248,18 +248,18 @@ function HomePage() {
                 }
               }}
               placeholder="Type an interest and press Enter"
-              className={`w-full px-3 py-2 min-h-[40px] border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors ${errors.interests ? 'border-error dark:border-dark-error' : 'border-light-border dark:border-dark-border'}`}
+              className={`w-full p-2 min-h-[40px] border rounded-md bg-[#2A2A2A] border-[#FFCC00] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#FFCC00] placeholder-[#A0A0A0] text-base ${errors.interests ? 'border-error dark:border-dark-error' : ''}`}
               aria-describedby={errors.interests ? 'interests-error' : undefined}
             />
             {interests.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {interests.map((interest, index) => (
-                  <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-light-primary/10 dark:bg-dark-primary/20 text-light-primary dark:text-dark-primary rounded-full text-sm font-semibold capitalize">
+                  <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-white text-[#090040] border border-[#FFCC00] rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-[#F0F0F0] active:scale-105 focus:outline-none focus:ring-2 focus:ring-[#FFCC00]" style={{margin:'4px'}}>
                     {interest}
                     <button
                       type="button"
-                      onClick={() => setInterests(interests.filter((_, i) => i !== index))}
-                      className="ml-1 text-light-primary dark:text-dark-primary hover:opacity-70 focus:outline-none"
+                      onClick={e => { if(window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }}
+                      className="ml-1 text-[#090040] hover:opacity-70 focus:outline-none"
                       aria-label={`Remove ${interest} interest`}
                     >
                       &times;
@@ -271,7 +271,7 @@ function HomePage() {
             <div className="mt-1 mb-2 text-xs text-light-text-muted dark:text-dark-text-muted font-medium">Add 1-3 interests</div>
             <div className="mt-4">
               <p className="text-xs text-light-text-muted dark:text-dark-text-muted mb-2">Or select from popular interests:</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   'Tech', 'Gaming', 'Reading', 'Cooking', 'Travel', 'Movies',
                   'Music', 'Sports', 'Fitness', 'Fashion', 'Art', 'Photography',
@@ -280,13 +280,15 @@ function HomePage() {
                   <button
                     key={quickInterest}
                     type="button"
-                    onClick={() => {
+                    onClick={e => {
+                      if(window.navigator.vibrate) window.navigator.vibrate([50]);
                       const lowerCaseInterest = quickInterest.toLowerCase();
                       if (!interests.includes(lowerCaseInterest)) {
                         setInterests([...interests, lowerCaseInterest]);
                       }
                     }}
-                    className="px-3 py-1.5 text-sm bg-light-surface dark:bg-find-gift border border-light-border dark:border-dark-border text-light-text-muted dark:text-white rounded-full hover:bg-light-primary/5 dark:hover:bg-button-hover hover:text-light-primary dark:hover:text-white transition-colors font-medium"
+                    className="interest-button bg-white text-[#090040] border border-[#FFCC00] rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-[#F0F0F0] active:scale-105 focus:outline-none focus:ring-2 focus:ring-[#FFCC00]"
+                    aria-label={`Interest: ${quickInterest}`}
                   >
                     {quickInterest}
                   </button>
@@ -299,7 +301,8 @@ function HomePage() {
           </div>
           <div>
             <label htmlFor="negativeKeywords" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Things to avoid <span className="text-light-text-muted dark:text-dark-text-muted">(optional)</span></label>
-            <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full px-3 py-2 min-h-[40px] border rounded-md bg-white dark:bg-gray-800 text-light-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-colors border-light-border dark:border-dark-border" />
+            <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" 
+              className="w-full p-2 min-h-[40px] border rounded-md bg-[#2A2A2A] border-[#FFCC00] text-[#E0E0E0] focus:outline-none focus:ring-2 focus:ring-[#FFCC00] placeholder-[#A0A0A0] text-base" />
           </div>
           <div>
             <label htmlFor="budget" className="block text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-2">Budget (optional)</label>
