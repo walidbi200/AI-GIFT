@@ -25,6 +25,16 @@ export default defineConfig({
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'pwa-192x192.webp',
+            sizes: '192x192',
+            type: 'image/webp'
+          },
+          {
+            src: 'pwa-512x512.webp',
+            sizes: '512x512',
+            type: 'image/webp'
           }
         ]
       }
