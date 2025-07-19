@@ -1,3 +1,4 @@
+// FILE: walidbi200/ai-gift/AI-GIFT-2fef8f469c6596d3b301b2142f1edcc9f74af4b0/tailwind.config.js
 // tailwind.config.js
 export default {
   content: [
@@ -15,32 +16,26 @@ export default {
         // Light Mode Colors
         'light-background': '#FFFFFF',
         'light-surface': '#F9FAFB',
-        'light-primary': '#6366F1',
-        'light-accent': '#F59E0B',
+        'light-primary': '#471396',    // Dark Purple
+        'light-accent': '#FFCC00',     // Yellow
         'light-text-primary': '#111827',
         'light-text-muted': '#6B7280',
         'light-border': '#E5E7EB',
 
-        // Dark Mode Colors
-        'dark-background': '#1A1A1A',
-        'dark-surface': '#2A2A2A',
-        'dark-primary': '#818CF8',
-        'dark-accent': '#FBBF24',
+        // Dark Mode Colors (New Palette)
+        'dark-background': '#090040',  // Dark Navy
+        'dark-surface': '#471396',     // Dark Purple
+        'dark-primary': '#B13BFF',     // Bright Violet
+        'dark-accent': '#FFCC00',      // Yellow
         'dark-text-primary': '#F9FAFB',
         'dark-text-muted': '#9CA3AF',
-        'dark-border': '#30363D',
+        'dark-border': '#471396',      // Dark Purple
 
         // Utility Colors
         'success': '#10B981',
         'dark-success': '#34D399',
         'error': '#EF4444',
         'dark-error': '#F87171',
-
-        // Custom Button Colors
-        'find-gift': '#4C8BF5',
-        'surprise-me': '#4B5EAA',
-        'button-hover': '#F28C38',
-        'button-text': '#E0E0E0',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',
