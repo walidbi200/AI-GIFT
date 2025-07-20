@@ -8,6 +8,7 @@ export interface GiftSuggestion {
   imageUrl?: string; // Optional image URL for real product images
   image?: string; // URL to the gift image
   price?: string; // Price as a string, e.g. "$29.99"
+  tag?: string; // Optional informational badge/tag
 }
 
 export interface FormErrors {

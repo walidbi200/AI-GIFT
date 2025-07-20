@@ -16,17 +16,32 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
 
   return (
     <article
-      className="card-container border border-border rounded-lg shadow-md flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-[1.03] animate-fade-in-up"
+      className="card-container group border border-border rounded-lg shadow-md flex flex-col transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 animate-fade-in-up"
       style={{ animationDelay }}
     >
       {/* Hero Image Container */}
       <div className="image-wrapper relative h-48">
+        {/* Dynamic Badge */}
+        {suggestion.tag && (
+          <div className="absolute top-3 left-3 bg-secondary text-white px-2.5 py-1 rounded-full text-xs font-bold z-10 shadow">
+            {suggestion.tag}
+          </div>
+        )}
         <img
           src={imageUrl}
           alt={suggestion.name}
           className="w-full h-full object-cover rounded-t-lg"
           loading="lazy"
         />
+        {/* Quick Actions Overlay (optional, placeholder) */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity duration-300 z-20">
+          {/* Example: Wishlist button */}
+          <button className="bg-white/80 hover:bg-white text-primary rounded-full p-2 shadow-lg transition-colors duration-200 mr-2" title="Add to Wishlist">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
+            </svg>
+          </button>
+        </div>
       </div>
       {/* Content Container */}
       <div className="flex-1 flex flex-col px-4 pb-4 pt-4">
