@@ -1,14 +1,14 @@
 // FILE: src/components/Button.tsx
 // This is the final, robust version with explicit theme classes to fix the light mode visibility issue.
 
-import React from 'react';
+import React from "react";
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
   onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
@@ -18,29 +18,29 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   onClick,
-  type = 'button',
+  type = "button",
   disabled = false,
   loading = false,
   icon,
-  className = '',
-  fullWidth = false
+  className = "",
+  fullWidth = false,
 }) => {
   const baseClasses = `
     inline-flex items-center justify-center font-display font-bold rounded-lg
     transition-all duration-200
     focus:outline-none focus:ring-4
     disabled:cursor-not-allowed
-    ${fullWidth ? 'w-full' : ''}
+    ${fullWidth ? "w-full" : ""}
     min-h-[44px] min-w-[44px] px-4 select-none
   `;
 
   const sizeClasses = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-3 text-base',
-    lg: 'px-6 py-4 text-lg'
+    sm: "px-3 py-2 text-sm",
+    md: "px-4 py-3 text-base",
+    lg: "px-6 py-4 text-lg",
   };
 
   const variantClasses = {
@@ -65,7 +65,7 @@ const Button: React.FC<ButtonProps> = ({
       hover:bg-light-surface hover:text-light-text-primary
       dark:hover:bg-dark-surface dark:hover:text-dark-text-primary
       focus:ring-gray-500/50
-    `
+    `,
   };
 
   const classes = `
@@ -81,7 +81,7 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       className={classes}
-      style={{ WebkitTapHighlightColor: 'transparent' }}
+      style={{ WebkitTapHighlightColor: "transparent" }}
     >
       {loading ? (
         <svg
@@ -103,10 +103,12 @@ const Button: React.FC<ButtonProps> = ({
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-      ) : icon}
+      ) : (
+        icon
+      )}
       {children}
     </button>
   );
 };
 
-export default Button; 
+export default Button;

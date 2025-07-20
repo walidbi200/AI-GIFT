@@ -1,56 +1,57 @@
-import React, { useEffect } from 'react'
-import type { ToastType } from '../types'
+import React, { useEffect } from "react";
+import type { ToastType } from "../types";
 
 interface ToastProps {
-  message: string
-  type: ToastType
-  isVisible: boolean
-  onClose: () => void
-  duration?: number
+  message: string;
+  type: ToastType;
+  isVisible: boolean;
+  onClose: () => void;
+  duration?: number;
 }
 
-const Toast: React.FC<ToastProps> = ({ 
-  message, 
-  type, 
-  isVisible, 
-  onClose, 
-  duration = 3000 
+const Toast: React.FC<ToastProps> = ({
+  message,
+  type,
+  isVisible,
+  onClose,
+  duration = 3000,
 }) => {
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(() => {
-        onClose()
-      }, duration)
+        onClose();
+      }, duration);
 
-      return () => clearTimeout(timer)
+      return () => clearTimeout(timer);
     }
-  }, [isVisible, duration, onClose])
+  }, [isVisible, duration, onClose]);
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   const getIcon = () => {
     switch (type) {
-      case 'success':
-        return '✅'
-      case 'error':
-        return '❌'
+      case "success":
+        return "✅";
+      case "error":
+        return "❌";
       default:
-        return 'ℹ️'
+        return "ℹ️";
     }
-  }
+  };
 
   const getStyles = () => {
-    const baseStyles = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-3 max-w-sm'
-    
+    const baseStyles =
+      "fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-3 max-w-sm";
+
     switch (type) {
-      case 'success':
-        return `${baseStyles} bg-green-500 text-white`
-      case 'error':
-        return `${baseStyles} bg-red-500 text-white`
+      case "success":
+        return `${baseStyles} bg-green-500 text-white`;
+      case "error":
+        return `${baseStyles} bg-red-500 text-white`;
       default:
-        return `${baseStyles} bg-blue-500 text-white`
+        return `${baseStyles} bg-blue-500 text-white`;
     }
-  }
+  };
 
   return (
     <div className={getStyles()}>
@@ -63,7 +64,7 @@ const Toast: React.FC<ToastProps> = ({
         ✕
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default Toast 
+export default Toast;

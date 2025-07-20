@@ -9,8 +9,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Poppins', 'sans-serif'],
       },
       colors: {
         // Light Mode Colors
@@ -36,6 +36,15 @@ export default {
         'dark-success': '#34D399',
         'error': '#EF4444',
         'dark-error': '#F87171',
+
+        // Custom Palette
+        primary: '#4A90E2',           // Cornflower Blue: for CTAs, links
+        secondary: '#F5A623',         // Goldenrod: for accents, highlights
+        background: '#F8F9FA',        // Alabaster: for main page backgrounds
+        surface: '#FFFFFF',           // White: for cards, modals
+        'text-primary': '#212529',    // Onyx: for main text
+        'text-secondary': '#6C757D',  // Abbey: for subtitles, descriptions
+        border: '#DEE2E6',            // Light Gray: for borders, dividers
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',

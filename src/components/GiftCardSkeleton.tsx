@@ -1,3 +1,5 @@
+import React from 'react';
+
 const GiftCardSkeleton = () => (
   <div className="bg-gray-100 dark:bg-gray-800 rounded-xl shadow-soft border border-gray-100 dark:border-gray-700 p-6 animate-pulse">
     <div className="flex items-start gap-4">
@@ -15,4 +17,4 @@ const GiftCardSkeleton = () => (
   </div>
 );
 
-export default GiftCardSkeleton; 
+export default React.memo(GiftCardSkeleton);

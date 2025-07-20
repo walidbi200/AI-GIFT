@@ -1,21 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://smartgiftfinder.xyz/</loc>
-    <lastmod>2025-07-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <loc>https://www.smartgiftfinder.xyz/</loc>
   </url>
   <url>
-    <loc>https://smartgiftfinder.xyz/about</loc>
-    <lastmod>2025-07-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://www.smartgiftfinder.xyz/about</loc>
   </url>
   <url>
-    <loc>https://smartgiftfinder.xyz/contact</loc>
-    <lastmod>2025-07-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://www.smartgiftfinder.xyz/contact</loc>
+  </url>
+  <url>
+    <loc>https://www.smartgiftfinder.xyz/privacy-policy</loc>
   </url>
 </urlset> 

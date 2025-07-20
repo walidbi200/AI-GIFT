@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -10,15 +10,24 @@ const Footer: React.FC = () => {
         &copy; {currentYear} Smart Gift Finder. All Rights Reserved.
       </p>
       <div className="flex justify-center gap-4 mt-2">
-        <Link to="/about" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+        <Link
+          to="/about"
+          className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+        >
           About
         </Link>
         <span className="text-slate-400">|</span>
-        <Link to="/contact" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+        <Link
+          to="/contact"
+          className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+        >
           Contact
         </Link>
         <span className="text-slate-400">|</span>
-        <Link to="/privacy-policy" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+        <Link
+          to="/privacy-policy"
+          className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+        >
           Privacy Policy
         </Link>
       </div>
@@ -26,4 +35,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 
 interface FormInputProps {
   label: string;
-  type: 'text' | 'number' | 'select' | 'range';
+  type: "text" | "number" | "select" | "range";
   value: string | number;
   onChange: (value: string | number) => void;
   placeholder?: string;
@@ -28,14 +28,14 @@ const FormInput: React.FC<FormInputProps> = ({
   min,
   max,
   icon,
-  className = '',
-  onKeyDown
+  className = "",
+  onKeyDown,
 }) => {
-  const inputId = `input-${label.toLowerCase().replace(/\s+/g, '-')}`;
+  const inputId = `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const hasError = !!error;
 
   const handleChange = (newValue: string | number) => {
-    if (type === 'range') {
+    if (type === "range") {
       onChange(Number(newValue));
     } else {
       onChange(newValue);
@@ -44,7 +44,7 @@ const FormInput: React.FC<FormInputProps> = ({
 
   const renderInput = () => {
     switch (type) {
-      case 'select':
+      case "select":
         return (
           <div className="relative">
             {icon && (
@@ -60,15 +60,16 @@ const FormInput: React.FC<FormInputProps> = ({
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                ${icon ? 'pl-10' : ''}
-                ${hasError 
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                ${icon ? "pl-10" : ""}
+                ${
+                  hasError
+                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
+                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                 }
                 ${className}
               `}
             >
-              <option value="">{placeholder || 'Select an option'}</option>
+              <option value="">{placeholder || "Select an option"}</option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -77,18 +78,30 @@ const FormInput: React.FC<FormInputProps> = ({
             </select>
             {/* Custom dropdown arrow */}
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           </div>
         );
 
-      case 'range':
+      case "range":
         return (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Age: {value}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Age: {value}
+              </span>
               {icon && <div className="text-gray-400">{icon}</div>}
             </div>
             <input
@@ -122,10 +135,11 @@ const FormInput: React.FC<FormInputProps> = ({
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                ${icon ? 'pl-10' : ''}
-                ${hasError 
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
+                ${icon ? "pl-10" : ""}
+                ${
+                  hasError
+                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
+                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                 }
                 ${className}
               `}
@@ -137,20 +151,30 @@ const FormInput: React.FC<FormInputProps> = ({
 
   return (
     <div className="space-y-2">
-      <label 
-        htmlFor={inputId} 
+      <label
+        htmlFor={inputId}
         className="block text-sm font-medium text-gray-700 dark:text-gray-300"
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      
+
       {renderInput()}
-      
+
       {hasError && (
         <p className="text-red-500 text-sm flex items-center gap-1 animate-fade-in">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           {error}
         </p>
@@ -159,4 +183,4 @@ const FormInput: React.FC<FormInputProps> = ({
   );
 };
 
-export default FormInput; 
+export default FormInput;
