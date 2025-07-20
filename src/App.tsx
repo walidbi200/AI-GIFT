@@ -267,9 +267,8 @@ function HomePage() {
           Find the perfect gift with AI-powered suggestions
         </p>
       </header>
-      <section className="mb-6 text-center text-lg font-semibold text-light-text-primary dark:text-dark-text-primary animate-fade-in-up">
-        <h2 className="sr-only">Gift Finder Form</h2>
-        Let's find the perfect gift! Start with a few details.
+      <section className="mb-6 text-center animate-fade-in-up">
+        <h2 className="font-display text-3xl font-bold text-text-primary">Let's find the perfect gift!</h2>
       </section>
       <section>
         <RecentSearches
@@ -278,13 +277,8 @@ function HomePage() {
           onClearSearches={clearSearches}
         />
       </section>
-      <section className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg p-6 sm:p-8 mb-8 border border-light-border dark:border-dark-border mx-4 sm:mx-0">
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          role="search"
-          aria-label="Gift recommendation form"
-        >
+      <section className="bg-surface rounded-lg shadow-lg p-8 mb-8 border border-border mx-4 sm:mx-0">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-6" role="search" aria-label="Gift recommendation form">
           {Object.keys(errors).length > 0 && (
             <div className="md:col-span-2 mb-4 p-3 rounded-lg text-white text-center font-bold animate-fade-in-up bg-error dark:bg-dark-error">
               Please fill in all required fields.
@@ -311,7 +305,7 @@ function HomePage() {
           <div className="col-span-1">
             <label
               htmlFor="relationship"
-              className="block text-base font-semibold text-text-secondary mb-2"
+              className="block text-base font-medium text-text-secondary mb-2"
             >
               Who is this for? <span className="text-error">*</span>
             </label>
@@ -344,7 +338,7 @@ function HomePage() {
           <div className="col-span-1">
             <label
               htmlFor="occasion"
-              className="block text-base font-semibold text-text-secondary mb-2"
+              className="block text-base font-medium text-text-secondary mb-2"
             >
               Occasion <span className="text-error">*</span>
             </label>
@@ -375,7 +369,7 @@ function HomePage() {
           <div className="col-span-1">
             <label
               htmlFor="interests"
-              className="block text-base font-semibold text-text-secondary mb-2"
+              className="block text-base font-medium text-text-secondary mb-2"
             >
               Interests <span className="text-error">*</span>
             </label>
@@ -541,14 +535,14 @@ function HomePage() {
             <button
               type="button"
               onClick={clearForm}
-              className="w-full md:w-auto px-6 py-3 rounded-lg border-2 border-secondary text-secondary font-bold text-lg bg-transparent hover:bg-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
+              className="w-full md:w-auto px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               🗑️ Clear Form
             </button>
             <button
               type="button"
               onClick={handleSurpriseMe}
-              className="w-full md:w-auto px-6 py-3 rounded-lg border-2 border-primary text-primary font-bold text-lg bg-transparent hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="w-full md:w-auto px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               🎲 Surprise Me
             </button>
@@ -622,91 +616,34 @@ function App() {
   useGoogleAnalytics();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-grow">
-        {/* Apply new background and text colors */}
-        <div className="min-h-screen bg-light-background dark:bg-dark-background text-light-text-primary dark:text-dark-text-primary flex flex-col">
-          {/* Add the ThemeToggle component here */}
-          <ThemeToggle />
-
-          <nav
-            className="bg-light-surface dark:bg-dark-surface/80 backdrop-blur-sm shadow-sm border-b border-light-border dark:border-dark-border sticky top-0 z-50"
-            role="navigation"
-            aria-label="Main navigation"
-          >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-16">
-                <Link
-                  to="/"
-                  className="flex items-center space-x-2"
-                  aria-label="Smart Gift Finder - Go to homepage"
-                >
-                  <span
-                    className="text-2xl"
-                    role="img"
-                    aria-label="Gift box icon"
-                  >
-                    🎁
-                  </span>
-                  <span className="text-xl font-display font-bold">
-                    Smart Gift Finder
-                  </span>
-                </Link>
-                <div className="flex items-center space-x-8" role="menubar">
-                  <Link
-                    to="/"
-                    className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium"
-                    role="menuitem"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium"
-                    role="menuitem"
-                  >
-                    About
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors font-medium"
-                    role="menuitem"
-                  >
-                    Contact
-                  </Link>
+      <main className="flex-grow flex flex-col items-center">
+        <div className="w-full flex-1 flex flex-col">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
+                  <p className="text-light-text-muted dark:text-dark-text-muted">
+                    Loading page...
+                  </p>
                 </div>
               </div>
-            </div>
-          </nav>
-
-          <main className="flex-grow container mx-auto py-8 px-4" role="main">
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center min-h-[400px]">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
-                    <p className="text-light-text-muted dark:text-dark-text-muted">
-                      Loading page...
-                    </p>
-                  </div>
-                </div>
-              }
-            >
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              </Routes>
-            </Suspense>
-          </main>
-
-          <Footer />
+            }
+          >
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            </Routes>
+          </Suspense>
         </div>
-        <Analytics />
-        <SpeedInsights />
+        <Footer />
       </main>
+      <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
