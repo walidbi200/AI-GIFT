@@ -16,23 +16,27 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
 
   return (
     <article
-      className="bg-surface border border-border rounded-lg shadow-md flex flex-col items-stretch transition-all duration-300 hover:shadow-lg hover:scale-[1.03] animate-fade-in-up"
+      className="card-container border border-border rounded-lg shadow-md flex flex-col transition-all duration-300 hover:shadow-lg hover:scale-[1.03] animate-fade-in-up"
       style={{ animationDelay }}
     >
-      <img
-        src={imageUrl}
-        alt={suggestion.name}
-        className="w-full h-48 object-cover rounded-t-lg mb-4"
-        loading="lazy"
-      />
-      <div className="flex-1 flex flex-col px-4 pb-4">
+      {/* Hero Image Container */}
+      <div className="image-wrapper relative h-48">
+        <img
+          src={imageUrl}
+          alt={suggestion.name}
+          className="w-full h-full object-cover rounded-t-lg"
+          loading="lazy"
+        />
+      </div>
+      {/* Content Container */}
+      <div className="flex-1 flex flex-col px-4 pb-4 pt-4">
         <header>
           <h2 className="text-lg font-bold text-text-primary mb-1 truncate">{suggestion.name}</h2>
           {suggestion.price && (
             <div className="text-base font-semibold text-text-secondary mb-2">{suggestion.price}</div>
           )}
         </header>
-        <section>
+        <section className="flex-grow">
           <p className="text-text-secondary text-sm mb-3 line-clamp-3">{suggestion.description}</p>
         </section>
         <footer className="mt-auto flex items-center gap-2">
