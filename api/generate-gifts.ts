@@ -55,14 +55,12 @@ export default async function handler(
 
     if (!openAIResponse.ok) {
       const errorData = await openAIResponse.json();
-      console.error('OpenAI API Error:', errorData);
       return response.status(openAIResponse.status).json({ message: 'Error from OpenAI API', details: errorData });
     }
 
     const data = await openAIResponse.json();
     
     if (!data.choices || data.choices.length === 0 || !data.choices[0].message || !data.choices[0].message.content) {
-        console.error('Invalid response structure from OpenAI:', data);
         return response.status(500).json({ message: 'Received an invalid response structure from OpenAI.' });
     }
 
@@ -71,7 +69,6 @@ export default async function handler(
     const jsonEndIndex = suggestionsText.lastIndexOf(']');
 
     if (jsonStartIndex === -1 || jsonEndIndex === -1) {
-        console.error('Could not find JSON array in the AI response:', suggestionsText);
         return response.status(500).json({ message: 'Could not find JSON array in the AI response.' });
     }
 
@@ -86,12 +83,10 @@ export default async function handler(
       }));
       return response.status(200).json(suggestions);
     } catch (parseError) {
-      console.error('JSON Parse Error:', parseError, '--- Original Text:', jsonString);
       return response.status(500).json({ message: 'Failed to parse suggestions from AI response.' });
     }
 
   } catch (error) {
-    console.error('Internal Server Error:', error);
     return response.status(500).json({ message: 'An unexpected error occurred.' });
   }
 }
