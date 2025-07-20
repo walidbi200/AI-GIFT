@@ -79,6 +79,7 @@ const POPULAR_TAGS = [
 // This is the component for your main gift finder page
 function HomePage() {
   const { trackGiftGeneration } = useGoogleAnalytics();
+  const [step, setStep] = useState(1);
   const [age, setAge] = useState(25);
   const [occasion, setOccasion] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
@@ -256,12 +257,15 @@ function HomePage() {
 
   return (
     <main className="w-full max-w-2xl mx-auto">
+      {/* Progress Bar */}
+      <div className="flex items-center justify-center mb-6 gap-2 sm:gap-4">
+        <div className={`flex-1 flex flex-col items-center ${step >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'} rounded-lg py-2 transition-all duration-200`}>Step 1: Core Details</div>
+        <div className="w-6 h-1 bg-gray-300 rounded-full mx-2 hidden sm:block" />
+        <div className={`flex-1 flex flex-col items-center ${step === 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'} rounded-lg py-2 transition-all duration-200`}>Step 2: Personalize</div>
+      </div>
       <header className="text-center mb-10">
         <h1 className="text-4xl sm:text-5xl font-display font-bold text-light-text-primary dark:text-dark-text-primary">
-          <span role="img" aria-label="Gift box icon">
-            🎁
-          </span>{" "}
-          Smart Gift Finder
+          <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
         </h1>
         <p className="text-light-text-muted dark:text-dark-text-muted mt-2">
           Find the perfect gift with AI-powered suggestions
@@ -278,274 +282,96 @@ function HomePage() {
         />
       </section>
       <section className="bg-surface rounded-lg shadow-lg p-8 mb-8 border border-border mx-4 sm:mx-0">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-6" role="search" aria-label="Gift recommendation form">
+        <form onSubmit={handleSubmit} className="space-y-6" role="search" aria-label="Gift recommendation form">
           {Object.keys(errors).length > 0 && (
-            <div className="md:col-span-2 mb-4 p-3 rounded-lg text-white text-center font-bold animate-fade-in-up bg-error dark:bg-dark-error">
+            <div className="mb-4 p-3 rounded-lg text-white text-center font-bold animate-fade-in-up bg-error dark:bg-dark-error">
               Please fill in all required fields.
             </div>
           )}
-          <div className="col-span-1">
-            <label
-              htmlFor="age"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Recipient Age:{" "}
-              <span className="text-primary font-bold">{age}</span>
-            </label>
-            <input
-              type="range"
-              id="age"
-              min="1"
-              max="100"
-              value={age}
-              onChange={(e) => setAge(parseInt(e.target.value))}
-              className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor="relationship"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Who is this for? <span className="text-error">*</span>
-            </label>
-            <select
-              id="relationship"
-              value={relationship}
-              onChange={(e) => setRelationship(e.target.value)}
-              className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? "border-error" : ""}`}
-              aria-describedby={
-                errors.relationship ? "relationship-error" : undefined
-              }
-            >
-              <option value="">Select relationship</option>
-              {relationships.map((rel) => (
-                <option key={rel.value} value={rel.value}>
-                  {rel.label}
-                </option>
-              ))}
-            </select>
-            {errors.relationship && (
-              <p
-                id="relationship-error"
-                className="text-error text-sm mt-1"
-                role="alert"
-              >
-                {errors.relationship}
-              </p>
-            )}
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor="occasion"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Occasion <span className="text-error">*</span>
-            </label>
-            <select
-              id="occasion"
-              value={occasion}
-              onChange={(e) => setOccasion(e.target.value)}
-              className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? "border-error" : ""}`}
-              aria-describedby={errors.occasion ? "occasion-error" : undefined}
-            >
-              <option value="">Select an occasion</option>
-              {occasions.map((occ) => (
-                <option key={occ.value} value={occ.value}>
-                  {occ.label}
-                </option>
-              ))}
-            </select>
-            {errors.occasion && (
-              <p
-                id="occasion-error"
-                className="text-error text-sm mt-1"
-                role="alert"
-              >
-                {errors.occasion}
-              </p>
-            )}
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor="interests"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Interests <span className="text-error">*</span>
-            </label>
-            <input
-              type="text"
-              id="interests"
-              value={currentInterest}
-              onChange={(e) => setCurrentInterest(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && currentInterest.trim()) {
-                  e.preventDefault();
-                  const newInterest = currentInterest.trim().toLowerCase();
-                  if (!interests.includes(newInterest)) {
-                    setInterests([...interests, newInterest]);
-                  }
-                  setCurrentInterest("");
-                }
-              }}
-              placeholder="Type an interest and press Enter"
-              className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? "border-error" : ""}`}
-              aria-describedby={
-                errors.interests ? "interests-error" : undefined
-              }
-            />
-            {interests.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {interests.map((interest, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
-                    style={{ margin: "4px" }}
-                  >
-                    {interest}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        if (window.navigator.vibrate)
-                          window.navigator.vibrate([50]);
-                        setInterests(interests.filter((_, i) => i !== index));
-                      }}
-                      className="ml-1 text-primary hover:opacity-70 focus:outline-none"
-                      aria-label={`Remove ${interest} interest`}
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
+          {/* Step 1 Fields */}
+          {step === 1 && (
+            <div className="fade-in">
+              <div className="mb-4">
+                <label htmlFor="age" className="block text-base font-medium text-text-secondary mb-2">
+                  Recipient Age: <span className="text-primary font-bold">{age}</span>
+                </label>
+                <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer" />
               </div>
-            )}
-            <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">
-              Add 1-3 interests
-            </div>
-            <div className="mt-4">
-              <p className="text-xs text-text-secondary mb-2">
-                Or select from popular interests:
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  "Tech",
-                  "Gaming",
-                  "Reading",
-                  "Cooking",
-                  "Travel",
-                  "Movies",
-                  "Music",
-                  "Sports",
-                  "Fitness",
-                  "Fashion",
-                  "Art",
-                  "Photography",
-                  "Gardening",
-                  "DIY Crafts",
-                  "Hiking",
-                  "Makeup",
-                ].map((quickInterest) => (
-                  <button
-                    key={quickInterest}
-                    type="button"
-                    onClick={(e) => {
-                      if (window.navigator.vibrate)
-                        window.navigator.vibrate([50]);
-                      const lowerCaseInterest = quickInterest.toLowerCase();
-                      if (!interests.includes(lowerCaseInterest)) {
-                        setInterests([...interests, lowerCaseInterest]);
-                      }
-                    }}
-                    className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label={`Interest: ${quickInterest}`}
-                  >
-                    {quickInterest}
-                  </button>
-                ))}
+              <div className="mb-4">
+                <label htmlFor="relationship" className="block text-base font-medium text-text-secondary mb-2">
+                  Who is this for? <span className="text-error">*</span>
+                </label>
+                <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? 'border-error' : ''}`} aria-describedby={errors.relationship ? 'relationship-error' : undefined}>
+                  <option value="">Select relationship</option>
+                  {relationships.map((rel) => (
+                    <option key={rel.value} value={rel.value}>{rel.label}</option>
+                  ))}
+                </select>
+                {errors.relationship && (
+                  <p id="relationship-error" className="text-error text-sm mt-1" role="alert">{errors.relationship}</p>
+                )}
+              </div>
+              <div className="mb-4">
+                <label htmlFor="occasion" className="block text-base font-medium text-text-secondary mb-2">
+                  Occasion <span className="text-error">*</span>
+                </label>
+                <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? 'border-error' : ''}`} aria-describedby={errors.occasion ? 'occasion-error' : undefined}>
+                  <option value="">Select an occasion</option>
+                  {occasions.map((occ) => (
+                    <option key={occ.value} value={occ.value}>{occ.label}</option>
+                  ))}
+                </select>
+                {errors.occasion && (
+                  <p id="occasion-error" className="text-error text-sm mt-1" role="alert">{errors.occasion}</p>
+                )}
               </div>
             </div>
-            {errors.interests && (
-              <p
-                id="interests-error"
-                className="text-error text-sm mt-1"
-                role="alert"
-              >
-                {errors.interests}
-              </p>
+          )}
+          {/* Step 2 Fields */}
+          {step === 2 && (
+            <div className="fade-in">
+              <div className="mb-4">
+                <label htmlFor="interests" className="block text-base font-medium text-text-secondary mb-2">
+                  Interests <span className="text-error">*</span>
+                </label>
+                <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); const newInterest = currentInterest.trim().toLowerCase(); if (!interests.includes(newInterest)) { setInterests([...interests, newInterest]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? 'border-error' : ''}`} aria-describedby={errors.interests ? 'interests-error' : undefined} />
+                {interests.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {interests.map((interest, index) => (
+                      <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" style={{ margin: '4px' }}>
+                        {interest}
+                        <button type="button" onClick={e => { if (window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }} className="ml-1 text-primary hover:opacity-70 focus:outline-none" aria-label={`Remove ${interest} interest`}>&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">Add 1-3 interests</div>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="negativeKeywords" className="block text-base font-medium text-text-secondary mb-2">Things to avoid <span className="text-text-secondary">(optional)</span></label>
+                <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base" />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="budget" className="block text-base font-medium text-text-secondary mb-2">Budget (optional)</label>
+                <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? 'border-error' : 'border-border'}`} aria-describedby={errors.budget ? 'budget-error' : undefined} />
+                {errors.budget && (
+                  <p id="budget-error" className="text-error text-sm mt-1" role="alert">{errors.budget}</p>
+                )}
+              </div>
+            </div>
+          )}
+          {/* Navigation Controls */}
+          <div className="flex justify-between items-center mt-8">
+            {step === 2 && (
+              <button type="button" onClick={() => setStep(1)} className="px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Back</button>
             )}
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor="negativeKeywords"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Things to avoid{" "}
-              <span className="text-text-secondary">(optional)</span>
-            </label>
-            <input
-              type="text"
-              id="negativeKeywords"
-              value={negativeKeywords}
-              onChange={(e) => setNegativeKeywords(e.target.value)}
-              placeholder="e.g. socks, mugs, books"
-              className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base"
-            />
-          </div>
-          <div className="col-span-1">
-            <label
-              htmlFor="budget"
-              className="block text-base font-medium text-text-secondary mb-2"
-            >
-              Budget (optional)
-            </label>
-            <input
-              type="number"
-              id="budget"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              placeholder="Enter maximum budget"
-              className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? "border-error" : "border-border"}`}
-              aria-describedby={errors.budget ? "budget-error" : undefined}
-            />
-            {errors.budget && (
-              <p
-                id="budget-error"
-                className="text-error text-sm mt-1"
-                role="alert"
-              >
-                {errors.budget}
-              </p>
+            <div className="flex-1" />
+            {step === 1 && (
+              <button type="button" onClick={() => setStep(2)} className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Next</button>
             )}
-          </div>
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-4 mt-4">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full md:w-auto px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <LoadingSpinner size="sm" />{" "}
-                  <span className="ml-2">Generating...</span>
-                </div>
-              ) : (
-                "🎁 Find My Gift"
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={clearForm}
-              className="w-full md:w-auto px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            >
-              🗑️ Clear Form
-            </button>
-            <button
-              type="button"
-              onClick={handleSurpriseMe}
-              className="w-full md:w-auto px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            >
-              🎲 Surprise Me
-            </button>
+            {step === 2 && (
+              <button type="submit" className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Find My Gift</button>
+            )}
           </div>
         </form>
       </section>
