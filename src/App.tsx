@@ -20,6 +20,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ThemeToggle from "./components/ThemeToggle";
+import GiftLoadingScreen from './components/GiftLoadingScreen';
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import("./pages/About"));
@@ -97,6 +98,34 @@ function HomePage() {
   const [isUsingMockData, setIsUsingMockData] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [hasGeneratedSuggestions, setHasGeneratedSuggestions] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<GiftSuggestion[]>([]);
+
+  // Update filtered suggestions when suggestions or activeFilters change
+  useEffect(() => {
+    if (activeFilters.length === 0) {
+      setFilteredSuggestions(suggestions);
+    } else {
+      setFilteredSuggestions(
+        suggestions.filter((s) =>
+          activeFilters.every((filter) =>
+            (s.reason && s.reason.toLowerCase().includes(filter.toLowerCase())) ||
+            (s.description && s.description.toLowerCase().includes(filter.toLowerCase()))
+          )
+        )
+      );
+    }
+  }, [suggestions, activeFilters]);
+
+  // Toggle filter
+  const toggleFilter = (filter: string) => {
+    setActiveFilters((prev) =>
+      prev.includes(filter)
+        ? prev.filter((f) => f !== filter)
+        : [...prev, filter]
+    );
+  };
 
   const { recentSearches, addSearch, clearSearches } = useRecentSearches();
 
@@ -146,7 +175,7 @@ function HomePage() {
       showToastMessage("Please fix the errors in the form", "error");
       return;
     }
-    setIsLoading(true);
+    setLoading(true);
     setSuggestions([]);
     try {
       const formData = {
@@ -163,8 +192,7 @@ function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const generatedSuggestions = await response.json();
       if (Array.isArray(generatedSuggestions)) {
         setSuggestions(generatedSuggestions);
@@ -191,7 +219,7 @@ function HomePage() {
       setSuggestions(mockSuggestions);
       setIsUsingMockData(true);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
       setHasGeneratedSuggestions(true);
     }
   };
@@ -268,6 +296,11 @@ function HomePage() {
     'Music', 'Sports', 'Fitness', 'Fashion', 'Art', 'Photography',
     'Gardening', 'DIY Crafts', 'Hiking', 'Makeup'
   ];
+
+  // Render loading screen if loading
+  if (loading) {
+    return <GiftLoadingScreen />;
+  }
 
   return (
     <main className="w-full max-w-2xl mx-auto">
@@ -413,7 +446,8 @@ function HomePage() {
       </section>
 
       {isLoading && <GiftBoxLoader />}
-      {suggestions.length > 0 && !isLoading && (
+      {/* Results Section */}
+      {!isLoading && suggestions.length > 0 && (
         <section className="animate-fade-in-up w-full">
           <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4 text-center">
             🎉 Here are a few ideas!
@@ -425,21 +459,36 @@ function HomePage() {
             {REFINE_OPTIONS.map((option) => (
               <Button
                 key={option.value}
-                variant="outline"
+                variant={activeFilters.includes(option.label) ? 'primary' : 'outline'}
                 size="sm"
-                onClick={() => handleRefine(option.label)}
+                className={activeFilters.includes(option.label) ? 'bg-primary text-white' : ''}
+                onClick={() => toggleFilter(option.label)}
               >
                 {option.label}
               </Button>
             ))}
           </nav>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {suggestions.map((suggestion, index) => (
-              <article key={suggestion.id}>
-                <GiftCard suggestion={suggestion} index={index} />
-              </article>
-            ))}
-          </div>
+          {filteredSuggestions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 animate-fade-in-up">
+              <span className="text-5xl mb-4">🤔</span>
+              <div className="text-xl font-bold mb-2 text-text-primary">Our AI is stumped!</div>
+              <div className="text-text-secondary mb-4">We couldn't find any gifts that match your filters.</div>
+              <ul className="text-sm text-text-secondary mb-4 list-disc list-inside">
+                <li>Try using broader interests or fewer filters.</li>
+                <li>Go back and adjust your search criteria.</li>
+                <li>Regenerate to get a new set of ideas.</li>
+              </ul>
+              <Button onClick={() => setActiveFilters([])} variant="outline" className="font-bold">Clear Filters</Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {filteredSuggestions.map((suggestion, index) => (
+                <article key={suggestion.id}>
+                  <GiftCard suggestion={suggestion} index={index} />
+                </article>
+              ))}
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-light-border dark:border-dark-border">
             <Button
               onClick={() => handleSubmit()}

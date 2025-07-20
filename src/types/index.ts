@@ -5,6 +5,7 @@ export interface GiftSuggestion {
   description: string;
   link: string;
   reason: string; // Add this line
+  imageUrl?: string; // Optional image URL for real product images
   image?: string; // URL to the gift image
   price?: string; // Price as a string, e.g. "$29.99"
 }
