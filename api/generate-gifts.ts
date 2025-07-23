@@ -12,14 +12,14 @@ export default async function handler(
 
   const { age, relationship, occasion, interests, budget, negativeKeywords } = request.body;
   const apiKey = process.env.OPENAI_API_KEY;
-  const affiliateTag = process.env.AMAZON_AFFILIATE_TAG || 'walidgifts-20';
+  const affiliateTag = process.env.AMAZON_AFFILIATE_TAG;
 
   if (!apiKey) {
     return response.status(500).json({ message: 'OpenAI API key is not configured.' });
   }
 
   const prompt = `
-    You are an expert gift recommender. Generate 5 unique and thoughtful gift suggestions based on the following details.
+    You are an expert gift recommender. Generate 5 unique and thoughtful gift suggestions. For each suggestion, provide a "name" (with a relevant emoji) that is a specific, searchable product (e.g., "Sony WH-1000XM5 Headphones" instead of "Noise Cancelling Headphones"). Also provide a short "description" (around 15-20 words).
     For each suggestion, provide a "name" (with a relevant emoji), a short "description" (around 15-20 words), and a "reason" (a sentence explaining why it's a great choice).
     Do NOT include any links. Avoid the following things: ${negativeKeywords || 'none'}.
     The response MUST be a valid JSON array of objects, and nothing else. Do not include any text before or after the JSON array.

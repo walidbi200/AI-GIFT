@@ -101,7 +101,7 @@ const Contact: React.FC = () => {
         from_name: formData.name,
         from_email: formData.email,
         message: formData.message,
-        to_email: "Bichriwalid1@gmail.com",
+        to_email: import.meta.env.VITE_EMAILJS_TO_EMAIL,
       };
 
       // Send email using EmailJS with environment variables

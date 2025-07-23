@@ -28,7 +28,7 @@ export default {
         'dark-primary': '#B13BFF',     // Bright Violet
         'dark-accent': '#FFCC00',      // Yellow
         'dark-text-primary': '#F9FAFB',
-        'dark-text-muted': '#9CA3AF',
+        'dark-text-muted': '#A1A7B2',
         'dark-border': '#471396',      // Dark Purple
 
         // Utility Colors
