@@ -21,6 +21,7 @@ import Footer from "./components/layout/Footer";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ThemeToggle from "./components/ThemeToggle";
 import GiftLoadingScreen from './components/GiftLoadingScreen';
+import NotFound from "./pages/NotFound";
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import("./pages/About"));
@@ -548,6 +549,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </div>

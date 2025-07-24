@@ -16,7 +16,7 @@ interface FormInputProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-const FormInput: React.FC<FormInputProps> = ({
+const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
   label,
   type,
   value,
@@ -30,8 +30,11 @@ const FormInput: React.FC<FormInputProps> = ({
   icon,
   className = "",
   onKeyDown,
+  id,
+  index,
 }) => {
-  const inputId = `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
+  // Generate a unique ID: use provided id, or label + random string
+  const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}-${Math.random().toString(36).substr(2, 6)}`;
   const hasError = !!error;
 
   const handleChange = (newValue: string | number) => {
