@@ -26,6 +26,8 @@ import NotFound from "./pages/NotFound";
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
+const BlogPage = React.lazy(() => import('./pages/Blog'));
+const BlogPost = React.lazy(() => import('./pages/BlogPost'));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from "./types";
@@ -548,6 +550,8 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
