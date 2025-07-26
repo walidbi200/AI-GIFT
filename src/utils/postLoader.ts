@@ -1,8 +1,4 @@
-import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
-
-const postsDirectory = path.join(process.cwd(), 'src/content/posts');
 
 export interface PostMetadata {
   title: string;
@@ -18,30 +14,35 @@ export interface Post extends PostMetadata {
 }
 
 export function getSortedPostsData(): PostMetadata[] {
-  const fileNames = fs.readdirSync(postsDirectory);
-  const allPostsData = fileNames.map((fileName) => {
-    const slug = fileName.replace(/.md$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const matterResult = matter(fileContents);
+  const modules = import.meta.glob('/src/content/posts/*.md', { eager: true, as: 'raw' });
+
+  const allPostsData = Object.entries(modules).map(([path, rawContent]) => {
+    const slug = path.split('/').pop()!.replace(/.md$/, '');
+    const { data } = matter(rawContent);
 
     return {
       slug,
-      ...(matterResult.data as Omit<PostMetadata, 'slug'>),
+      ...(data as Omit<PostMetadata, 'slug'>),
     };
   });
 
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return allPostsData.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1));
 }
 
-export function getPostData(slug: string): Post {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const matterResult = matter(fileContents);
+export function getPostData(slug: string): Post | undefined {
+  const modules = import.meta.glob('/src/content/posts/*.md', { eager: true, as: 'raw' });
+  const postPath = `/src/content/posts/${slug}.md`;
 
-  return {
-    slug,
-    content: matterResult.content,
-    ...(matterResult.data as Omit<PostMetadata, 'slug'>),
-  };
+  if (modules[postPath]) {
+    const rawContent = modules[postPath];
+    const { data, content } = matter(rawContent);
+
+    return {
+      slug,
+      content,
+      ...(data as Omit<PostMetadata, 'slug'>),
+    };
+  }
+
+  return undefined;
 } 

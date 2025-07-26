@@ -25,34 +25,32 @@ const BlogPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-8 md:grid-cols-2">
-        {allPostsData.map((post) => (
-          <Link to={`/blog/${post.slug}`} key={post.slug} className="block group">
-            <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-md overflow-hidden h-full flex flex-col transition-transform duration-300 ease-in-out group-hover:scale-[1.03] group-hover:shadow-xl">
-              <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="mb-2">
-                  {post.tags.map(tag => (
-                    <span key={tag} className="text-xs font-semibold bg-light-primary/10 text-light-primary dark:bg-dark-primary/20 dark:text-dark-primary px-2 py-1 rounded-full mr-2">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <h2 className="text-xl font-bold text-light-text-primary dark:text-dark-text-primary group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
-                  {post.title}
-                </h2>
-                <p className="text-sm text-light-text-muted dark:text-dark-text-muted mt-1 mb-4 flex-grow">
-                  {post.description}
-                </p>
-                <p className="text-xs text-gray-400 mt-auto">
-                  📅 {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
+    <div className="grid gap-8 md:grid-cols-2">
+      {allPostsData.map((post) => (
+        <Link to={`/blog/${post.slug}`} key={post.slug} className="block group">
+          <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-md overflow-hidden h-full flex flex-col transition-transform duration-300 ease-in-out group-hover:scale-[1.03] group-hover:shadow-xl">
+            <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
+            <div className="p-6 flex flex-col flex-grow">
+              <div className="mb-2">
+                {post.tags.map(tag => (
+                  <span key={tag} className="text-xs font-semibold bg-light-primary/10 text-light-primary dark:bg-dark-primary/20 dark:text-dark-primary px-2 py-1 rounded-full mr-2">
+                    {tag}
+                  </span>
+                ))}
               </div>
+              <h2 className="text-xl font-bold text-light-text-primary dark:text-dark-text-primary group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
+                {post.title}
+              </h2>
+              <p className="text-sm text-light-text-muted dark:text-dark-text-muted mt-1 mb-4 flex-grow">
+                {post.description}
+              </p>
+              <p className="text-xs text-gray-400 mt-auto">
+                📅 {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
             </div>
-          </Link>
-        ))}
-      </div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 };
