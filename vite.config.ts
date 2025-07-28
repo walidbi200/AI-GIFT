@@ -2,6 +2,27 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Custom Contentlayer integration for Vite
+function contentlayerPlugin() {
+  return {
+    name: 'contentlayer',
+    buildStart() {
+      // This will run contentlayer build process
+      // For now, we'll handle this manually or via package.json scripts
+      console.log('Contentlayer: Building content...');
+    },
+    handleHotUpdate({ file, server }) {
+      // Hot reload when markdown files change
+      if (file.includes('src/content/posts') && file.endsWith('.md')) {
+        console.log('Contentlayer: Content file changed, rebuilding...');
+        server.ws.send({
+          type: 'full-reload'
+        });
+      }
+    }
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -38,7 +59,8 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
+    contentlayerPlugin()
   ],
   build: {
     rollupOptions: {

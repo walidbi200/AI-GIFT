@@ -4,12 +4,14 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
+        "dev": "contentlayer2 build && vite",
         "dev:api": "tsx watch api/generate-gifts.ts",
         "dev:full": "concurrently \"npm run dev\" \"npm run dev:api\"",
-        "build": "vite build",
+        "build": "contentlayer2 build && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "content:build": "contentlayer2 build",
+        "content:dev": "contentlayer2 build --watch"
     },
     "dependencies": {
         "@emailjs/browser": "^4.4.1",
@@ -19,6 +21,7 @@
         "@vercel/speed-insights": "^1.2.0",
         "@vitejs/plugin-react": "^4.3.4",
         "autoprefixer": "^10.4.20",
+        "contentlayer2": "^0.5.8",
         "cors": "^2.8.5",
         "date-fns": "^4.1.0",
         "express": "^4.18.2",
@@ -30,6 +33,8 @@
         "react-helmet-async": "^2.0.5",
         "react-markdown": "^10.1.0",
         "react-router-dom": "^7.6.3",
+        "rehype-pretty-code": "^0.14.1",
+        "remark-gfm": "^4.0.1",
         "slugify": "^1.6.6",
         "tailwindcss": "^3.4.17",
         "typescript": "^5.2.2",
