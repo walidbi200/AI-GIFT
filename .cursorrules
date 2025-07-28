@@ -1,0 +1,85 @@
+- You are an expert in TypeScript, React, Tailwind CSS, React Router, Vercel Serverless Functions, and OpenAI API.
+
+- Code Style and Structure
+  - Write concise, technical TypeScript code with accurate examples.
+  - Use functional and declarative programming patterns; avoid classes.
+  - Prefer iteration and modularization over code duplication.
+  - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+  - Structure files: exported component, subcomponents, helpers, static content, types.
+  - Place all application code under /src, with /src/components for reusable components and /src/pages for page components.
+  - For Vercel Serverless Functions, place API routes in /api (e.g., api/generate-gifts.ts).
+  - Store Markdown blog content in /src/content/blog.
+
+- Naming Conventions
+  - All components should go in /src/components and be named like gift-recommendation.tsx.
+  - Use lowercase with dashes for directories (e.g., components/gift-finder).
+  - Favor named exports for components (e.g., export function GiftRecommendation).
+  - Name serverless functions descriptively (e.g., generate-gifts.ts).
+  - Use PascalCase for TypeScript interfaces (e.g., GiftRecommendationProps).
+
+- TypeScript Usage
+  - Use TypeScript for all code; prefer interfaces over types for props and state.
+  - Avoid enums; use maps or const objects for fixed sets of values (e.g., const GiftCategories = { Tech: 'tech', Fashion: 'fashion' }).
+  - Use functional components with TypeScript interfaces for props and state.
+  - Define interfaces for API request/response bodies in serverless functions.
+
+- Syntax and Formatting
+  - Use the "function" keyword for pure functions (e.g., function getGiftSuggestions).
+  - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements (e.g., if (isLoading) return <Spinner />).
+  - Use declarative JSX with minimal nesting.
+  - Format code with Prettier defaults (single quotes, trailing commas, 2-space indentation).
+
+- UI and Styling
+  - Use Tailwind CSS for all styling; follow a mobile-first approach with classes like sm:, md:, lg:.
+  - Avoid inline CSS or separate CSS files unless necessary for third-party integrations.
+  - Implement responsive design with Tailwind CSS utility classes.
+  - Use placeholder images from https://placekitten.com/ for seed data or mockups.
+
+- Performance Optimization
+  - Minimize use of useEffect and useState; prefer static or server-side rendering where possible.
+  - Wrap client-side interactive components in React.Suspense with a fallback (e.g., <Suspense fallback={<Spinner />}>).
+  - Use dynamic imports for non-critical components (e.g., const LazyComponent = dynamic(() => import('./Component'))).
+  - Optimize images: use WebP format, include width/height attributes, implement lazy loading with loading="lazy".
+  - Optimize Web Vitals (LCP, CLS, FID) by minimizing render-blocking resources and using Tailwind’s utility-first approach.
+
+- Key Conventions
+  - Use React Router v6 for routing; define routes in /src/routes.tsx.
+  - For state management, use URL search parameters with query-string or similar libraries instead of client-side state where possible.
+  - Integrate OpenAI API in serverless functions (e.g., /api/generate-gifts.ts) using secure environment variables (process.env.OPENAI_API_KEY).
+  - Handle API errors gracefully with appropriate HTTP status codes (e.g., 400 for bad requests, 500 for server errors).
+  - Configure Cloudflare for DNS and security; enable caching and security features.
+  - Integrate Google Analytics with gtag.js in /src/lib/analytics.ts.
+  - Enable Vercel Analytics/Speed Insights via the Vercel dashboard for performance monitoring.
+  - Use Vite as the build tool; configure in /vite.config.ts.
+  - Deploy to Vercel; ensure /vercel.json is configured for routing and serverless functions.
+  - Use Git conventional commits (e.g., feat: add gift recommendation endpoint) and push to GitHub’s main branch for production.
+
+- Components Organization
+  - Organize components in /src/components by feature or type:
+    /src/components
+    ├── /ui
+    │   ├── /Button
+    │   ├── /Card
+    │   ├── /Spinner
+    │   └── /Input
+    ├── /gift-finder
+    │   ├── /GiftRecommendation
+    │   └── /GiftForm
+    ├── /blog
+    │   ├── /BlogPost
+    │   └── /BlogList
+    └── /layout
+        ├── /Navbar
+        ├── /Footer
+        └── /Header
+  - Private Components: Place page-specific components in /src/pages/[page]/_components (e.g., /src/pages/gift-finder/_components/GiftFilter.tsx).
+  - Shared Components: Store reusable components in /src/components (e.g., /src/components/ui/Button.tsx).
+  - Modular Approach: Group feature-specific components, hooks, and utilities in folders like /src/components/gift-finder.
+  - Store custom hooks in /src/hooks (e.g., /src/hooks/useGiftRecommendations.ts).
+  - Store utility functions in /src/lib (e.g., /src/lib/api.ts for OpenAI API calls).
+
+- Deployment and Version Control
+  - Use Git for version control with conventional commits (e.g., feat, fix, docs, refactor).
+  - Push code to GitHub; use the main branch for production deployments.
+  - Configure Vercel for automatic deployments from GitHub.
+  - Ensure vercel.json includes correct API route mappings and redirects.
