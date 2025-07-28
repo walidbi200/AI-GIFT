@@ -7,6 +7,8 @@ export interface PostMetadata {
   date: string;
   tags: string[];
   image: string;
+  author: string;
+  readTime: string;
 }
 
 export interface Post extends PostMetadata {
@@ -17,7 +19,7 @@ export function getSortedPostsData(): PostMetadata[] {
   const modules = import.meta.glob('/src/content/posts/*.md', { query: '?raw', import: 'default', eager: true });
 
   const allPostsData = Object.entries(modules).map(([path, rawContent]) => {
-    const slug = path.split('/').pop()!.replace(/.md$/, '');
+    const slug = path.split('/').pop()!.replace(/\.md$/, '');
     const { data } = matter(rawContent as string);
 
     return {
