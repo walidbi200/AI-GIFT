@@ -15,36 +15,34 @@ export interface Post extends PostMetadata {
   content: string;
 }
 
+// This function gets metadata for all posts and sorts them by date
 export function getSortedPostsData(): PostMetadata[] {
-  const modules = import.meta.glob('/src/content/posts/*.md', { query: '?raw', import: 'default', eager: true });
+  const modules = import.meta.glob('/src/content/posts/*.md', { eager: true });
 
-  const allPostsData = Object.entries(modules).map(([path, rawContent]) => {
-    const slug = path.split('/').pop()!.replace(/\.md$/, '');
-    const { data } = matter(rawContent as string);
-
+  const allPostsData = Object.values(modules).map((module: any) => {
+    const { frontmatter } = module;
     return {
-      slug,
-      ...(data as Omit<PostMetadata, 'slug'>),
-    };
+      slug: frontmatter.slug,
+      ...frontmatter,
+    } as PostMetadata;
   });
 
   return allPostsData.sort((a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1));
 }
 
+// This function gets the full content for a single post
 export function getPostData(slug: string): Post | undefined {
-  const modules = import.meta.glob('/src/content/posts/*.md', { query: '?raw', import: 'default', eager: true });
-  const postPath = `/src/content/posts/${slug}.md`;
+  const modules = import.meta.glob('/src/content/posts/*.md', { eager: true });
 
-  const rawContent = modules[postPath] as string | undefined;
-
-  if (rawContent) {
-    const { data, content } = matter(rawContent);
-
-    return {
-      slug,
-      content,
-      ...(data as Omit<PostMetadata, 'slug'>),
-    };
+  for (const path in modules) {
+    const module: any = modules[path];
+    if (module.frontmatter.slug === slug) {
+      return {
+        slug: module.frontmatter.slug,
+        content: module.default, // The HTML content
+        ...module.frontmatter,
+      } as Post;
+    }
   }
 
   return undefined;
