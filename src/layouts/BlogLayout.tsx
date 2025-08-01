@@ -12,22 +12,37 @@ const BlogLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             Smart Gift Finder
           </Link>
           <nav className="space-x-6">
-            <Link to="/blog" className="text-lg text-gray-500 hover:text-gray-800 transition-colors">Blog</Link>
-            <Link to="/about" className="text-lg text-gray-500 hover:text-gray-800 transition-colors">About</Link>
-            <Link to="/contact" className="text-lg text-gray-500 hover:text-gray-800 transition-colors">Contact</Link>
+            <Link
+              to="/blog"
+              className="text-lg text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              Blog
+            </Link>
+            <Link
+              to="/about"
+              className="text-lg text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              className="text-lg text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              Contact
+            </Link>
           </nav>
         </div>
       </header>
 
       {/* The main content of each page will be rendered here */}
-      <main className="max-w-5xl mx-auto py-12 px-4">
-        {children}
-      </main>
+      <main className="max-w-5xl mx-auto py-12 px-4">{children}</main>
 
       {/* Footer from the new design */}
       <footer className="bg-white py-8 mt-12 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-lg text-gray-500">© 2025 Smart Gift Finder. All rights reserved.</p>
+          <p className="text-lg text-gray-500">
+            ï¿½ 2025 Smart Gift Finder. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

@@ -96,15 +96,13 @@ export const storage = {
   set: (key: string, value: any) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-    }
+    } catch (error) {}
   },
 
   remove: (key: string) => {
     try {
       localStorage.removeItem(key);
-    } catch (error) {
-    }
+    } catch (error) {}
   },
 };
 

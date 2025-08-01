@@ -10,7 +10,7 @@ export const Post = defineDocumentType(() => ({
     tags: { type: 'list', of: { type: 'string' } },
     image: { type: 'string', required: true },
     author: { type: 'string', required: true },
-    readTime: { type: 'string', required: true },
+    readTime: { type: 'number', required: true },
   },
   computedFields: {
     url: {
