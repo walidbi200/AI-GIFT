@@ -1,66 +1,82 @@
-// Types for blog post content management
-// This should match the Contentlayer schema in contentlayer.config.ts
-
+// Blog post types and interfaces
 export interface Post {
   slug: string;
   title: string;
   description: string;
-  content?: string; // For markdown content
-  body?: {
-    html: string;
-    raw: string;
-  }; // For Contentlayer processed content
   date: string;
   author: string;
-  readTime: number; // Changed to number to match contentlayer schema
-  image: string; // Changed from optional to required to match schema
-  tags: string[]; // Changed from optional to required to match schema
-  url: string; // Added computed field from Contentlayer
+  tags: string[];
+  readTime: number;
+  featured?: boolean;
+  image: string;
+  content: string;
+  url: string;
+  body: string;
 }
 
-// Utility type for content loading states
+export interface SEO {
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  canonicalUrl: string;
+  openGraph?: {
+    title: string;
+    description: string;
+    image: string;
+    type: string;
+  };
+  twitter?: {
+    card: string;
+    title: string;
+    description: string;
+    image: string;
+  };
+}
+
+export interface BlogPageProps {
+  posts: Post[];
+  featuredPosts?: Post[];
+  currentPage?: number;
+  totalPages?: number;
+  selectedTag?: string;
+  searchQuery?: string;
+}
+
+export interface BlogPostPageProps {
+  post: Post;
+  relatedPosts?: Post[];
+}
+
+export interface ContentlayerPost {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  author: string;
+  tags: string[];
+  readTime: number;
+  image: string;
+  url: string;
+  body: string;
+}
+
 export interface ContentLoadingState {
   posts: Post[];
   isLoading: boolean;
   error: string | null;
 }
 
-// Type for Contentlayer generated content
-export interface ContentlayerPost extends Omit<Post, "content"> {
-  body: {
-    html: string;
-    raw: string;
-  };
-  _raw: {
-    flattenedPath: string;
-    sourceFileName: string;
-    sourceFileDir: string;
-  };
-}
-
-// Type guard to check if content is from Contentlayer
-export function isContentlayerPost(post: unknown): post is ContentlayerPost {
-  return Boolean(
-    post &&
-    typeof post === "object" &&
-    post !== null &&
-    "body" in post &&
-    "_raw" in post
-  );
-}
-
-// Fallback post data for development
+// Fallback post for error states
 export const FALLBACK_POST: Post = {
-  slug: "sample-post",
-  title: "Sample Blog Post",
-  description:
-    "This is a sample post shown when Contentlayer content is not available.",
-  date: new Date().toISOString().split("T")[0],
-  author: "Smart Gift Finder Team",
-  readTime: 3,
-  image: "/images/blog/placeholder.svg",
-  tags: ["Sample"],
-  url: "/blog/sample-post",
-  content:
-    "# Sample Content\n\nThis is sample content shown during development.",
+  slug: 'error',
+  title: 'Post Not Found',
+  description: 'The requested blog post could not be found.',
+  date: new Date().toISOString(),
+  author: 'Smart Gift Finder',
+  tags: ['error'],
+  readTime: 1,
+  image: '/images/blog/placeholder.jpg',
+  content: 'This post could not be loaded.',
+  url: '/blog/error',
+  body: 'This post could not be loaded.',
 };

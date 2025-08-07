@@ -13,17 +13,22 @@ An AI-powered gift recommendation platform that helps you find the perfect gifts
 ## Pages
 
 ### Home Page (/)
+
 The main gift recommendation interface with a comprehensive form for gathering recipient information.
 
 ### About Page (/about)
+
 A clean, minimalist page that explains:
+
 - What Smart Gift Finder does
 - How the AI technology works
 - The story behind the project's creation
 - Company values and mission
 
 ### Contact Page (/contact)
+
 A contact form with:
+
 - Name, Email, and Message fields
 - Form validation
 - EmailJS integration for sending emails
@@ -43,10 +48,10 @@ To enable the contact form functionality, you need to set up EmailJS:
 ```typescript
 // In src/pages/Contact.tsx, replace these placeholders:
 await emailjs.send(
-  'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-  'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
+  "YOUR_SERVICE_ID", // Replace with your EmailJS service ID
+  "YOUR_TEMPLATE_ID", // Replace with your EmailJS template ID
   templateParams,
-  'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
+  "YOUR_PUBLIC_KEY", // Replace with your EmailJS public key
 );
 ```
 
@@ -82,4 +87,4 @@ This project was created with love and code by Walid Bichri.
 
 ## License
 
-All Rights Reserved. 
+All Rights Reserved.

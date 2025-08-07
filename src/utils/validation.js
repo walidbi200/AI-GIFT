@@ -6,9 +6,9 @@
  * @returns {boolean} True if valid, false otherwise.
  */
 function validateEmail(email) {
-  if (typeof email !== 'string') return false;
+  if (typeof email !== "string") return false;
   // Simple regex for demonstration; not RFC-complete
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-module.exports = { validateEmail }; 
+module.exports = { validateEmail };
