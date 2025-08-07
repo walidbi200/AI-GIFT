@@ -28,8 +28,10 @@ const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const BlogIndex = React.lazy(() => import("./pages/BlogIndex"));
 const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
+const Login = React.lazy(() => import("./pages/Login"));
 const AdminDashboard = React.lazy(() => import("./components/admin/AdminDashboard"));
 const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
+const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from "./types";
@@ -554,8 +556,23 @@ function App() {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/blog" element={<BlogIndex />} />
                     <Route path="/blog/:slug" element={<BlogPostPage />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/admin/blog-generator" element={<BlogGenerator />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route 
+                      path="/admin" 
+                      element={
+                        <ProtectedRoute>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/blog-generator" 
+                      element={
+                        <ProtectedRoute>
+                          <BlogGenerator />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
