@@ -126,6 +126,8 @@ const BlogGenerator: React.FC = () => {
   };
 
   const generateBlog = async () => {
+    console.log('🔥 Frontend: Starting blog generation with:', formData);
+    
     if (!validateForm()) return;
 
     setIsGenerating(true);
@@ -134,6 +136,7 @@ const BlogGenerator: React.FC = () => {
     setContentQuality(null);
 
     try {
+      console.log('🔥 Frontend: Making API request to /api/generate-blog');
       const response = await fetch('/api/generate-blog', {
         method: 'POST',
         headers: {
@@ -149,16 +152,24 @@ const BlogGenerator: React.FC = () => {
         }),
       });
 
-      const result = await response.json();
+      console.log('🔥 Frontend: API response status:', response.status);
+      console.log('🔥 Frontend: API response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to generate blog');
+        const errorText = await response.text();
+        console.log('❌ Frontend: API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
       }
 
+      const result = await response.json();
+      console.log('🔥 Frontend: Received blog data:', result);
+
       if (result.success && result.data) {
+        console.log('🔥 Frontend: Setting generated blog data');
         setGeneratedBlog(result.data);
         setShowPreview(true);
         
+        console.log('🔥 Frontend: Analyzing generated content...');
         // Analyze the generated content
         const seo = analyzeSEO(result.data.content, result.data.keywords);
         const quality = assessContentQuality(result.data.content);
@@ -168,12 +179,14 @@ const BlogGenerator: React.FC = () => {
         setContentQuality(quality);
         setOptimizedContent(optimized.content);
         
+        console.log('🔥 Frontend: Blog generation completed successfully');
         showToastMessage('Blog generated successfully!', 'success');
       } else {
+        console.log('❌ Frontend: Invalid response format:', result);
         throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('Blog generation error:', error);
+      console.error('💥 Frontend: Blog generation failed:', error);
       showToastMessage(
         error instanceof Error ? error.message : 'Failed to generate blog',
         'error'

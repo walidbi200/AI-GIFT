@@ -131,21 +131,28 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  console.log('🔥 Blog API called with method:', req.method);
+  console.log('🔥 Request body:', JSON.stringify(req.body, null, 2));
+  console.log('🔥 OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+  
   // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
+    console.log('🔥 OPTIONS request - returning 200');
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
+    console.log('❌ Wrong method:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // Check API key
   if (!process.env.OPENAI_API_KEY) {
+    console.log('❌ No API key configured');
     return res.status(500).json({ 
       error: 'OpenAI API key not configured',
       suggestion: 'Add OPENAI_API_KEY to your environment variables'
@@ -163,9 +170,11 @@ export default async function handler(
 
   try {
     const { topic, audience, contentLength, tone, keywords }: GenerateBlogRequest = req.body;
+    console.log('🔥 Extracted params:', { topic, audience, contentLength, tone, keywords });
 
     // Validate input
     if (!topic || !audience || !contentLength || !tone) {
+      console.log('❌ Missing required fields:', { topic, audience, contentLength, tone });
       return res.status(400).json({
         error: 'Missing required fields',
         required: ['topic', 'audience', 'contentLength', 'tone'],
@@ -174,6 +183,7 @@ export default async function handler(
     }
 
     if (topic.length < 3 || topic.length > 100) {
+      console.log('❌ Invalid topic length:', topic.length);
       return res.status(400).json({
         error: 'Topic must be between 3 and 100 characters'
       });
@@ -181,7 +191,9 @@ export default async function handler(
 
     // Generate content using OpenAI
     const prompt = getPrompt({ topic, audience, contentLength, tone, keywords: keywords || [] });
+    console.log('🔥 Generated prompt length:', prompt.length);
     
+    console.log('🔥 Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
@@ -197,24 +209,40 @@ export default async function handler(
       temperature: 0.7,
       max_tokens: 4000,
     });
+    
+    console.log('🔥 OpenAI response status: OK');
+    console.log('🔥 OpenAI response structure:', {
+      hasChoices: !!completion.choices,
+      choicesLength: completion.choices?.length,
+      hasMessage: !!completion.choices?.[0]?.message,
+      hasContent: !!completion.choices?.[0]?.message?.content
+    });
 
     const responseText = completion.choices[0]?.message?.content;
+    console.log('🔥 OpenAI response text length:', responseText?.length || 0);
+    console.log('🔥 OpenAI response preview:', responseText?.substring(0, 200) + '...');
     
     if (!responseText) {
+      console.log('❌ No response text from OpenAI');
       return res.status(500).json({ error: 'Failed to generate content' });
     }
 
     // Parse the JSON response
     let parsedResponse: any;
     try {
+      console.log('🔥 Attempting to parse JSON response...');
       // Extract JSON from the response (in case there's extra text)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.log('❌ No JSON found in response');
         throw new Error('No JSON found in response');
       }
       parsedResponse = JSON.parse(jsonMatch[0]);
+      console.log('🔥 Successfully parsed JSON response');
+      console.log('🔥 Parsed response keys:', Object.keys(parsedResponse));
     } catch (parseError) {
-      console.error('Failed to parse AI response:', responseText);
+      console.error('❌ Failed to parse AI response:', responseText);
+      console.error('❌ Parse error:', parseError);
       return res.status(500).json({ 
         error: 'Failed to parse generated content',
         rawResponse: responseText.substring(0, 500) + '...'
@@ -235,9 +263,17 @@ export default async function handler(
       suggestedFeaturedImage: parsedResponse.suggestedFeaturedImage || 'Gift-related stock photo'
     };
 
-    // Log usage for monitoring
-    console.log(`Blog generated for topic: "${topic}" | Tokens used: ${completion.usage?.total_tokens || 'unknown'}`);
+    console.log('🔥 Generated blog structure:', {
+      title: generatedBlog.title,
+      contentLength: generatedBlog.content.length,
+      tags: generatedBlog.tags,
+      readingTime: generatedBlog.estimatedReadingTime
+    });
 
+    // Log usage for monitoring
+    console.log(`🔥 Blog generated for topic: "${topic}" | Tokens used: ${completion.usage?.total_tokens || 'unknown'}`);
+
+    console.log('🔥 Returning successful response');
     return res.status(200).json({
       success: true,
       data: generatedBlog,
@@ -249,9 +285,14 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Blog generation error:', error);
+    console.error('💥 Blog generation error:', error);
     
     if (error instanceof OpenAI.APIError) {
+      console.log('❌ OpenAI API error:', {
+        status: error.status,
+        message: error.message,
+        code: error.code
+      });
       return res.status(error.status || 500).json({
         error: 'OpenAI API error',
         message: error.message,
@@ -259,6 +300,7 @@ export default async function handler(
       });
     }
 
+    console.log('❌ General error:', error instanceof Error ? error.message : 'Unknown error');
     return res.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'

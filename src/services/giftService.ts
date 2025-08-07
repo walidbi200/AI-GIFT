@@ -36,8 +36,8 @@ export class GiftService {
         );
       }
 
-      const data: ApiResponse = await response.json();
-      return data.suggestions;
+      const suggestions = await response.json();
+      return suggestions;
     } catch (error) {
       // Provide user-friendly error messages
       if (error instanceof Error) {

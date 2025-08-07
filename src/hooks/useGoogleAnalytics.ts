@@ -38,7 +38,7 @@ export function useGoogleAnalytics() {
       if (typeof window !== 'undefined' && !window.gtag) {
         const script = document.createElement('script');
         script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${process.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX'}`;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${import.meta.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX'}`;
         document.head.appendChild(script);
 
         window.dataLayer = window.dataLayer || [];
@@ -47,7 +47,7 @@ export function useGoogleAnalytics() {
         };
 
         window.gtag('js', new Date());
-        window.gtag('config', process.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX', {
+        window.gtag('config', import.meta.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX', {
           page_title: document.title,
           page_location: window.location.href,
         });
@@ -59,7 +59,7 @@ export function useGoogleAnalytics() {
 
   const trackPageView = (page: string, title?: string) => {
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('config', process.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX', {
+      window.gtag('config', import.meta.env.VITE_GA_TRACKING_ID || 'G-XXXXXXXXXX', {
         page_title: title || document.title,
         page_location: window.location.origin + page,
       });
