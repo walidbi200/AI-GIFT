@@ -17,17 +17,84 @@ export function useAuth() {
 
   useEffect(() => {
     // Check for existing authentication on mount
-    const token = localStorage.getItem('adminToken');
-    const user = localStorage.getItem('adminUser');
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        const user = localStorage.getItem('adminUser');
 
-    if (token && user) {
+        if (token && user) {
+          // Validate token with server (optional but recommended)
+          try {
+            const response = await fetch('/api/auth/validate', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ token }),
+            });
+
+            if (response.ok) {
+              setAuthState({
+                isAuthenticated: true,
+                user,
+                token,
+                isLoading: false,
+              });
+            } else {
+              // Token is invalid, clear it
+              localStorage.removeItem('adminToken');
+              localStorage.removeItem('adminUser');
+              setAuthState({
+                isAuthenticated: false,
+                user: null,
+                token: null,
+                isLoading: false,
+              });
+            }
+          } catch (error) {
+            // If validation fails, assume token is valid for now
+            console.warn('Token validation failed, using cached auth:', error);
+            setAuthState({
+              isAuthenticated: true,
+              user,
+              token,
+              isLoading: false,
+            });
+          }
+        } else {
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            token: null,
+            isLoading: false,
+          });
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          token: null,
+          isLoading: false,
+        });
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const login = (token: string, user: string) => {
+    try {
+      localStorage.setItem('adminToken', token);
+      localStorage.setItem('adminUser', user);
       setAuthState({
         isAuthenticated: true,
         user,
         token,
         isLoading: false,
       });
-    } else {
+    } catch (error) {
+      console.error('Login failed:', error);
       setAuthState({
         isAuthenticated: false,
         user: null,
@@ -35,28 +102,21 @@ export function useAuth() {
         isLoading: false,
       });
     }
-  }, []);
-
-  const login = (token: string, user: string) => {
-    localStorage.setItem('adminToken', token);
-    localStorage.setItem('adminUser', user);
-    setAuthState({
-      isAuthenticated: true,
-      user,
-      token,
-      isLoading: false,
-    });
   };
 
   const logout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      token: null,
-      isLoading: false,
-    });
+    try {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return {

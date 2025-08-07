@@ -33,6 +33,14 @@ export default async function handler(
   try {
     const { username, password }: LoginRequest = req.body;
 
+    // Debug logging (remove in production)
+    console.log('Login attempt:', { 
+      username, 
+      hasPassword: !!password,
+      adminUserConfigured: !!process.env.ADMIN_USER,
+      adminPassConfigured: !!process.env.ADMIN_PASS
+    });
+
     // Validate input
     if (!username || !password) {
       res.status(400).json({ 
@@ -50,14 +58,27 @@ export default async function handler(
       console.error('Admin credentials not configured in environment variables');
       res.status(500).json({ 
         success: false, 
-        message: 'Server configuration error' 
+        message: 'Server configuration error - please check environment variables' 
       });
       return;
     }
 
-    if (username === adminUser && password === adminPass) {
+    // Compare credentials (case-sensitive)
+    const usernameMatch = username === adminUser;
+    const passwordMatch = password === adminPass;
+
+    console.log('Credential check:', { 
+      usernameMatch, 
+      passwordMatch,
+      providedUsername: username,
+      expectedUsername: adminUser
+    });
+
+    if (usernameMatch && passwordMatch) {
       // Generate a simple session token (in production, use JWT)
       const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+      
+      console.log('Login successful for user:', username);
       
       res.status(200).json({
         success: true,
@@ -65,9 +86,10 @@ export default async function handler(
         token
       });
     } else {
+      console.log('Login failed - invalid credentials');
       res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid username or password'
       });
     }
   } catch (error) {

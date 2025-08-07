@@ -8,6 +8,7 @@ import { BlogEditor } from './BlogEditor';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { SEODashboard } from './SEODashboard';
 import { useAuth } from '../../hooks/useAuth';
+import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 interface BlogStats {
   totalPosts: number;
@@ -337,57 +338,98 @@ const AdminDashboard: React.FC = () => {
     </div>
   );
 
-  const renderAnalytics = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Analytics Dashboard</h2>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Overview</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Page Views (30 days)</span>
-              <span className="font-medium">12,847</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Unique Visitors</span>
-              <span className="font-medium">8,234</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Session Duration</span>
-              <span className="font-medium">2m 34s</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Bounce Rate</span>
-              <span className="font-medium text-green-600">32%</span>
-            </div>
-          </div>
+  const renderAnalytics = () => {
+    const { analytics } = useGoogleAnalytics();
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-900">Analytics Dashboard</h2>
+          <Button
+            onClick={analytics.refreshData}
+            disabled={analytics.isLoading}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            {analytics.isLoading ? 'Loading...' : 'Refresh Data'}
+          </Button>
         </div>
+        
+        {analytics.error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{analytics.error}</p>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Overview</h3>
+            {analytics.isLoading ? (
+              <div className="space-y-4">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Page Views (30 days)</span>
+                  <span className="font-medium">{analytics.pageViews.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Unique Visitors</span>
+                  <span className="font-medium">{analytics.uniqueVisitors.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Avg. Session Duration</span>
+                  <span className="font-medium">{Math.floor(analytics.sessionDuration / 60)}m {analytics.sessionDuration % 60}s</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Bounce Rate</span>
+                  <span className={`font-medium ${analytics.bounceRate < 30 ? 'text-green-600' : analytics.bounceRate < 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    {analytics.bounceRate}%
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Performance</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Most Viewed Post</span>
-              <span className="font-medium">Tech Gifts Guide</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Reading Time</span>
-              <span className="font-medium">4.2 min</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Social Shares</span>
-              <span className="font-medium">1,234</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Comments</span>
-              <span className="font-medium">89</span>
-            </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Pages</h3>
+            {analytics.isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {analytics.topPages.map((page, index) => (
+                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 truncate">{page.title}</p>
+                      <p className="text-sm text-gray-600">{page.path}</p>
+                    </div>
+                    <span className="text-sm font-medium text-gray-500">{page.views.toLocaleString()} views</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSEOMonitor = () => (
     <SEODashboard />
