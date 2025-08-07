@@ -49,5 +49,8 @@
         "eslint-plugin-react-refresh": "^0.4.7",
         "tsx": "^4.16.2",
         "vite-plugin-pwa": "^1.0.1"
+    },
+    "resolutions": {
+        "@rollup/rollup-linux-x64-gnu": "1.0.0"
     }
 }

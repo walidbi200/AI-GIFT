@@ -215,3 +215,19 @@ export function searchPosts(query: string): Post[] {
     post.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
   );
 }
+
+export function formatPostDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+export function formatReadTime(minutes: number): string {
+  if (minutes === 1) {
+    return '1 min read';
+  }
+  return `${minutes} min read`;
+}
