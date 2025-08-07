@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { signIn } from '../hooks/useNextAuth';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -8,7 +8,6 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,24 +15,13 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const result = await signIn({ username, password });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Use the auth hook to login
-        login(data.token, username);
-        
+      if (result.success) {
         // Redirect to admin dashboard
         navigate('/admin');
       } else {
-        setError(data.message || 'Login failed');
+        setError(result.error || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');

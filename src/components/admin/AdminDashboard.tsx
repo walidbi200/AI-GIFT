@@ -7,7 +7,7 @@ import { getAllPosts } from '../../utils/blogContent';
 import { BlogEditor } from './BlogEditor';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { SEODashboard } from './SEODashboard';
-import { useAuth } from '../../hooks/useAuth';
+import { useSession, signOut } from '../../hooks/useNextAuth';
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 interface BlogStats {
@@ -30,7 +30,8 @@ interface AIGenerationStats {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user?.name || 'Admin';
   const [activeTab, setActiveTab] = useState('overview');
   const [blogStats, setBlogStats] = useState<BlogStats>({
     totalPosts: 0,
@@ -96,7 +97,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate('/login');
     showToastMessage('Logged out successfully', 'success');
   };

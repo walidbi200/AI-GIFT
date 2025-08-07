@@ -1,19 +1,16 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useSession } from '../../hooks/useNextAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const auth = useAuth();
-  
-  // Safely destructure with defaults to prevent undefined errors
-  const { isAuthenticated = false, isLoading = true } = auth || {};
+  const { data: session, status } = useSession();
 
   // Show loading state
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -25,7 +22,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  if (status === 'unauthenticated' || !session) {
     return <Navigate to="/login" replace />;
   }
 
