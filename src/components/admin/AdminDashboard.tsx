@@ -340,7 +340,7 @@ const AdminDashboard: React.FC = () => {
   );
 
   const renderAnalytics = () => {
-    const { analytics } = useGoogleAnalytics();
+    const analytics = useGoogleAnalytics();
     
     return (
       <div className="space-y-6">
