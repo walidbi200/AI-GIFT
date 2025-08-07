@@ -193,22 +193,36 @@ export default async function handler(
     const prompt = getPrompt({ topic, audience, contentLength, tone, keywords: keywords || [] });
     console.log('🔥 Generated prompt length:', prompt.length);
     
-    console.log('🔥 Calling OpenAI API...');
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert gift-giving blogger and SEO specialist. Create high-quality, engaging content that helps readers find the perfect gifts.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 4000,
-    });
+         console.log('🔥 Calling OpenAI API...');
+     const completion = await openai.chat.completions.create({
+       model: 'gpt-3.5-turbo',
+       messages: [
+         {
+           role: 'system',
+           content: `You are a professional blog writer. You must respond with ONLY valid JSON, no additional text or formatting. The JSON must be properly escaped and contain no unescaped quotes or newlines within string values.`
+         },
+         {
+           role: 'user',
+           content: `Write a ${contentLength} blog post about "${topic}" in a ${tone} tone. 
+
+CRITICAL: Respond with ONLY this exact JSON structure, properly escaped:
+{
+  "title": "Blog post title here",
+  "description": "SEO meta description (max 160 chars)",
+  "content": "Full HTML blog post content with proper escaping",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+
+Make sure to:
+- Escape all quotes in the content 
+- Replace newlines with \\n
+- Keep content as HTML with proper tags like <h2>, <p>, <ul>, etc.
+- No markdown formatting in the content field`
+         }
+       ],
+       max_tokens: 2000,
+       temperature: 0.7,
+     });
     
     console.log('🔥 OpenAI response status: OK');
     console.log('🔥 OpenAI response structure:', {
@@ -227,27 +241,44 @@ export default async function handler(
       return res.status(500).json({ error: 'Failed to generate content' });
     }
 
-    // Parse the JSON response
-    let parsedResponse: any;
-    try {
-      console.log('🔥 Attempting to parse JSON response...');
-      // Extract JSON from the response (in case there's extra text)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.log('❌ No JSON found in response');
-        throw new Error('No JSON found in response');
-      }
-      parsedResponse = JSON.parse(jsonMatch[0]);
-      console.log('🔥 Successfully parsed JSON response');
-      console.log('🔥 Parsed response keys:', Object.keys(parsedResponse));
-    } catch (parseError) {
-      console.error('❌ Failed to parse AI response:', responseText);
-      console.error('❌ Parse error:', parseError);
-      return res.status(500).json({ 
-        error: 'Failed to parse generated content',
-        rawResponse: responseText.substring(0, 500) + '...'
-      });
-    }
+         // Parse the JSON response
+     let parsedResponse: any;
+     try {
+       console.log('🔥 Attempting to parse JSON response...');
+       // Clean up the response in case there's extra formatting
+       const cleanedContent = responseText
+         .trim()
+         .replace(/^```json\s*/, '') // Remove ```json prefix if present
+         .replace(/```\s*$/, '')     // Remove ``` suffix if present
+         .replace(/^\s*/, '')        // Remove leading whitespace
+         .replace(/\s*$/, '');       // Remove trailing whitespace
+
+       console.log('🔥 Cleaned content:', cleanedContent);
+       
+       parsedResponse = JSON.parse(cleanedContent);
+       console.log('🔥 Successfully parsed JSON response');
+       console.log('🔥 Parsed response keys:', Object.keys(parsedResponse));
+     } catch (parseError) {
+       console.error('💥 JSON parsing failed:', parseError);
+       console.log('💥 Attempting to construct JSON manually...');
+       
+       // Fallback: construct JSON manually if parsing fails
+       const titleMatch = responseText.match(/"title":\s*"([^"]+)"/);
+       const descriptionMatch = responseText.match(/"description":\s*"([^"]+)"/);
+       const contentMatch = responseText.match(/"content":\s*"([^"]+)"/);
+       
+       if (titleMatch && descriptionMatch) {
+         parsedResponse = {
+           title: titleMatch[1],
+           description: descriptionMatch[1],
+           content: contentMatch ? contentMatch[1] : "Content generation failed, please try again.",
+           tags: ["blog", "generated"]
+         };
+         console.log('🔥 Manually constructed blog content:', parsedResponse);
+       } else {
+         throw new Error(`Failed to parse or extract content from OpenAI response: ${parseError.message}`);
+       }
+     }
 
     // Validate and structure the response
     const generatedBlog: GeneratedBlog = {
