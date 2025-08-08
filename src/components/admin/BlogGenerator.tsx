@@ -7,34 +7,34 @@ import { generateTopicSuggestions } from '../../utils/aiPrompts';
 
 interface GeneratedBlog {
   title: string;
-  slug: string;
   description: string;
   content: string;
   tags: string[];
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  estimatedReadingTime: number;
-  suggestedFeaturedImage: string;
+  primaryKeyword: string;
+  wordCount: number;
+  seoAnalysis?: {
+    titleLength: number;
+    descriptionLength: number;
+    hasKeywordInTitle: boolean;
+    estimatedReadTime: string;
+  };
 }
 
 interface BlogGeneratorForm {
   topic: string;
-  audience: 'parents' | 'young-adults' | 'professionals' | 'seniors' | 'general';
-  contentLength: '800-1200' | '1200-1800' | '1800+';
   tone: 'professional' | 'casual' | 'friendly' | 'expert';
-  keywords: string[];
-  contentType: 'gift-guide' | 'trending' | 'problem-solving' | 'holiday-seasonal' | 'demographic-specific' | 'budget-focused' | 'luxury-premium';
+  length: 'short' | 'medium' | 'long';
+  primaryKeyword: string;
+  secondaryKeywords: string;
 }
 
 const BlogGenerator: React.FC = () => {
   const [formData, setFormData] = useState<BlogGeneratorForm>({
     topic: '',
-    audience: 'general',
-    contentLength: '1200-1800',
     tone: 'friendly',
-    keywords: [],
-    contentType: 'gift-guide'
+    length: 'medium',
+    primaryKeyword: '',
+    secondaryKeywords: ''
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -43,23 +43,14 @@ const BlogGenerator: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<ToastType>('success');
-  const [keywordInput, setKeywordInput] = useState('');
   const [seoAnalysis, setSeoAnalysis] = useState<any>(null);
   const [contentQuality, setContentQuality] = useState<any>(null);
   const [optimizedContent, setOptimizedContent] = useState<string>('');
 
-  const audienceOptions = [
-    { value: 'parents', label: 'Parents & Families' },
-    { value: 'young-adults', label: 'Young Adults & Millennials' },
-    { value: 'professionals', label: 'Working Professionals' },
-    { value: 'seniors', label: 'Seniors & Older Adults' },
-    { value: 'general', label: 'General Audience' }
-  ];
-
-  const contentLengthOptions = [
-    { value: '800-1200', label: 'Short (800-1200 words)' },
-    { value: '1200-1800', label: 'Medium (1200-1800 words)' },
-    { value: '1800+', label: 'Long (1800+ words)' }
+  const lengthOptions = [
+    { value: 'short', label: 'Short (800-1200 words)' },
+    { value: 'medium', label: 'Medium (1200-1800 words)' },
+    { value: 'long', label: 'Long (1800+ words)' }
   ];
 
   const toneOptions = [
@@ -69,15 +60,7 @@ const BlogGenerator: React.FC = () => {
     { value: 'expert', label: 'Expert & Informative' }
   ];
 
-  const contentTypeOptions = [
-    { value: 'gift-guide', label: 'Gift Guide' },
-    { value: 'trending', label: 'Trending Topics' },
-    { value: 'problem-solving', label: 'Problem Solving' },
-    { value: 'holiday-seasonal', label: 'Holiday & Seasonal' },
-    { value: 'demographic-specific', label: 'Demographic Specific' },
-    { value: 'budget-focused', label: 'Budget Focused' },
-    { value: 'luxury-premium', label: 'Luxury & Premium' }
-  ];
+
 
   const showToastMessage = (message: string, type: ToastType) => {
     setToastMessage(message);
@@ -92,16 +75,9 @@ const BlogGenerator: React.FC = () => {
     }));
   };
 
-  const addKeyword = () => {
-    if (keywordInput.trim() && !formData.keywords.includes(keywordInput.trim())) {
-      handleInputChange('keywords', [...formData.keywords, keywordInput.trim()]);
-      setKeywordInput('');
-    }
-  };
 
-  const removeKeyword = (keyword: string) => {
-    handleInputChange('keywords', formData.keywords.filter(k => k !== keyword));
-  };
+
+
 
   const generateTopicSuggestion = () => {
     const suggestions = generateTopicSuggestions(formData.audience, formData.contentType);
@@ -118,8 +94,8 @@ const BlogGenerator: React.FC = () => {
       showToastMessage('Topic must be at least 3 characters long', 'error');
       return false;
     }
-    if (formData.keywords.length === 0) {
-      showToastMessage('Please add at least one keyword', 'error');
+    if (!formData.primaryKeyword.trim()) {
+      showToastMessage('Please enter a primary keyword', 'error');
       return false;
     }
     return true;
@@ -144,11 +120,10 @@ const BlogGenerator: React.FC = () => {
         },
         body: JSON.stringify({
           topic: formData.topic,
-          audience: formData.audience,
-          contentLength: formData.contentLength,
           tone: formData.tone,
-          keywords: formData.keywords,
-          contentType: formData.contentType
+          length: formData.length,
+          primaryKeyword: formData.primaryKeyword,
+          secondaryKeywords: formData.secondaryKeywords
         }),
       });
 
@@ -164,27 +139,22 @@ const BlogGenerator: React.FC = () => {
       const result = await response.json();
       console.log('🔥 Frontend: Received blog data:', result);
 
-      if (result.success && result.data) {
-        console.log('🔥 Frontend: Setting generated blog data');
-        setGeneratedBlog(result.data);
-        setShowPreview(true);
-        
-        console.log('🔥 Frontend: Analyzing generated content...');
-        // Analyze the generated content
-        const seo = analyzeSEO(result.data.content, result.data.keywords);
-        const quality = assessContentQuality(result.data.content);
-        const optimized = optimizeContent(result.data.content, result.data.keywords);
-        
-        setSeoAnalysis(seo);
-        setContentQuality(quality);
-        setOptimizedContent(optimized.content);
-        
-        console.log('🔥 Frontend: Blog generation completed successfully');
-        showToastMessage('Blog generated successfully!', 'success');
-      } else {
-        console.log('❌ Frontend: Invalid response format:', result);
-        throw new Error('Invalid response format');
-      }
+      console.log('🔥 Frontend: Setting generated blog data');
+      setGeneratedBlog(result);
+      setShowPreview(true);
+      
+      console.log('🔥 Frontend: Analyzing generated content...');
+      // Analyze the generated content
+      const seo = analyzeSEO(result.content, [result.primaryKeyword]);
+      const quality = assessContentQuality(result.content);
+      const optimized = optimizeContent(result.content, [result.primaryKeyword]);
+      
+      setSeoAnalysis(seo);
+      setContentQuality(quality);
+      setOptimizedContent(optimized.content);
+      
+      console.log('🔥 Frontend: Blog generation completed successfully');
+      showToastMessage('Blog generated successfully!', 'success');
     } catch (error) {
       console.error('💥 Frontend: Blog generation failed:', error);
       showToastMessage(
@@ -249,53 +219,17 @@ const BlogGenerator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Content Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Content Type
-                </label>
-                <select
-                  value={formData.contentType}
-                  onChange={(e) => handleInputChange('contentType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {contentTypeOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Audience */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Target Audience
-                </label>
-                <select
-                  value={formData.audience}
-                  onChange={(e) => handleInputChange('audience', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {audienceOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Content Length */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Content Length
                 </label>
                 <select
-                  value={formData.contentLength}
-                  onChange={(e) => handleInputChange('contentLength', e.target.value)}
+                  value={formData.length}
+                  onChange={(e) => handleInputChange('length', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {contentLengthOptions.map(option => (
+                  {lengthOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -321,43 +255,32 @@ const BlogGenerator: React.FC = () => {
                 </select>
               </div>
 
-              {/* Keywords */}
+              {/* Primary Keyword */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  SEO Keywords *
+                  Primary Keyword *
                 </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={keywordInput}
-                    onChange={(e) => setKeywordInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addKeyword()}
-                    placeholder="Add keyword and press Enter"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Button
-                    onClick={addKeyword}
-                    className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.keywords.map(keyword => (
-                    <span
-                      key={keyword}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
-                    >
-                      {keyword}
-                      <button
-                        onClick={() => removeKeyword(keyword)}
-                        className="ml-2 text-blue-600 hover:text-blue-800"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
+                <input
+                  type="text"
+                  value={formData.primaryKeyword}
+                  onChange={(e) => handleInputChange('primaryKeyword', e.target.value)}
+                  placeholder="e.g., tech gifts, birthday presents"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Secondary Keywords */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Secondary Keywords
+                </label>
+                <input
+                  type="text"
+                  value={formData.secondaryKeywords}
+                  onChange={(e) => handleInputChange('secondaryKeywords', e.target.value)}
+                  placeholder="e.g., gadgets, electronics, presents"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
 
               {/* Generate Button */}
@@ -397,7 +320,7 @@ const BlogGenerator: React.FC = () => {
                         </div>
                         <div>
                           <span className="text-gray-600">Reading Time:</span>
-                          <span className="ml-2 font-semibold">{generatedBlog.estimatedReadingTime} min</span>
+                          <span className="ml-2 font-semibold">{generatedBlog.seoAnalysis?.estimatedReadTime || 'N/A'}</span>
                         </div>
                       </div>
                       {seoAnalysis.suggestions.length > 0 && (

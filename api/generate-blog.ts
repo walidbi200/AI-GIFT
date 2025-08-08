@@ -1,340 +1,131 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
 
-// Types for the API
-interface GenerateBlogRequest {
-  topic: string;
-  audience: 'parents' | 'young-adults' | 'professionals' | 'seniors' | 'general';
-  contentLength: '800-1200' | '1200-1800' | '1800+';
-  tone: 'professional' | 'casual' | 'friendly' | 'expert';
-  keywords: string[];
-}
-
-interface GeneratedBlog {
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  tags: string[];
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  estimatedReadingTime: number;
-  suggestedFeaturedImage: string;
-}
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Rate limiting
-const rateLimit = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  requests: new Map<string, { count: number; resetTime: number }>(),
-};
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const userRequests = rateLimit.requests.get(ip);
-
-  if (!userRequests || now > userRequests.resetTime) {
-    rateLimit.requests.set(ip, { count: 1, resetTime: now + rateLimit.windowMs });
-    return true;
-  }
-
-  if (userRequests.count >= rateLimit.max) {
-    return false;
-  }
-
-  userRequests.count++;
-  return true;
-}
-
-// Generate slug from title
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-}
-
-// Calculate reading time
-function calculateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
-}
-
-// AI Prompts for different content types
-const getPrompt = (params: GenerateBlogRequest): string => {
-  const { topic, audience, contentLength, tone, keywords } = params;
-  
-  const audienceMap = {
-    'parents': 'parents and families',
-    'young-adults': 'young adults and millennials',
-    'professionals': 'working professionals',
-    'seniors': 'seniors and older adults',
-    'general': 'general audience'
-  };
-
-  const toneMap = {
-    'professional': 'professional and authoritative',
-    'casual': 'casual and conversational',
-    'friendly': 'friendly and approachable',
-    'expert': 'expert and informative'
-  };
-
-  const lengthMap = {
-    '800-1200': '800-1200 words',
-    '1200-1800': '1200-1800 words',
-    '1800+': '1800+ words'
-  };
-
-  return `Create a comprehensive, SEO-optimized blog post about "${topic}" for gift-giving with the following specifications:
-
-TARGET AUDIENCE: ${audienceMap[audience]}
-TONE: ${toneMap[tone]}
-LENGTH: ${lengthMap[contentLength]}
-SEO KEYWORDS: ${keywords.join(', ')}
-
-REQUIREMENTS:
-1. Create an engaging, click-worthy title that includes the main keyword
-2. Write a compelling meta description (150-160 characters)
-3. Structure the content with proper H2 and H3 headings
-4. Include 8-12 specific gift recommendations with price ranges
-5. Add practical tips and advice for gift-givers
-6. Include a mix of budget-friendly and premium options
-7. End with a strong call-to-action to use our AI gift finder tool
-8. Optimize for the provided SEO keywords naturally
-9. Make the content valuable and actionable for readers
-
-FORMAT THE RESPONSE AS JSON WITH THE FOLLOWING STRUCTURE:
-{
-  "title": "Engaging title here",
-  "description": "Meta description here",
-  "content": "Full markdown content with proper formatting",
-  "tags": ["tag1", "tag2", "tag3"],
-  "metaTitle": "SEO-optimized title (60 characters max)",
-  "metaDescription": "SEO meta description (150-160 characters)",
-  "keywords": ["keyword1", "keyword2", "keyword3"],
-  "suggestedFeaturedImage": "Brief description of ideal featured image"
-}
-
-Ensure the content is original, helpful, and provides real value to readers looking for gift ideas.`;
-};
-
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔥 Blog API called with method:', req.method);
   console.log('🔥 Request body:', JSON.stringify(req.body, null, 2));
-  console.log('🔥 OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
   
-  // Handle CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    console.log('🔥 OPTIONS request - returning 200');
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    console.log('❌ Wrong method:', req.method);
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Check API key
-  if (!process.env.OPENAI_API_KEY) {
-    console.log('❌ No API key configured');
-    return res.status(500).json({ 
-      error: 'OpenAI API key not configured',
-      suggestion: 'Add OPENAI_API_KEY to your environment variables'
-    });
-  }
-
-  // Rate limiting
-  const clientIP = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown';
-  if (!checkRateLimit(clientIP)) {
-    return res.status(429).json({ 
-      error: 'Rate limit exceeded',
-      suggestion: 'Please wait 15 minutes before making another request'
-    });
-  }
-
   try {
-    const { topic, audience, contentLength, tone, keywords }: GenerateBlogRequest = req.body;
-    console.log('🔥 Extracted params:', { topic, audience, contentLength, tone, keywords });
-
-    // Validate input
-    if (!topic || !audience || !contentLength || !tone) {
-      console.log('❌ Missing required fields:', { topic, audience, contentLength, tone });
-      return res.status(400).json({
-        error: 'Missing required fields',
-        required: ['topic', 'audience', 'contentLength', 'tone'],
-        received: { topic, audience, contentLength, tone }
-      });
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    if (topic.length < 3 || topic.length > 100) {
-      console.log('❌ Invalid topic length:', topic.length);
-      return res.status(400).json({
-        error: 'Topic must be between 3 and 100 characters'
-      });
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
 
-    // Generate content using OpenAI
-    const prompt = getPrompt({ topic, audience, contentLength, tone, keywords: keywords || [] });
-    console.log('🔥 Generated prompt length:', prompt.length);
+    const { topic, tone, length, primaryKeyword, secondaryKeywords } = req.body;
     
-         console.log('🔥 Calling OpenAI API...');
-     const completion = await openai.chat.completions.create({
-       model: 'gpt-3.5-turbo',
-       messages: [
-         {
-           role: 'system',
-           content: `You are a professional blog writer. You must respond with ONLY valid JSON, no additional text or formatting. The JSON must be properly escaped and contain no unescaped quotes or newlines within string values.`
-         },
-         {
-           role: 'user',
-           content: `Write a ${contentLength} blog post about "${topic}" in a ${tone} tone. 
+    // Load the human-first SEO rules (optional - for reference)
+    let seoRules = '';
+    try {
+      const rulesPath = path.join(process.cwd(), 'content', 'human_first_seo_rules.md');
+      seoRules = fs.readFileSync(rulesPath, 'utf8');
+    } catch (error) {
+      console.log('📋 SEO rules file not found, using default rules');
+    }
 
-CRITICAL: Respond with ONLY this exact JSON structure, properly escaped:
+    // Enhanced prompt using the template structure
+    const enhancedPrompt = `You are an expert ${topic} writer. Write a ${length} blog post with the following requirements:
+
+TOPIC: ${topic}
+TONE: ${tone}
+PRIMARY KEYWORD: ${primaryKeyword || topic}
+SECONDARY KEYWORDS: ${secondaryKeywords || 'related terms'}
+
+HUMAN-FIRST SEO RULES TO FOLLOW:
+1. Write for people first - conversational tone, avoid jargon unless explained
+2. Show expertise - include real examples, reference credible sources  
+3. Structure matters - H1 for title, H2 for main sections, H3 for sub-points
+4. Engage, don't dump keywords - natural keyword placement, no stuffing
+5. Make it scannable - bullet points, short paragraphs, bold important words
+6. Add unique angle - personal insights, fresh perspectives
+
+AVOID AI-SOUNDING PHRASES:
+- Don't overuse: "Moreover", "Furthermore", "In conclusion", "Overall"
+- Don't use vague words like "things", "stuff"  
+- DO use contractions: you're, don't, it's
+- DO vary sentence lengths
+- DO add personal touches and mini-examples
+
+Return ONLY valid JSON with this structure:
 {
-  "title": "Blog post title here",
-  "description": "SEO meta description (max 160 chars)",
-  "content": "Full HTML blog post content with proper escaping",
-  "tags": ["tag1", "tag2", "tag3"]
-}
+  "title": "Engaging title under 60 chars with primary keyword",
+  "description": "Compelling meta description under 155 chars",
+  "content": "Full HTML blog post with proper H2/H3 structure and engaging content",
+  "tags": ["primary-keyword", "secondary-keyword", "topic-related"],
+  "primaryKeyword": "${primaryKeyword || topic}",
+  "wordCount": [estimated word count as number]
+}`;
 
-Make sure to:
-- Escape all quotes in the content 
-- Replace newlines with \\n
-- Keep content as HTML with proper tags like <h2>, <p>, <ul>, etc.
-- No markdown formatting in the content field`
-         }
-       ],
-       max_tokens: 2000,
-       temperature: 0.7,
-     });
-    
-    console.log('🔥 OpenAI response status: OK');
-    console.log('🔥 OpenAI response structure:', {
-      hasChoices: !!completion.choices,
-      choicesLength: completion.choices?.length,
-      hasMessage: !!completion.choices?.[0]?.message,
-      hasContent: !!completion.choices?.[0]?.message?.content
+    // Use optimized parameters
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional blog writer who creates engaging, human-like content that ranks well in search engines. Always return valid JSON only.'
+          },
+          {
+            role: 'user',
+            content: enhancedPrompt
+          }
+        ],
+        temperature: 0.7,
+        top_p: 0.9,
+        frequency_penalty: 0.2,
+        presence_penalty: 0.3,
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
+      }),
     });
 
-    const responseText = completion.choices[0]?.message?.content;
-    console.log('🔥 OpenAI response text length:', responseText?.length || 0);
-    console.log('🔥 OpenAI response preview:', responseText?.substring(0, 200) + '...');
-    
-    if (!responseText) {
-      console.log('❌ No response text from OpenAI');
-      return res.status(500).json({ error: 'Failed to generate content' });
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.log('❌ OpenAI error:', errorData);
+      return res.status(500).json({ error: 'OpenAI API error', details: errorData });
     }
 
-         // Parse the JSON response
-     let parsedResponse: any;
-     try {
-       console.log('🔥 Attempting to parse JSON response...');
-       // Clean up the response in case there's extra formatting
-       const cleanedContent = responseText
-         .trim()
-         .replace(/^```json\s*/, '') // Remove ```json prefix if present
-         .replace(/```\s*$/, '')     // Remove ``` suffix if present
-         .replace(/^\s*/, '')        // Remove leading whitespace
-         .replace(/\s*$/, '');       // Remove trailing whitespace
+    const data = await response.json();
+    const rawContent = data.choices[0].message.content;
+    
+    // Parse the JSON response
+    let blogContent;
+    try {
+      blogContent = JSON.parse(rawContent);
+      
+      // Add SEO analysis
+      blogContent.seoAnalysis = {
+        titleLength: blogContent.title?.length || 0,
+        descriptionLength: blogContent.description?.length || 0,
+        hasKeywordInTitle: blogContent.title?.toLowerCase().includes((primaryKeyword || topic).toLowerCase()),
+        estimatedReadTime: Math.ceil((blogContent.wordCount || 500) / 200) + ' min'
+      };
+      
+      console.log('🔥 Enhanced blog content generated:', blogContent);
+      
+    } catch (parseError) {
+      console.error('💥 JSON parsing failed:', parseError);
+      return res.status(500).json({ 
+        error: 'Failed to parse generated content', 
+        rawResponse: rawContent.substring(0, 500) 
+      });
+    }
 
-       console.log('🔥 Cleaned content:', cleanedContent);
-       
-       parsedResponse = JSON.parse(cleanedContent);
-       console.log('🔥 Successfully parsed JSON response');
-       console.log('🔥 Parsed response keys:', Object.keys(parsedResponse));
-     } catch (parseError) {
-       console.error('💥 JSON parsing failed:', parseError);
-       console.log('💥 Attempting to construct JSON manually...');
-       
-       // Fallback: construct JSON manually if parsing fails
-       const titleMatch = responseText.match(/"title":\s*"([^"]+)"/);
-       const descriptionMatch = responseText.match(/"description":\s*"([^"]+)"/);
-       const contentMatch = responseText.match(/"content":\s*"([^"]+)"/);
-       
-       if (titleMatch && descriptionMatch) {
-         parsedResponse = {
-           title: titleMatch[1],
-           description: descriptionMatch[1],
-           content: contentMatch ? contentMatch[1] : "Content generation failed, please try again.",
-           tags: ["blog", "generated"]
-         };
-         console.log('🔥 Manually constructed blog content:', parsedResponse);
-       } else {
-         throw new Error(`Failed to parse or extract content from OpenAI response: ${parseError.message}`);
-       }
-     }
-
-    // Validate and structure the response
-    const generatedBlog: GeneratedBlog = {
-      title: parsedResponse.title || `Gift Guide: ${topic}`,
-      slug: generateSlug(parsedResponse.title || topic),
-      description: parsedResponse.description || '',
-      content: parsedResponse.content || '',
-      tags: Array.isArray(parsedResponse.tags) ? parsedResponse.tags : [topic, 'gifts', 'gift-guide'],
-      metaTitle: parsedResponse.metaTitle || parsedResponse.title || `Gift Guide: ${topic}`,
-      metaDescription: parsedResponse.metaDescription || parsedResponse.description || '',
-      keywords: Array.isArray(parsedResponse.keywords) ? parsedResponse.keywords : keywords || [],
-      estimatedReadingTime: calculateReadingTime(parsedResponse.content || ''),
-      suggestedFeaturedImage: parsedResponse.suggestedFeaturedImage || 'Gift-related stock photo'
-    };
-
-    console.log('🔥 Generated blog structure:', {
-      title: generatedBlog.title,
-      contentLength: generatedBlog.content.length,
-      tags: generatedBlog.tags,
-      readingTime: generatedBlog.estimatedReadingTime
-    });
-
-    // Log usage for monitoring
-    console.log(`🔥 Blog generated for topic: "${topic}" | Tokens used: ${completion.usage?.total_tokens || 'unknown'}`);
-
-    console.log('🔥 Returning successful response');
-    return res.status(200).json({
-      success: true,
-      data: generatedBlog,
-      usage: {
-        totalTokens: completion.usage?.total_tokens,
-        promptTokens: completion.usage?.prompt_tokens,
-        completionTokens: completion.usage?.completion_tokens
-      }
-    });
-
+    res.status(200).json(blogContent);
+    
   } catch (error) {
     console.error('💥 Blog generation error:', error);
-    
-    if (error instanceof OpenAI.APIError) {
-      console.log('❌ OpenAI API error:', {
-        status: error.status,
-        message: error.message,
-        code: error.code
-      });
-      return res.status(error.status || 500).json({
-        error: 'OpenAI API error',
-        message: error.message,
-        code: error.code
-      });
-    }
-
-    console.log('❌ General error:', error instanceof Error ? error.message : 'Unknown error');
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    res.status(500).json({ 
+      error: 'Failed to generate blog post',
+      details: error.message
     });
   }
 }

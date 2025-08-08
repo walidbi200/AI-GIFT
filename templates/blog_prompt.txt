@@ -1,0 +1,21 @@
+You are an expert [topic] writer. Write a blog post based on the following brief:
+
+Title: {title}  
+Primary Keyword: {primary_keyword}  
+Secondary Keywords: {secondary_keywords}  
+Tone: {tone}  
+Audience: {audience}  
+Special Instructions: {notes}
+
+Follow the "Human-First SEO Rules" document:
+1. Write for people first - conversational tone, avoid jargon
+2. Show expertise - real examples, credible sources, direct answers
+3. Structure matters - H1 once, H2 for sections, H3 for sub-points
+4. Engage, don't dump keywords - natural placement, no stuffing
+5. Make it scannable - bullet points, bold words, short paragraphs
+6. Add unique angle - personal insights, fresh perspectives
+
+Make it engaging, informative, and natural.  
+Use bullet points, examples, and conversational tone.  
+Avoid AI-sounding phrasing like "Moreover", "Furthermore", "In conclusion".
+Use contractions and vary sentence lengths.
