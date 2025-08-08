@@ -18,10 +18,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { topic, tone, length, primaryKeyword, secondaryKeywords } = req.body;
     
     // Load the human-first SEO rules (optional - for reference)
-    let seoRules = '';
+    let _seoRules = '';
     try {
       const rulesPath = path.join(process.cwd(), 'content', 'human_first_seo_rules.md');
-      seoRules = fs.readFileSync(rulesPath, 'utf8');
+      _seoRules = fs.readFileSync(rulesPath, 'utf8');
     } catch (error) {
       console.log('📋 SEO rules file not found, using default rules');
     }
@@ -111,21 +111,24 @@ Return ONLY valid JSON with this structure:
       
       console.log('🔥 Enhanced blog content generated:', blogContent);
       
-    } catch (parseError) {
-      console.error('💥 JSON parsing failed:', parseError);
+    } catch (parseError: unknown) {
+      const errorMessage = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
+      console.error('💥 JSON parsing failed:', errorMessage);
       return res.status(500).json({ 
         error: 'Failed to parse generated content', 
+        details: errorMessage,
         rawResponse: rawContent.substring(0, 500) 
       });
     }
 
     res.status(200).json(blogContent);
     
-  } catch (error) {
-    console.error('💥 Blog generation error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('💥 Blog generation error:', errorMessage);
     res.status(500).json({ 
       error: 'Failed to generate blog post',
-      details: error.message
+      details: errorMessage
     });
   }
 }

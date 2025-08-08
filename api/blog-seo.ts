@@ -317,7 +317,7 @@ async function handleSEOAnalysis(
   res: VercelResponse,
   data: SEOAnalysisRequest
 ) {
-  const { content, title, keywords, url } = data;
+  const { content, title, keywords, url: _url } = data;
 
   if (!content || !title || !keywords || !Array.isArray(keywords)) {
     res.status(400).json({ error: 'Missing required fields: content, title, keywords' });
@@ -351,7 +351,7 @@ async function handleSEOAnalysis(
 }
 
 async function handleKeywordAnalysis(
-  req: VercelRequest,
+  _req: VercelRequest,
   res: VercelResponse,
   data: KeywordAnalysisRequest
 ) {
@@ -413,11 +413,11 @@ async function handleKeywordAnalysis(
 }
 
 async function handleContentOptimization(
-  req: VercelRequest,
+  _req: VercelRequest,
   res: VercelResponse,
   data: ContentOptimizationRequest
 ) {
-  const { content, targetKeywords, contentType } = data;
+  const { content, targetKeywords, contentType: _contentType } = data;
 
   if (!content || !targetKeywords || !Array.isArray(targetKeywords)) {
     res.status(400).json({ error: 'Missing required fields: content, targetKeywords' });

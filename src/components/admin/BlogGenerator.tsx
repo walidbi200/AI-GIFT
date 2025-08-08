@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';
@@ -45,7 +45,7 @@ const BlogGenerator: React.FC = () => {
   const [toastType, setToastType] = useState<ToastType>('success');
   const [seoAnalysis, setSeoAnalysis] = useState<any>(null);
   const [contentQuality, setContentQuality] = useState<any>(null);
-  const [optimizedContent, setOptimizedContent] = useState<string>('');
+  const [_optimizedContent, setOptimizedContent] = useState<string>('');
 
   const lengthOptions = [
     { value: 'short', label: 'Short (800-1200 words)' },
@@ -80,7 +80,7 @@ const BlogGenerator: React.FC = () => {
 
 
   const generateTopicSuggestion = () => {
-    const suggestions = generateTopicSuggestions(formData.audience, formData.contentType);
+    const suggestions = generateTopicSuggestions('general', 'gift-guide');
     const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
     handleInputChange('topic', randomSuggestion);
   };
@@ -327,7 +327,7 @@ const BlogGenerator: React.FC = () => {
                         <div className="mt-2">
                           <span className="text-gray-600 text-sm">Suggestions:</span>
                           <ul className="text-sm text-gray-700 mt-1">
-                            {seoAnalysis.suggestions.slice(0, 3).map((suggestion, index) => (
+                            {seoAnalysis.suggestions.slice(0, 3).map((suggestion: string, index: number) => (
                               <li key={index}>• {suggestion}</li>
                             ))}
                           </ul>
@@ -434,6 +434,7 @@ const BlogGenerator: React.FC = () => {
         <Toast
           message={toastMessage}
           type={toastType}
+          isVisible={showToast}
           onClose={() => setShowToast(false)}
         />
       )}

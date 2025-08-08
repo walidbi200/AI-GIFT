@@ -63,7 +63,7 @@ const AdminDashboard: React.FC = () => {
       // Calculate blog stats (mock data for now)
       const stats: BlogStats = {
         totalPosts: posts.length,
-        totalViews: posts.reduce((sum, post) => sum + (Math.floor(Math.random() * 1000) + 100), 0),
+        totalViews: posts.reduce((sum, _post) => sum + (Math.floor(Math.random() * 1000) + 100), 0),
         averageReadingTime: Math.round(posts.reduce((sum, post) => sum + post.readTime, 0) / posts.length),
         topPerformingPosts: posts.slice(0, 5).map(post => ({
           title: post.title,
@@ -542,6 +542,7 @@ const AdminDashboard: React.FC = () => {
         <Toast
           message={toastMessage}
           type={toastType}
+          isVisible={showToast}
           onClose={() => setShowToast(false)}
         />
       )}
