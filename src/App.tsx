@@ -32,6 +32,7 @@ const Login = React.lazy(() => import("./pages/Login"));
 const AdminDashboard = React.lazy(() => import("./components/admin/AdminDashboard"));
 const AdminSimple = React.lazy(() => import("./pages/AdminSimple"));
 const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
+const SaveToBlog = React.lazy(() => import("./components/admin/SaveToBlog"));
 const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
 const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
 
@@ -572,6 +573,14 @@ function App() {
                       element={
                         <SimpleProtectedRoute>
                           <BlogGenerator />
+                        </SimpleProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/save-to-blog" 
+                      element={
+                        <SimpleProtectedRoute>
+                          <SaveToBlog />
                         </SimpleProtectedRoute>
                       } 
                     />

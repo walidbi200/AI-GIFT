@@ -7,6 +7,7 @@ import { getAllPosts } from '../../utils/blogContent';
 import { BlogEditor } from './BlogEditor';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { SEODashboard } from './SEODashboard';
+import SaveToBlog from './SaveToBlog';
 import { useSession, signOut } from '../../hooks/useNextAuth';
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
@@ -108,6 +109,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'blog-editor', label: 'Blog Editor', icon: '✏️' },
     { id: 'bulk-generator', label: 'Bulk Generator', icon: '📦' },
     { id: 'ai-generator', label: 'AI Generator', icon: '🤖' },
+    { id: 'save-to-blog', label: 'Save to Blog', icon: '💾' },
     { id: 'analytics', label: 'Analytics', icon: '📈' },
     { id: 'seo', label: 'SEO Monitor', icon: '🔍' }
   ];
@@ -284,17 +286,26 @@ const AdminDashboard: React.FC = () => {
   const renderAIGenerator = () => (
     <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-blue-900 mb-2">AI Blog Generator</h2>
+        <h2 className="text-xl font-semibold text-blue-900 mb-2">AI Blog Generation Tools</h2>
         <p className="text-blue-700 mb-4">
-          Create high-quality, SEO-optimized blog posts using our AI-powered content generator.
+          Create high-quality, SEO-optimized blog posts using our AI-powered content generators.
         </p>
-        <Link
-          to="/admin/blog-generator"
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          <span className="mr-2">🤖</span>
-          Open Blog Generator
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            to="/admin/blog-generator"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            <span className="mr-2">🤖</span>
+            Quick Blog Generator
+          </Link>
+          <Link
+            to="/admin/save-to-blog"
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            <span className="mr-2">💾</span>
+            Save to Blog
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -453,6 +464,10 @@ const AdminDashboard: React.FC = () => {
     <BulkContentGenerator />
   );
 
+  const renderSaveToBlog = () => (
+    <SaveToBlog />
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -465,6 +480,8 @@ const AdminDashboard: React.FC = () => {
         return renderBulkGenerator();
       case 'ai-generator':
         return renderAIGenerator();
+      case 'save-to-blog':
+        return renderSaveToBlog();
       case 'analytics':
         return renderAnalytics();
       case 'seo':
