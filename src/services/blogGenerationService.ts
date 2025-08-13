@@ -72,13 +72,13 @@ export class BlogGenerationService {
   // Read configuration files
   private async readChatGPTParams(): Promise<ChatGPTParams> {
     const filePath = path.join(this.configPath, 'chatgpt_params.json');
-    const content = await fs.promises.readFile(filePath, 'utf-8');
+    const content = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(content);
   }
 
   private async readEditorialBrief(): Promise<EditorialBrief> {
     const filePath = path.join(this.templatesPath, 'editorial_brief.md');
-    const content = await fs.promises.readFile(filePath, 'utf-8');
+    const content = fs.readFileSync(filePath, 'utf-8');
     
     // Parse the markdown brief into structured data
     const lines = content.split('\n');
@@ -127,22 +127,22 @@ export class BlogGenerationService {
 
   private async readBlogPrompt(): Promise<string> {
     const filePath = path.join(this.templatesPath, 'blog_prompt.txt');
-    return await fs.promises.readFile(filePath, 'utf-8');
+    return fs.readFileSync(filePath, 'utf-8');
   }
 
   private async readHumanFirstSEORules(): Promise<string> {
     const filePath = path.join(this.contentPath, 'human_first_seo_rules.md');
-    return await fs.promises.readFile(filePath, 'utf-8');
+    return fs.readFileSync(filePath, 'utf-8');
   }
 
   private async readHumanizationChecklist(): Promise<string> {
     const filePath = path.join(this.contentPath, 'humanization_checklist.md');
-    return await fs.promises.readFile(filePath, 'utf-8');
+    return fs.readFileSync(filePath, 'utf-8');
   }
 
   private async readSEOPublishChecklist(): Promise<string> {
     const filePath = path.join(this.contentPath, 'seo_publish_checklist.md');
-    return await fs.promises.readFile(filePath, 'utf-8');
+    return fs.readFileSync(filePath, 'utf-8');
   }
 
   // Generate initial blog draft using OpenAI
@@ -339,10 +339,14 @@ export class BlogGenerationService {
 
   // Save blog post to file
   private async saveBlogPost(post: BlogPost): Promise<string> {
-    // Ensure posts directory exists
-    await fs.promises.mkdir(this.postsPath, { recursive: true });
+    try {
+      // Ensure posts directory exists
+      if (!fs.existsSync(this.postsPath)) {
+        fs.mkdirSync(this.postsPath, { recursive: true });
+        console.log(`📁 Created posts directory: ${this.postsPath}`);
+      }
 
-    const frontmatter = `---
+      const frontmatter = `---
 title: "${post.title}"
 slug: "${post.slug}"
 date: "${post.date}"
@@ -353,13 +357,18 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 
 `;
 
-    const fullContent = frontmatter + post.content;
-    const filePath = path.join(this.postsPath, `${post.slug}.md`);
-    
-    await fs.promises.writeFile(filePath, fullContent, 'utf-8');
-    console.log(`✅ Blog post saved: ${filePath}`);
-    
-    return filePath;
+      const fullContent = frontmatter + post.content;
+      const filePath = path.join(this.postsPath, `${post.slug}.md`);
+      
+      // Use synchronous write for better error handling
+      fs.writeFileSync(filePath, fullContent, 'utf-8');
+      console.log(`✅ Blog post saved: ${filePath}`);
+      
+      return filePath;
+    } catch (error) {
+      console.error('❌ Error saving blog post:', error);
+      throw new Error(`Failed to save blog post: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   // WordPress integration
