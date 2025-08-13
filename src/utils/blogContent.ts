@@ -1,5 +1,10 @@
-import fs from 'fs';
-import path from 'path';
+// Only import fs and path in server environment
+let fs: any, path: any;
+if (typeof window === 'undefined') {
+  // Server-side only
+  fs = require('fs');
+  path = require('path');
+}
 
 export interface Post {
   id: string;
@@ -105,6 +110,11 @@ const hardcodedPosts: Post[] = [
 
 // Function to load saved blog posts from the file system
 function loadSavedBlogPosts(): Post[] {
+  // Return empty array if running in browser (client-side)
+  if (typeof window !== 'undefined') {
+    return [];
+  }
+  
   try {
     const postsDir = path.join(process.cwd(), 'content', 'posts');
     
@@ -168,14 +178,14 @@ function loadSavedBlogPosts(): Post[] {
 }
 
 // Combine hardcoded and saved posts
-function getAllPosts(): Post[] {
+function combineAllPosts(): Post[] {
   const savedPosts = loadSavedBlogPosts();
   return [...savedPosts, ...hardcodedPosts];
 }
 
 // Export functions
 export function getAllPosts(): Post[] {
-  return getAllPosts();
+  return combineAllPosts();
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
