@@ -1,65 +1,90 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllPosts, formatPostDate, formatReadTime, Post } from '../../utils/blogContent';
+import { formatPostDate, formatReadTime } from '../../utils/blogContent';
+import type { Post } from '../../types/post';
 
-const BlogList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
+interface BlogListProps {
+  posts: Post[];
+  featuredPosts: Post[];
+  selectedTag: string;
+  searchQuery: string;
+  onTagSelect: (tag: string) => void;
+  onSearchChange: (query: string) => void;
+}
+
+const BlogList: React.FC<BlogListProps> = ({
+  posts,
+  featuredPosts,
+  selectedTag,
+  searchQuery,
+  onTagSelect,
+  onSearchChange
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const postsPerPage = 6;
 
-  // Load posts on component mount
+  // Update allPosts when posts prop changes
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const posts = await getAllPosts();
-        setAllPosts(posts);
-      } catch (error) {
-        console.error('Error loading posts:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPosts();
-  }, []);
+    // Defensive check: ensure posts is an array
+    if (Array.isArray(posts)) {
+      setAllPosts(posts);
+    } else {
+      console.warn('⚠️ Posts prop is not an array:', typeof posts);
+      setAllPosts([]);
+    }
+  }, [posts]);
   
-  // Get unique tags from all posts
+  // Get unique tags from all posts with defensive checks
   const allTags = useMemo(() => {
     const tags = new Set<string>();
+    
+    if (!Array.isArray(allPosts)) {
+      console.warn('⚠️ allPosts is not an array for tags');
+      return [];
+    }
+    
     allPosts.forEach(post => {
-      post.tags.forEach(tag => tags.add(tag));
+      if (Array.isArray(post.tags)) {
+        post.tags.forEach(tag => tags.add(tag));
+      }
     });
     return Array.from(tags).sort();
   }, [allPosts]);
 
-  // Filter posts based on search and tag
+  // Filter posts based on search and tag with defensive checks
   const filteredPosts = useMemo(() => {
-    let filtered = allPosts;
+    if (!Array.isArray(allPosts)) {
+      console.warn('⚠️ allPosts is not an array for filtering');
+      return [];
+    }
 
-    if (searchTerm) {
+    let filtered = [...allPosts]; // Create a copy to avoid mutations
+
+    if (searchQuery) {
       filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
       );
     }
 
     if (selectedTag) {
       filtered = filtered.filter(post =>
-        post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
+        Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
       );
     }
 
     return filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-  }, [allPosts, searchTerm, selectedTag]);
+  }, [allPosts, searchQuery, selectedTag]);
 
-  // Pagination
+  // Pagination with defensive slice
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+  const paginatedPosts = Array.isArray(filteredPosts) 
+    ? filteredPosts.slice(startIndex, startIndex + postsPerPage)
+    : [];
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -67,8 +92,8 @@ const BlogList: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedTag('');
+    onSearchChange('');
+    onTagSelect('');
     setCurrentPage(1);
   };
 
@@ -100,8 +125,8 @@ const BlogList: React.FC = () => {
           <input
             type="text"
             placeholder="Search blog posts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <svg
@@ -123,7 +148,7 @@ const BlogList: React.FC = () => {
         {allTags.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2">
             <button
-              onClick={() => setSelectedTag('')}
+              onClick={() => onTagSelect('')}
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                 selectedTag === ''
                   ? 'bg-blue-600 text-white'
@@ -135,7 +160,7 @@ const BlogList: React.FC = () => {
             {allTags.map(tag => (
               <button
                 key={tag}
-                onClick={() => setSelectedTag(tag)}
+                onClick={() => onTagSelect(tag)}
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedTag.toLowerCase() === tag.toLowerCase()
                     ? 'bg-blue-600 text-white'
@@ -149,7 +174,7 @@ const BlogList: React.FC = () => {
         )}
 
         {/* Clear Filters */}
-        {(searchTerm || selectedTag) && (
+        {(searchQuery || selectedTag) && (
           <div className="text-center">
             <button
               onClick={clearFilters}
@@ -227,14 +252,17 @@ const BlogList: React.FC = () => {
   );
 };
 
-// Post Card Component
+// Post Card Component with defensive checks
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
+  // Defensive check for tags
+  const safeTags = Array.isArray(post.tags) ? post.tags : [];
+  
   return (
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="p-6">
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {post.tags.slice(0, 3).map(tag => (
+          {safeTags.slice(0, 3).map(tag => (
             <span
               key={tag}
               className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
@@ -242,9 +270,9 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
               {tag}
             </span>
           ))}
-          {post.tags.length > 3 && (
+          {safeTags.length > 3 && (
             <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-              +{post.tags.length - 3}
+              +{safeTags.length - 3}
             </span>
           )}
         </div>

@@ -37,45 +37,95 @@ const BlogIndex: React.FC = () => {
   const loadPosts = async () => {
     try {
       setIsLoading(true);
-      const loadedPosts = getAllPosts();
+      setError(null);
+      
+      console.log('🔄 Loading blog posts...');
+      const loadedPosts = await getAllPosts();
+      
+      // Defensive check: ensure loadedPosts is an array
+      if (!Array.isArray(loadedPosts)) {
+        console.error('❌ getAllPosts returned non-array:', typeof loadedPosts, loadedPosts);
+        setPosts([]);
+        setError('Invalid data format received from server');
+        return;
+      }
+      
+      console.log(`✅ Loaded ${loadedPosts.length} blog posts`);
+      console.log('📋 Posts data structure:', loadedPosts.slice(0, 2)); // Log first 2 posts for debugging
+      
       setPosts(loadedPosts);
     } catch (err) {
+      console.error('❌ Error loading posts:', err);
       setError('Failed to load blog posts');
-      console.error('Error loading posts:', err);
+      setPosts([]); // Ensure posts is always an array
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Filter and sort posts
+  // Filter and sort posts with defensive array checks
   const filteredPosts = useMemo(() => {
-    let filtered = posts;
+    // Defensive check: ensure posts is an array
+    if (!Array.isArray(posts)) {
+      console.warn('⚠️ Posts is not an array, using empty array');
+      return [];
+    }
+
+    let filtered = [...posts]; // Create a copy to avoid mutations
 
     // Filter by search query
     if (searchQuery) {
-      filtered = searchPosts(searchQuery);
+      try {
+        const searchResults = searchPosts(searchQuery);
+        // Since searchPosts is async, we'll filter synchronously here
+        filtered = filtered.filter(post =>
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (Array.isArray(post.tags) && post.tags.some(tag => 
+            tag.toLowerCase().includes(searchQuery.toLowerCase())
+          ))
+        );
+      } catch (error) {
+        console.error('❌ Error filtering by search:', error);
+      }
     }
 
     // Filter by tag
     if (selectedTag) {
-      filtered = filtered.filter(post => post.tags.includes(selectedTag));
+      filtered = filtered.filter(post => 
+        Array.isArray(post.tags) && post.tags.includes(selectedTag)
+      );
     }
 
-    // Posts are already sorted by date (newest first)
+    // Sort by date (newest first)
+    filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    console.log(`🔍 Filtered to ${filtered.length} posts (search: "${searchQuery}", tag: "${selectedTag}")`);
     return filtered;
   }, [posts, searchQuery, selectedTag]);
 
-  // Get featured posts (first 3 posts)
+  // Get featured posts (first 3 posts) with defensive slice
   const featuredPosts = useMemo(() => {
-    return filteredPosts.slice(0, 3).map(post => ({ ...post, featured: true }));
+    if (!Array.isArray(filteredPosts)) {
+      console.warn('⚠️ filteredPosts is not an array for featured posts');
+      return [];
+    }
+    
+    const featured = filteredPosts.slice(0, 3);
+    return featured.map(post => ({ ...post, featured: true }));
   }, [filteredPosts]);
 
-  // Get regular posts (excluding featured)
+  // Get regular posts (excluding featured) with defensive slice
   const regularPosts = useMemo(() => {
+    if (!Array.isArray(filteredPosts)) {
+      console.warn('⚠️ filteredPosts is not an array for regular posts');
+      return [];
+    }
+    
     return filteredPosts.slice(3);
   }, [filteredPosts]);
 
-  // Pagination
+  // Pagination with defensive checks
   const totalPages = Math.ceil(regularPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
