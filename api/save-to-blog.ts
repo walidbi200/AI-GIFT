@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { addBlogPost } from './blog-posts';
 
+// Serverless-compatible interfaces
 interface SaveToBlogRequest {
   title: string;
   targetAudience: string;
@@ -42,7 +43,7 @@ interface BlogPost {
   featuredImage?: string;
 }
 
-// Generate slug from title
+// Utility functions
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -52,7 +53,6 @@ function generateSlug(title: string): string {
     .trim();
 }
 
-// Calculate reading time
 function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200;
   const textContent = content.replace(/<[^>]*>/g, ' ');
@@ -60,104 +60,105 @@ function calculateReadingTime(content: string): number {
   return Math.ceil(wordCount / wordsPerMinute);
 }
 
-// Enhanced validation function with specific requirements
+// Serverless-compatible validation
 function validateBlogRequest(body: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   
-  // Check if body exists
-  if (!body) {
-    errors.push('Request body is missing');
-    return { isValid: false, errors };
-  }
-
-  // Validate title (required, 1-200 chars)
-  if (!body.title || typeof body.title !== 'string') {
-    errors.push('Title is required and must be a string');
-  } else {
-    const title = body.title.trim();
-    if (title.length === 0) {
-      errors.push('Title cannot be empty');
-    } else if (title.length > 200) {
-      errors.push('Title must be 200 characters or less');
+  try {
+    // Check if body exists
+    if (!body || typeof body !== 'object') {
+      errors.push('Request body is missing or invalid');
+      return { isValid: false, errors };
     }
-  }
 
-  // Validate targetAudience (required, 1-100 chars)
-  if (!body.targetAudience || typeof body.targetAudience !== 'string') {
-    errors.push('Target audience is required and must be a string');
-  } else {
-    const audience = body.targetAudience.trim();
-    if (audience.length === 0) {
-      errors.push('Target audience cannot be empty');
-    } else if (audience.length > 100) {
-      errors.push('Target audience must be 100 characters or less');
-    }
-  }
-
-  // Validate goal (required, 1-50 chars)
-  if (!body.goal || typeof body.goal !== 'string') {
-    errors.push('Goal is required and must be a string');
-  } else {
-    const goal = body.goal.trim();
-    if (goal.length === 0) {
-      errors.push('Goal cannot be empty');
-    } else if (goal.length > 50) {
-      errors.push('Goal must be 50 characters or less');
-    }
-  }
-
-  // Validate primaryKeyword (required, 1-50 chars)
-  if (!body.primaryKeyword || typeof body.primaryKeyword !== 'string') {
-    errors.push('Primary keyword is required and must be a string');
-  } else {
-    const keyword = body.primaryKeyword.trim();
-    if (keyword.length === 0) {
-      errors.push('Primary keyword cannot be empty');
-    } else if (keyword.length > 50) {
-      errors.push('Primary keyword must be 50 characters or less');
-    }
-  }
-
-  // Validate secondaryKeywords (optional array, max 10 items)
-  if (body.secondaryKeywords !== undefined) {
-    if (!Array.isArray(body.secondaryKeywords)) {
-      errors.push('Secondary keywords must be an array');
-    } else if (body.secondaryKeywords.length > 10) {
-      errors.push('Secondary keywords cannot exceed 10 items');
+    // Validate title (required, 1-200 chars)
+    if (!body.title || typeof body.title !== 'string') {
+      errors.push('Title is required and must be a string');
     } else {
-      // Validate each keyword
-      body.secondaryKeywords.forEach((keyword: any, index: number) => {
-        if (typeof keyword !== 'string' || keyword.trim().length === 0) {
-          errors.push(`Secondary keyword at index ${index} must be a non-empty string`);
-        } else if (keyword.trim().length > 50) {
-          errors.push(`Secondary keyword at index ${index} must be 50 characters or less`);
-        }
-      });
+      const title = body.title.trim();
+      if (title.length === 0) {
+        errors.push('Title cannot be empty');
+      } else if (title.length > 200) {
+        errors.push('Title must be 200 characters or less');
+      }
     }
-  }
 
-  // Validate other array fields
-  if (body.outline !== undefined && !Array.isArray(body.outline)) {
-    errors.push('Outline must be an array');
-  }
+    // Validate targetAudience (required, 1-100 chars)
+    if (!body.targetAudience || typeof body.targetAudience !== 'string') {
+      errors.push('Target audience is required and must be a string');
+    } else {
+      const audience = body.targetAudience.trim();
+      if (audience.length === 0) {
+        errors.push('Target audience cannot be empty');
+      } else if (audience.length > 100) {
+        errors.push('Target audience must be 100 characters or less');
+      }
+    }
 
-  if (body.references !== undefined && !Array.isArray(body.references)) {
-    errors.push('References must be an array');
-  }
+    // Validate goal (required, 1-50 chars)
+    if (!body.goal || typeof body.goal !== 'string') {
+      errors.push('Goal is required and must be a string');
+    } else {
+      const goal = body.goal.trim();
+      if (goal.length === 0) {
+        errors.push('Goal cannot be empty');
+      } else if (goal.length > 50) {
+        errors.push('Goal must be 50 characters or less');
+      }
+    }
 
-  if (body.specialNotes !== undefined && !Array.isArray(body.specialNotes)) {
-    errors.push('Special notes must be an array');
-  }
+    // Validate primaryKeyword (required, 1-50 chars)
+    if (!body.primaryKeyword || typeof body.primaryKeyword !== 'string') {
+      errors.push('Primary keyword is required and must be a string');
+    } else {
+      const keyword = body.primaryKeyword.trim();
+      if (keyword.length === 0) {
+        errors.push('Primary keyword cannot be empty');
+      } else if (keyword.length > 50) {
+        errors.push('Primary keyword must be 50 characters or less');
+      }
+    }
 
-  // Validate featuredImage (optional string)
-  if (body.featuredImage !== undefined && typeof body.featuredImage !== 'string') {
-    errors.push('Featured image must be a string');
+    // Validate secondaryKeywords (optional array, max 10 items)
+    if (body.secondaryKeywords !== undefined) {
+      if (!Array.isArray(body.secondaryKeywords)) {
+        errors.push('Secondary keywords must be an array');
+      } else if (body.secondaryKeywords.length > 10) {
+        errors.push('Secondary keywords cannot exceed 10 items');
+      } else {
+        body.secondaryKeywords.forEach((keyword: any, index: number) => {
+          if (typeof keyword !== 'string' || keyword.trim().length === 0) {
+            errors.push(`Secondary keyword at index ${index} must be a non-empty string`);
+          } else if (keyword.trim().length > 50) {
+            errors.push(`Secondary keyword at index ${index} must be 50 characters or less`);
+          }
+        });
+      }
+    }
+
+    // Validate other fields
+    if (body.outline !== undefined && !Array.isArray(body.outline)) {
+      errors.push('Outline must be an array');
+    }
+    if (body.references !== undefined && !Array.isArray(body.references)) {
+      errors.push('References must be an array');
+    }
+    if (body.specialNotes !== undefined && !Array.isArray(body.specialNotes)) {
+      errors.push('Special notes must be an array');
+    }
+    if (body.featuredImage !== undefined && typeof body.featuredImage !== 'string') {
+      errors.push('Featured image must be a string');
+    }
+
+  } catch (validationError) {
+    console.error('Validation error:', validationError);
+    errors.push('Request validation failed');
   }
 
   return { isValid: errors.length === 0, errors };
 }
 
-// Generate blog content using AI (simplified version for production)
+// Serverless-compatible content generation
 async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content: string; description: string; tags: string[] }> {
   try {
     console.log('🤖 Attempting to generate content with OpenAI...');
@@ -282,7 +283,7 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
   }
 }
 
-// Helper function to send consistent JSON responses
+// Serverless-compatible response helper
 function sendJsonResponse(
   res: VercelResponse, 
   statusCode: number, 
@@ -291,56 +292,68 @@ function sendJsonResponse(
   data?: any, 
   errors?: string[]
 ): void {
-  const response: SaveToBlogResponse = {
-    success,
-    message,
-    data,
-    errors,
-    timestamp: new Date().toISOString(),
-    requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  };
+  try {
+    const response: SaveToBlogResponse = {
+      success,
+      message,
+      data,
+      errors,
+      timestamp: new Date().toISOString(),
+      requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
 
-  console.log(`📤 Sending ${statusCode} response:`, JSON.stringify(response, null, 2));
-  res.status(statusCode).json(response);
+    console.log(`📤 Sending ${statusCode} response:`, JSON.stringify(response, null, 2));
+    res.status(statusCode).json(response);
+  } catch (responseError) {
+    console.error('❌ Error sending response:', responseError);
+    // Fallback response if JSON serialization fails
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      timestamp: new Date().toISOString(),
+      requestId: `req_${Date.now()}`
+    });
+  }
 }
 
+// Main serverless function handler
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
   const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-  console.log(`🚀 Save to Blog API called [${requestId}]`);
-  console.log('📋 Request method:', req.method);
-  console.log('�� Request headers:', JSON.stringify(req.headers, null, 2));
-  
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log('✅ CORS preflight request handled');
-    res.status(200).end();
-    return;
-  }
-
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    console.log('❌ Invalid method:', req.method);
-    sendJsonResponse(
-      res, 
-      405, 
-      false, 
-      'Method not allowed. Only POST requests are supported.'
-    );
-    return;
-  }
-
   try {
-    // Log full incoming request body before processing
-    console.log('📝 Full request body:', JSON.stringify(req.body, null, 2));
+    console.log(`🚀 Save to Blog API called [${requestId}]`);
+    console.log('📋 Request method:', req.method);
+    console.log('📋 Request headers:', JSON.stringify(req.headers, null, 2));
+    
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      console.log('✅ CORS preflight request handled');
+      res.status(200).end();
+      return;
+    }
+
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+      console.log('❌ Invalid method:', req.method);
+      sendJsonResponse(
+        res, 
+        405, 
+        false, 
+        'Method not allowed. Only POST requests are supported.'
+      );
+      return;
+    }
+
+    // Log incoming payload
+    console.log('📝 Incoming payload:', JSON.stringify(req.body, null, 2));
     console.log('📝 Request body type:', typeof req.body);
     console.log('📝 Request body keys:', req.body ? Object.keys(req.body) : 'No body');
 
