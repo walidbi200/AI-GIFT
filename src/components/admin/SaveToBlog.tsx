@@ -21,6 +21,13 @@ interface SaveToBlogResponse {
   warnings: string[];
   wordpressPublished: boolean;
   message: string;
+  data?: {
+    postId?: string;
+    slug?: string;
+    wordCount?: number;
+    filePath?: string;
+  };
+  errors?: string[];
 }
 
 const SaveToBlog: React.FC = () => {
@@ -111,6 +118,8 @@ const SaveToBlog: React.FC = () => {
     setResult(null);
 
     try {
+      console.log('🚀 Sending blog save request:', JSON.stringify(brief, null, 2));
+
       const response = await fetch('/api/save-to-blog', {
         method: 'POST',
         headers: {
@@ -119,18 +128,101 @@ const SaveToBlog: React.FC = () => {
         body: JSON.stringify(brief),
       });
 
-      const result: SaveToBlogResponse = await response.json();
+      console.log('📊 Response status:', response.status);
+      console.log('📊 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        // Try to get error details from response
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        let errorDetails = '';
+        
+        try {
+          const errorText = await response.text();
+          console.log('📋 Error response text:', errorText);
+          
+          // Try to parse as JSON for structured error
+          try {
+            const errorJson = JSON.parse(errorText);
+            if (errorJson.message) {
+              errorMessage = errorJson.message;
+            }
+            if (errorJson.errors && Array.isArray(errorJson.errors)) {
+              errorDetails = errorJson.errors.join(', ');
+            }
+          } catch (parseError) {
+            // If not JSON, use the raw text
+            errorMessage = errorText || errorMessage;
+          }
+        } catch (textError) {
+          console.error('❌ Could not read error response:', textError);
+        }
+
+        const fullErrorMessage = errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage;
+        throw new Error(fullErrorMessage);
+      }
+
+      // Parse successful response
+      let result: SaveToBlogResponse;
+      try {
+        const responseText = await response.text();
+        console.log('📋 Response text:', responseText);
+        
+        result = JSON.parse(responseText);
+        console.log('✅ Response parsed as JSON:', result);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response as JSON:', parseError);
+        throw new Error('Invalid response format from server');
+      }
+
+      // Validate response structure
+      if (!result || typeof result.success !== 'boolean') {
+        throw new Error('Invalid response structure from server');
+      }
 
       if (result.success) {
-        showToastMessage('Blog post generated and saved successfully!', 'success');
-        setResult(result);
+        const successMessage = result.data?.filePath 
+          ? `Blog post saved successfully! View at: ${result.data.filePath}`
+          : 'Blog post generated and saved successfully!';
+        showToastMessage(successMessage, 'success');
+        
+        // Log success details
+        console.log('🎉 Blog save successful:', {
+          postId: result.data?.postId,
+          slug: result.data?.slug,
+          wordCount: result.data?.wordCount,
+          filePath: result.data?.filePath
+        });
       } else {
-        showToastMessage(result.message || 'Blog generation failed', 'error');
-        setResult(result);
+        const errorMessage = result.message || 'Blog generation failed';
+        const errorDetails = result.errors && Array.isArray(result.errors) 
+          ? `: ${result.errors.join(', ')}`
+          : '';
+        showToastMessage(`${errorMessage}${errorDetails}`, 'error');
       }
+
+      setResult(result);
     } catch (error) {
-      console.error('Error saving to blog:', error);
-      showToastMessage('Failed to generate blog post. Please try again.', 'error');
+      console.error('❌ Error saving to blog:', error);
+      
+      // Provide user-friendly error messages
+      let userMessage = 'Failed to generate blog post. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('HTTP error! status: 400')) {
+          userMessage = 'Invalid blog data. Please check your input and try again.';
+        } else if (error.message.includes('HTTP error! status: 500')) {
+          userMessage = 'Server error occurred. Please try again later.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          userMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('Invalid response format')) {
+          userMessage = 'Server returned invalid response. Please try again.';
+        } else {
+          userMessage = error.message;
+        }
+      }
+      
+      showToastMessage(userMessage, 'error');
     } finally {
       setIsLoading(false);
     }

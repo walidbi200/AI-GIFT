@@ -16,10 +16,16 @@ interface SaveToBlogRequest {
 
 interface SaveToBlogResponse {
   success: boolean;
-  filePath?: string;
-  warnings: string[];
-  wordpressPublished: boolean;
   message: string;
+  data?: {
+    filePath?: string;
+    postId?: string;
+    slug?: string;
+    wordCount?: number;
+  };
+  errors?: string[];
+  timestamp: string;
+  requestId: string;
 }
 
 interface BlogPost {
@@ -54,7 +60,7 @@ function calculateReadingTime(content: string): number {
   return Math.ceil(wordCount / wordsPerMinute);
 }
 
-// Enhanced validation function
+// Enhanced validation function with specific requirements
 function validateBlogRequest(body: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   
@@ -64,38 +70,88 @@ function validateBlogRequest(body: any): { isValid: boolean; errors: string[] } 
     return { isValid: false, errors };
   }
 
-  // Check required fields
-  if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
-    errors.push('Title is required and must be a non-empty string');
+  // Validate title (required, 1-200 chars)
+  if (!body.title || typeof body.title !== 'string') {
+    errors.push('Title is required and must be a string');
+  } else {
+    const title = body.title.trim();
+    if (title.length === 0) {
+      errors.push('Title cannot be empty');
+    } else if (title.length > 200) {
+      errors.push('Title must be 200 characters or less');
+    }
   }
 
-  if (!body.targetAudience || typeof body.targetAudience !== 'string' || body.targetAudience.trim().length === 0) {
-    errors.push('Target audience is required and must be a non-empty string');
+  // Validate targetAudience (required, 1-100 chars)
+  if (!body.targetAudience || typeof body.targetAudience !== 'string') {
+    errors.push('Target audience is required and must be a string');
+  } else {
+    const audience = body.targetAudience.trim();
+    if (audience.length === 0) {
+      errors.push('Target audience cannot be empty');
+    } else if (audience.length > 100) {
+      errors.push('Target audience must be 100 characters or less');
+    }
   }
 
-  if (!body.goal || typeof body.goal !== 'string' || body.goal.trim().length === 0) {
-    errors.push('Goal is required and must be a non-empty string');
+  // Validate goal (required, 1-50 chars)
+  if (!body.goal || typeof body.goal !== 'string') {
+    errors.push('Goal is required and must be a string');
+  } else {
+    const goal = body.goal.trim();
+    if (goal.length === 0) {
+      errors.push('Goal cannot be empty');
+    } else if (goal.length > 50) {
+      errors.push('Goal must be 50 characters or less');
+    }
   }
 
-  if (!body.primaryKeyword || typeof body.primaryKeyword !== 'string' || body.primaryKeyword.trim().length === 0) {
-    errors.push('Primary keyword is required and must be a non-empty string');
+  // Validate primaryKeyword (required, 1-50 chars)
+  if (!body.primaryKeyword || typeof body.primaryKeyword !== 'string') {
+    errors.push('Primary keyword is required and must be a string');
+  } else {
+    const keyword = body.primaryKeyword.trim();
+    if (keyword.length === 0) {
+      errors.push('Primary keyword cannot be empty');
+    } else if (keyword.length > 50) {
+      errors.push('Primary keyword must be 50 characters or less');
+    }
   }
 
-  // Validate array fields
-  if (body.secondaryKeywords && !Array.isArray(body.secondaryKeywords)) {
-    errors.push('Secondary keywords must be an array');
+  // Validate secondaryKeywords (optional array, max 10 items)
+  if (body.secondaryKeywords !== undefined) {
+    if (!Array.isArray(body.secondaryKeywords)) {
+      errors.push('Secondary keywords must be an array');
+    } else if (body.secondaryKeywords.length > 10) {
+      errors.push('Secondary keywords cannot exceed 10 items');
+    } else {
+      // Validate each keyword
+      body.secondaryKeywords.forEach((keyword: any, index: number) => {
+        if (typeof keyword !== 'string' || keyword.trim().length === 0) {
+          errors.push(`Secondary keyword at index ${index} must be a non-empty string`);
+        } else if (keyword.trim().length > 50) {
+          errors.push(`Secondary keyword at index ${index} must be 50 characters or less`);
+        }
+      });
+    }
   }
 
-  if (body.outline && !Array.isArray(body.outline)) {
+  // Validate other array fields
+  if (body.outline !== undefined && !Array.isArray(body.outline)) {
     errors.push('Outline must be an array');
   }
 
-  if (body.references && !Array.isArray(body.references)) {
+  if (body.references !== undefined && !Array.isArray(body.references)) {
     errors.push('References must be an array');
   }
 
-  if (body.specialNotes && !Array.isArray(body.specialNotes)) {
+  if (body.specialNotes !== undefined && !Array.isArray(body.specialNotes)) {
     errors.push('Special notes must be an array');
+  }
+
+  // Validate featuredImage (optional string)
+  if (body.featuredImage !== undefined && typeof body.featuredImage !== 'string') {
+    errors.push('Featured image must be a string');
   }
 
   return { isValid: errors.length === 0, errors };
@@ -226,13 +282,37 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
   }
 }
 
+// Helper function to send consistent JSON responses
+function sendJsonResponse(
+  res: VercelResponse, 
+  statusCode: number, 
+  success: boolean, 
+  message: string, 
+  data?: any, 
+  errors?: string[]
+): void {
+  const response: SaveToBlogResponse = {
+    success,
+    message,
+    data,
+    errors,
+    timestamp: new Date().toISOString(),
+    requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  };
+
+  console.log(`📤 Sending ${statusCode} response:`, JSON.stringify(response, null, 2));
+  res.status(statusCode).json(response);
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  console.log('🚀 Save to Blog API called');
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  console.log(`🚀 Save to Blog API called [${requestId}]`);
   console.log('📋 Request method:', req.method);
-  console.log('📋 Request headers:', JSON.stringify(req.headers, null, 2));
+  console.log('�� Request headers:', JSON.stringify(req.headers, null, 2));
   
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -249,10 +329,12 @@ export default async function handler(
   // Only allow POST requests
   if (req.method !== 'POST') {
     console.log('❌ Invalid method:', req.method);
-    res.status(405).json({
-      success: false,
-      message: 'Method not allowed. Only POST requests are supported.'
-    });
+    sendJsonResponse(
+      res, 
+      405, 
+      false, 
+      'Method not allowed. Only POST requests are supported.'
+    );
     return;
   }
 
@@ -266,11 +348,14 @@ export default async function handler(
     const validation = validateBlogRequest(req.body);
     if (!validation.isValid) {
       console.log('❌ Validation failed:', validation.errors);
-      res.status(400).json({
-        success: false,
-        message: 'Invalid request data',
-        errors: validation.errors
-      });
+      sendJsonResponse(
+        res, 
+        400, 
+        false, 
+        'Invalid request data', 
+        undefined, 
+        validation.errors
+      );
       return;
     }
 
@@ -354,18 +439,19 @@ export default async function handler(
       wordCount: newPost.wordCount
     });
 
-    // Prepare response
-    const response: SaveToBlogResponse = {
-      success: true,
-      filePath: `/blog/${newPost.slug}`,
-      warnings: [],
-      wordpressPublished: false,
-      message: 'Blog post generated and saved successfully!'
-    };
-
     // Send success response
-    console.log('📤 Sending success response:', JSON.stringify(response, null, 2));
-    res.status(200).json(response);
+    sendJsonResponse(
+      res, 
+      200, 
+      true, 
+      'Blog post generated and saved successfully!',
+      {
+        filePath: `/blog/${newPost.slug}`,
+        postId: newPost.id,
+        slug: newPost.slug,
+        wordCount: newPost.wordCount
+      }
+    );
 
   } catch (error) {
     console.error('❌ Save to Blog API error:', error);
@@ -375,16 +461,13 @@ export default async function handler(
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
-    const errorResponse = {
-      success: false,
-      warnings: [errorMessage],
-      wordpressPublished: false,
-      message: `Blog generation failed: ${errorMessage}`,
-      timestamp: new Date().toISOString(),
-      requestId: `req_${Date.now()}`
-    };
-
-    console.log('📤 Sending error response:', JSON.stringify(errorResponse, null, 2));
-    res.status(500).json(errorResponse);
+    sendJsonResponse(
+      res, 
+      500, 
+      false, 
+      `Blog generation failed: ${errorMessage}`,
+      undefined,
+      [errorMessage]
+    );
   }
 }
