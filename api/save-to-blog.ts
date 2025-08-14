@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { addBlogPost } from './blog-posts';
 
 interface SaveToBlogRequest {
   title: string;
@@ -34,9 +35,6 @@ interface BlogPost {
   wordCount: number;
   featuredImage?: string;
 }
-
-// Import the shared blog posts storage
-import { addBlogPost } from './blog-posts';
 
 // Generate slug from title
 function generateSlug(title: string): string {
