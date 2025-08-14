@@ -121,6 +121,11 @@ function calculateReadingTime(content: string): number {
   return Math.ceil(wordCount / wordsPerMinute);
 }
 
+// Function to add a new blog post (used by save-to-blog API)
+export function addBlogPost(post: BlogPost): void {
+  blogPosts.unshift(post);
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
