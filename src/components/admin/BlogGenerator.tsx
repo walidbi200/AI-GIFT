@@ -166,12 +166,43 @@ const BlogGenerator: React.FC = () => {
     }
   };
 
-  const saveToBlog = () => {
+  const saveToBlog = async () => {
     if (!generatedBlog) return;
 
-    // In a real implementation, this would save to your content management system
-    // For now, we'll just show a success message
-    showToastMessage('Blog saved successfully! (This would save to your CMS in production)', 'success');
+    try {
+      // Create a brief from the generated blog
+      const brief = {
+        title: formData.topic,
+        targetAudience: 'General audience',
+        goal: 'inform',
+        primaryKeyword: formData.primaryKeyword || formData.topic.split(' ')[0],
+        secondaryKeywords: formData.secondaryKeywords || [],
+        toneOfVoice: formData.tone,
+        outline: [],
+        references: [],
+        specialNotes: [],
+        featuredImage: ''
+      };
+
+      const response = await fetch('/api/save-to-blog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(brief),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToastMessage('Blog post generated and saved successfully! ✅', 'success');
+      } else {
+        showToastMessage(result.message || 'Blog generation failed', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving to blog:', error);
+      showToastMessage('Failed to save blog post. Please try again.', 'error');
+    }
   };
 
   const getSeoScoreColor = (score: number) => {

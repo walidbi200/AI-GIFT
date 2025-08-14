@@ -108,7 +108,7 @@ const hardcodedPosts: Post[] = [
   }
 ];
 
-// Function to load saved blog posts from the file system
+// Function to load saved blog posts from the file system (development only)
 function loadSavedBlogPosts(): Post[] {
   // Return empty array if running in browser (client-side)
   if (typeof window !== 'undefined') {
@@ -177,6 +177,22 @@ function loadSavedBlogPosts(): Post[] {
   }
 }
 
+// Function to load posts from API (production)
+async function loadPostsFromAPI(): Promise<Post[]> {
+  try {
+    const response = await fetch('/api/blog-posts');
+    if (response.ok) {
+      const posts = await response.json();
+      return posts;
+    }
+    console.warn('⚠️ Failed to load posts from API, falling back to hardcoded posts');
+    return [];
+  } catch (error) {
+    console.error('❌ Error loading posts from API:', error);
+    return [];
+  }
+}
+
 // Combine hardcoded and saved posts
 function combineAllPosts(): Post[] {
   const savedPosts = loadSavedBlogPosts();
@@ -184,17 +200,27 @@ function combineAllPosts(): Post[] {
 }
 
 // Export functions
-export function getAllPosts(): Post[] {
+export async function getAllPosts(): Promise<Post[]> {
+  // Try to load from API first (production), fall back to file system (development)
+  try {
+    const apiPosts = await loadPostsFromAPI();
+    if (apiPosts.length > 0) {
+      return apiPosts;
+    }
+  } catch (error) {
+    console.log('📝 Using file system posts (development mode)');
+  }
+  
   return combineAllPosts();
 }
 
-export function getPostBySlug(slug: string): Post | undefined {
-  const posts = getAllPosts();
+export async function getPostBySlug(slug: string): Promise<Post | undefined> {
+  const posts = await getAllPosts();
   return posts.find(post => post.slug === slug);
 }
 
-export function getPostsByTag(tag: string): Post[] {
-  const posts = getAllPosts();
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  const posts = await getAllPosts();
   return posts.filter(post => 
     post.tags.some(postTag => 
       postTag.toLowerCase().includes(tag.toLowerCase())
@@ -202,8 +228,8 @@ export function getPostsByTag(tag: string): Post[] {
   );
 }
 
-export function searchPosts(query: string): Post[] {
-  const posts = getAllPosts();
+export async function searchPosts(query: string): Promise<Post[]> {
+  const posts = await getAllPosts();
   const lowercaseQuery = query.toLowerCase();
   
   return posts.filter(post => 
