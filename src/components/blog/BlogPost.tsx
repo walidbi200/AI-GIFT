@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getPostBySlug, getAllPosts, formatPostDate, formatReadTime, Post } from '../../utils/blogContent';
+
+// Mock functions since blogContent utility was removed
+const formatPostDate = (date: string) => new Date(date).toLocaleDateString();
+const formatReadTime = (minutes: number) => `${minutes} min read`;
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  tags: string[];
+  publishedAt: string;
+  status: 'published' | 'draft';
+  readingTime: number;
+  wordCount: number;
+  featuredImage?: string;
+}
+
+const getPostBySlug = async (slug: string): Promise<Post | null> => {
+  // Mock implementation - return null since we removed the blog storage
+  return null;
+};
+
+const getAllPosts = async (): Promise<Post[]> => {
+  // Mock implementation - return empty array since we removed the blog storage
+  return [];
+};
 
 const BlogPost: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

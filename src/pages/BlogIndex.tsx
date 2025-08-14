@@ -1,14 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import BlogList from '../components/blog/BlogList';
-import { getAllPosts, getPostsByTag, searchPosts } from '../utils/blogContent';
-import type { Post } from '../types/post';
+
+// Mock functions since blogContent utility was removed
+const getAllPosts = async () => {
+  // Mock implementation - return empty array since we removed the blog storage
+  return [];
+};
+
+const getPostsByTag = async (tag: string) => {
+  // Mock implementation - return empty array since we removed the blog storage
+  return [];
+};
+
+const searchPosts = async (query: string) => {
+  // Mock implementation - return empty array since we removed the blog storage
+  return [];
+};
 
 const POSTS_PER_PAGE = 9;
 
 const BlogIndex: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [searchParams, setSearchParams] = useState<URLSearchParams>(new URLSearchParams());
+  const [posts, setPosts] = useState<any[]>([]); // Changed type to any[] as Post type is removed
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

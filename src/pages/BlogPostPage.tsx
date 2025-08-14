@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import BlogPost from '../components/blog/BlogPost';
-import { getAllPosts, getPostBySlug } from '../utils/blogContent';
 import type { Post } from '../types/post';
+
+// Mock functions since blogContent utility was removed
+const getAllPosts = async () => {
+  // Mock implementation - return empty array since we removed the blog storage
+  return [];
+};
+
+const getPostBySlug = async (slug: string) => {
+  // Mock implementation - return null since we removed the blog storage
+  return null;
+};
 
 const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -27,7 +37,7 @@ const BlogPostPage: React.FC = () => {
       setError(null);
 
       // Load the specific post
-      const loadedPost = getPostBySlug(slug!);
+      const loadedPost = await getPostBySlug(slug!);
       
       if (!loadedPost) {
         setError('Post not found');
@@ -38,7 +48,7 @@ const BlogPostPage: React.FC = () => {
       setPost(loadedPost);
 
       // Load related posts (posts with similar tags, excluding current post)
-      const allPosts = getAllPosts();
+      const allPosts = await getAllPosts();
       const related = allPosts
         .filter(p => p.slug !== slug && p.tags.some(tag => loadedPost.tags.includes(tag)))
         .sort((a, b) => {

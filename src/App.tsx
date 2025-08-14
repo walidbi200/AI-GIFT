@@ -2,26 +2,24 @@
 // This is the final, complete, and unabridged version of your application's
 // main component, with all features and correct routing.
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
-
-// --- Your Actual Component Imports ---
-import GiftCard from "./components/GiftCard";
-import GiftCardSkeleton from "./components/GiftCardSkeleton";
-import LoadingSpinner from "./components/LoadingSpinner";
-import Toast from "./components/Toast";
-import FeedbackModal from "./components/FeedbackModal";
-import RecentSearches from "./components/RecentSearches";
-import Button from "./components/Button";
-import GiftBoxLoader from "./components/GiftBoxLoader";
-import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import ThemeToggle from "./components/ThemeToggle";
-import GiftLoadingScreen from './components/GiftLoadingScreen';
-import NotFound from "./pages/NotFound";
+import React, { Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import HomePage from './pages/HomePage';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import BlogIndex from './pages/BlogIndex';
+import BlogPostPage from './pages/BlogPostPage';
+import Login from './pages/Login';
+import AdminSimple from './pages/AdminSimple';
+import BlogGenerator from './components/admin/BlogGenerator';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import NotFound from './pages/NotFound';
+import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
+import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import("./pages/About"));
@@ -32,7 +30,6 @@ const Login = React.lazy(() => import("./pages/Login"));
 const AdminDashboard = React.lazy(() => import("./components/admin/AdminDashboard"));
 const AdminSimple = React.lazy(() => import("./pages/AdminSimple"));
 const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
-const SaveToBlog = React.lazy(() => import("./components/admin/SaveToBlog"));
 const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
 const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
 
@@ -573,14 +570,6 @@ function App() {
                       element={
                         <SimpleProtectedRoute>
                           <BlogGenerator />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/save-to-blog" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <SaveToBlog />
                         </SimpleProtectedRoute>
                       } 
                     />

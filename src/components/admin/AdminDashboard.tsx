@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';
-import { getAllPosts } from '../../utils/blogContent';
 import { BlogEditor } from './BlogEditor';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { SEODashboard } from './SEODashboard';
-import SaveToBlog from './SaveToBlog';
+import BlogList from './BlogList';
+import BlogGenerator from './BlogGenerator';
+import BlogErrorBoundary from '../BlogErrorBoundary';
 import { useSession, signOut } from '../../hooks/useNextAuth';
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
@@ -58,19 +59,16 @@ const AdminDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      // Load blog posts
-      const posts = getAllPosts();
-      
-      // Calculate blog stats (mock data for now)
+      // Mock blog stats since we removed the blog content utilities
       const stats: BlogStats = {
-        totalPosts: posts.length,
-        totalViews: posts.reduce((sum, _post) => sum + (Math.floor(Math.random() * 1000) + 100), 0),
-        averageReadingTime: Math.round(posts.reduce((sum, post) => sum + post.readTime, 0) / posts.length),
-        topPerformingPosts: posts.slice(0, 5).map(post => ({
-          title: post.title,
-          views: Math.floor(Math.random() * 1000) + 100,
-          readingTime: post.readTime
-        })).sort((a, b) => b.views - a.views)
+        totalPosts: 5,
+        totalViews: 1250,
+        averageReadingTime: 4,
+        topPerformingPosts: [
+          { title: 'Sample Blog Post 1', views: 450, readingTime: 5 },
+          { title: 'Sample Blog Post 2', views: 320, readingTime: 3 },
+          { title: 'Sample Blog Post 3', views: 280, readingTime: 4 }
+        ]
       };
 
       // Mock AI stats
@@ -109,9 +107,9 @@ const AdminDashboard: React.FC = () => {
     { id: 'blog-editor', label: 'Blog Editor', icon: '✏️' },
     { id: 'bulk-generator', label: 'Bulk Generator', icon: '📦' },
     { id: 'ai-generator', label: 'AI Generator', icon: '🤖' },
-    { id: 'save-to-blog', label: 'Save to Blog', icon: '💾' },
     { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'seo', label: 'SEO Monitor', icon: '🔍' }
+    { id: 'seo', label: 'SEO Monitor', icon: '🔍' },
+    { id: 'blog-list', label: 'Blog List', icon: '📋' }
   ];
 
   const renderOverview = () => (
@@ -251,17 +249,18 @@ const AdminDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {getAllPosts().map((post, index) => (
-                <tr key={index} className="hover:bg-gray-50">
+              {/* Mock data for content management */}
+              {[1, 2, 3].map((i) => (
+                <tr key={i} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                    <div className="text-sm text-gray-500">{post.description}</div>
+                    <div className="text-sm font-medium text-gray-900">Sample Post {i}</div>
+                    <div className="text-sm text-gray-500">Description for Sample Post {i}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(post.date).toLocaleDateString()}
+                    {new Date().toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {post.readTime} min
+                    5 min
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
@@ -278,73 +277,6 @@ const AdminDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAIGenerator = () => (
-    <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-blue-900 mb-2">AI Blog Generation Tools</h2>
-        <p className="text-blue-700 mb-4">
-          Create high-quality, SEO-optimized blog posts using our AI-powered content generators.
-        </p>
-        <div className="flex gap-4">
-          <Link
-            to="/admin/blog-generator"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <span className="mr-2">🤖</span>
-            Quick Blog Generator
-          </Link>
-          <Link
-            to="/admin/save-to-blog"
-            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            <span className="mr-2">💾</span>
-            Save to Blog
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Generation</h3>
-          <div className="space-y-3">
-            <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200">
-              🎄 Christmas Gift Guide
-            </Button>
-            <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200">
-              💝 Valentine's Day Ideas
-            </Button>
-            <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200">
-              🎓 Graduation Gifts
-            </Button>
-            <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200">
-              🏠 Housewarming Gifts
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Generation History</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium text-gray-900">Tech Gifts for Professionals</p>
-                <p className="text-sm text-gray-600">2 hours ago</p>
-              </div>
-              <span className="text-sm font-medium text-green-600">87% Quality</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium text-gray-900">Budget-Friendly Gift Ideas</p>
-                <p className="text-sm text-gray-600">1 day ago</p>
-              </div>
-              <span className="text-sm font-medium text-green-600">92% Quality</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -448,24 +380,27 @@ const AdminDashboard: React.FC = () => {
   );
 
   const renderBlogEditor = () => (
-    <BlogEditor
-      onSave={(post) => {
-        showToastMessage('Blog post saved successfully!', 'success');
-        console.log('Saved post:', post);
-      }}
-      onPublish={(post) => {
-        showToastMessage('Blog post published successfully!', 'success');
-        console.log('Published post:', post);
-      }}
-    />
+    <BlogErrorBoundary>
+      <BlogEditor />
+    </BlogErrorBoundary>
   );
 
   const renderBulkGenerator = () => (
-    <BulkContentGenerator />
+    <BlogErrorBoundary>
+      <BulkContentGenerator />
+    </BlogErrorBoundary>
   );
 
-  const renderSaveToBlog = () => (
-    <SaveToBlog />
+  const renderAIGenerator = () => (
+    <BlogErrorBoundary>
+      <BlogGenerator />
+    </BlogErrorBoundary>
+  );
+
+  const renderBlogList = () => (
+    <BlogErrorBoundary>
+      <BlogList />
+    </BlogErrorBoundary>
   );
 
   const renderContent = () => {
@@ -480,12 +415,12 @@ const AdminDashboard: React.FC = () => {
         return renderBulkGenerator();
       case 'ai-generator':
         return renderAIGenerator();
-      case 'save-to-blog':
-        return renderSaveToBlog();
       case 'analytics':
         return renderAnalytics();
       case 'seo':
         return renderSEOMonitor();
+      case 'blog-list':
+        return renderBlogList();
       default:
         return renderOverview();
     }

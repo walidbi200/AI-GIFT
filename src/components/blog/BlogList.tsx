@@ -1,7 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPostDate, formatReadTime } from '../../utils/blogContent';
-import type { Post } from '../../types/post';
+
+// Mock functions since blogContent utility was removed
+const formatPostDate = (date: string) => new Date(date).toLocaleDateString();
+const formatReadTime = (minutes: number) => `${minutes} min read`;
 
 interface BlogListProps {
   posts: Post[];
