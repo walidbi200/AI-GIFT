@@ -54,9 +54,64 @@ function calculateReadingTime(content: string): number {
   return Math.ceil(wordCount / wordsPerMinute);
 }
 
+// Enhanced validation function
+function validateBlogRequest(body: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Check if body exists
+  if (!body) {
+    errors.push('Request body is missing');
+    return { isValid: false, errors };
+  }
+
+  // Check required fields
+  if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
+    errors.push('Title is required and must be a non-empty string');
+  }
+
+  if (!body.targetAudience || typeof body.targetAudience !== 'string' || body.targetAudience.trim().length === 0) {
+    errors.push('Target audience is required and must be a non-empty string');
+  }
+
+  if (!body.goal || typeof body.goal !== 'string' || body.goal.trim().length === 0) {
+    errors.push('Goal is required and must be a non-empty string');
+  }
+
+  if (!body.primaryKeyword || typeof body.primaryKeyword !== 'string' || body.primaryKeyword.trim().length === 0) {
+    errors.push('Primary keyword is required and must be a non-empty string');
+  }
+
+  // Validate array fields
+  if (body.secondaryKeywords && !Array.isArray(body.secondaryKeywords)) {
+    errors.push('Secondary keywords must be an array');
+  }
+
+  if (body.outline && !Array.isArray(body.outline)) {
+    errors.push('Outline must be an array');
+  }
+
+  if (body.references && !Array.isArray(body.references)) {
+    errors.push('References must be an array');
+  }
+
+  if (body.specialNotes && !Array.isArray(body.specialNotes)) {
+    errors.push('Special notes must be an array');
+  }
+
+  return { isValid: errors.length === 0, errors };
+}
+
 // Generate blog content using AI (simplified version for production)
 async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content: string; description: string; tags: string[] }> {
   try {
+    console.log('🤖 Attempting to generate content with OpenAI...');
+    
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('⚠️ OpenAI API key not found, using fallback content');
+      throw new Error('OpenAI API key not configured');
+    }
+
     // Use OpenAI API to generate content
     const openai = require('openai');
     const client = new openai.OpenAI({
@@ -81,6 +136,7 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
     
     Format the response as HTML with proper headings (h2, h3) and paragraphs.`;
 
+    console.log('📝 Sending request to OpenAI...');
     const completion = await client.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -98,6 +154,7 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
     });
 
     const content = completion.choices[0]?.message?.content || '';
+    console.log('✅ OpenAI content generated successfully');
     
     // Generate description from content
     const description = content
@@ -115,7 +172,10 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
 
     return { content, description, tags };
   } catch (error) {
-    console.error('Error generating content with OpenAI:', error);
+    console.error('❌ Error generating content with OpenAI:', error);
+    console.error('📋 Error stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
+    
+    console.log('🔄 Using fallback content generation...');
     
     // Fallback content if OpenAI fails
     const fallbackContent = `
@@ -157,6 +217,7 @@ async function generateBlogContent(brief: SaveToBlogRequest): Promise<{ content:
 
     const fallbackTags = [brief.primaryKeyword, ...brief.secondaryKeywords, 'gift ideas', 'lifestyle'].filter(Boolean);
 
+    console.log('✅ Fallback content generated successfully');
     return { 
       content: fallbackContent, 
       description: fallbackDescription, 
@@ -169,6 +230,10 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
+  console.log('🚀 Save to Blog API called');
+  console.log('📋 Request method:', req.method);
+  console.log('📋 Request headers:', JSON.stringify(req.headers, null, 2));
+  
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -176,12 +241,14 @@ export default async function handler(
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ CORS preflight request handled');
     res.status(200).end();
     return;
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
+    console.log('❌ Invalid method:', req.method);
     res.status(405).json({
       success: false,
       message: 'Method not allowed. Only POST requests are supported.'
@@ -190,10 +257,25 @@ export default async function handler(
   }
 
   try {
-    console.log('🚀 Save to Blog API called');
-    console.log('📝 Request body:', JSON.stringify(req.body, null, 2));
+    // Log full incoming request body before processing
+    console.log('📝 Full request body:', JSON.stringify(req.body, null, 2));
+    console.log('📝 Request body type:', typeof req.body);
+    console.log('📝 Request body keys:', req.body ? Object.keys(req.body) : 'No body');
 
     // Validate request body
+    const validation = validateBlogRequest(req.body);
+    if (!validation.isValid) {
+      console.log('❌ Validation failed:', validation.errors);
+      res.status(400).json({
+        success: false,
+        message: 'Invalid request data',
+        errors: validation.errors
+      });
+      return;
+    }
+
+    console.log('✅ Request validation passed');
+
     const {
       title,
       targetAudience,
@@ -207,16 +289,7 @@ export default async function handler(
       featuredImage
     }: SaveToBlogRequest = req.body;
 
-    // Validate required fields
-    if (!title || !targetAudience || !goal || !primaryKeyword) {
-      res.status(400).json({
-        success: false,
-        message: 'Missing required fields: title, targetAudience, goal, primaryKeyword'
-      });
-      return;
-    }
-
-    // Create editorial brief
+    // Create editorial brief with additional validation
     const brief = {
       title: title.trim(),
       targetAudience: targetAudience.trim(),
@@ -230,11 +303,16 @@ export default async function handler(
       featuredImage: featuredImage?.trim()
     };
 
-    console.log('📋 Editorial brief created:', brief);
+    console.log('📋 Editorial brief created:', JSON.stringify(brief, null, 2));
 
     // Generate blog content
     console.log('🔄 Starting blog generation process...');
     const { content, description, tags } = await generateBlogContent(brief);
+
+    console.log('✅ Content generation completed');
+    console.log('📝 Content length:', content.length);
+    console.log('📝 Description:', description);
+    console.log('📝 Tags:', tags);
 
     // Create blog post
     const newPost: BlogPost = {
@@ -251,10 +329,25 @@ export default async function handler(
       featuredImage: brief.featuredImage
     };
 
-    // Add to shared blog posts storage
-    addBlogPost(newPost);
+    console.log('📝 Blog post object created:', JSON.stringify({
+      id: newPost.id,
+      title: newPost.title,
+      slug: newPost.slug,
+      wordCount: newPost.wordCount,
+      readingTime: newPost.readingTime
+    }, null, 2));
 
-    console.log('✅ Blog generation completed:', {
+    // Add to shared blog posts storage
+    console.log('💾 Saving blog post to storage...');
+    try {
+      addBlogPost(newPost);
+      console.log('✅ Blog post saved to storage successfully');
+    } catch (storageError) {
+      console.error('❌ Error saving to storage:', storageError);
+      throw new Error(`Failed to save blog post to storage: ${storageError instanceof Error ? storageError.message : 'Unknown storage error'}`);
+    }
+
+    console.log('✅ Blog generation completed successfully:', {
       success: true,
       postId: newPost.id,
       slug: newPost.slug,
@@ -271,18 +364,27 @@ export default async function handler(
     };
 
     // Send success response
+    console.log('📤 Sending success response:', JSON.stringify(response, null, 2));
     res.status(200).json(response);
 
   } catch (error) {
     console.error('❌ Save to Blog API error:', error);
+    console.error('📋 Error stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
+    console.error('📋 Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('📋 Error message:', error instanceof Error ? error.message : 'Unknown error');
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
-    res.status(500).json({
+    const errorResponse = {
       success: false,
       warnings: [errorMessage],
       wordpressPublished: false,
-      message: `Blog generation failed: ${errorMessage}`
-    });
+      message: `Blog generation failed: ${errorMessage}`,
+      timestamp: new Date().toISOString(),
+      requestId: `req_${Date.now()}`
+    };
+
+    console.log('📤 Sending error response:', JSON.stringify(errorResponse, null, 2));
+    res.status(500).json(errorResponse);
   }
 }
