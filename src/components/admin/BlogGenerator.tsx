@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';
+import { ImageManager } from '../../lib/imageUtils';
+import type { UnsplashImage } from '../../lib/imageUtils';
 
 // Mock function since aiPrompts utility was removed
 const generateTopicSuggestions = async (keyword: string): Promise<string[]> => {
@@ -78,6 +80,13 @@ const BlogGenerator: React.FC = () => {
   const [seoAnalysis, setSeoAnalysis] = useState<any>(null);
   const [contentQuality, setContentQuality] = useState<any>(null);
   const [_optimizedContent, setOptimizedContent] = useState<string>('');
+  const [savedBlogs, setSavedBlogs] = useState<any[]>([]);
+  const [showImageSelector, setShowImageSelector] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<UnsplashImage[]>([]);
+  const [featuredImage, setFeaturedImage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const imageManager = new ImageManager();
 
   const lengthOptions = [
     { value: 'short', label: 'Short (800-1200 words)' },
@@ -100,42 +109,80 @@ const BlogGenerator: React.FC = () => {
     setShowToast(true);
   };
 
-  // Add this function to your BlogGenerator component
-  const saveBlogToJSON = async (blogData: GeneratedBlog) => {
+  // New save function for the file-based system
+  const saveBlogToSystem = async (blogData: any) => {
     try {
-      console.log('💾 Saving blog to JSON file...');
+      setIsSaving(true);
+      console.log('💾 Saving blog to system...');
       
-      // Create unique filename based on title and timestamp
-      const timestamp = Date.now();
-      const slug = blogData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      
-      const filename = `${slug}-${timestamp}.json`;
-      
-      // Prepare blog object
-      const blogPost = {
-        id: timestamp,
-        slug: slug,
-        filename: filename,
-        createdAt: new Date().toISOString(),
+      // Add featured image to blog data
+      const blogWithImages = {
         ...blogData,
-        status: 'published'
+        featuredImage: featuredImage,
+        galleryImages: selectedImages.map(img => img.url)
       };
       
-      // For now, just store in localStorage as fallback
-      // (You can implement file download or other methods later)
-      const existingBlogs = JSON.parse(localStorage.getItem('savedBlogs') || '[]');
-      existingBlogs.unshift(blogPost);
-      localStorage.setItem('savedBlogs', JSON.stringify(existingBlogs));
+      // Save via API route
+      const response = await fetch('/api/blog/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(blogWithImages)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${errorText}`);
+      }
+
+      const result = await response.json();
       
-      console.log('✅ Blog saved successfully:', filename);
-      return { success: true, filename, id: timestamp };
-      
+      if (result.success) {
+        console.log('✅ Blog saved successfully:', result.blog?.filename);
+        
+        // Update local state
+        setSavedBlogs(prev => [result.blog, ...prev]);
+        
+        // Reset form
+        setFeaturedImage('');
+        setSelectedImages([]);
+        
+        showToastMessage(`Blog published successfully! View at: /blog/${result.blog?.slug}`, 'success');
+        return { success: true, blog: result.blog };
+      } else {
+        throw new Error(result.error || 'Failed to save blog');
+      }
     } catch (error) {
       console.error('❌ Error saving blog:', error);
+      showToastMessage(`Error saving blog: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Image selection functionality
+  const handleImageSearch = async (query?: string) => {
+    try {
+      const searchQuery = query || generatedBlog?.primaryKeyword || 'blog';
+      const result = await imageManager.getUnsplashImages(searchQuery);
+      
+      if (result.success && result.images) {
+        setSelectedImages(result.images);
+        setShowImageSelector(true);
+      } else {
+        // Fallback to default images if Unsplash fails
+        const defaultImages = imageManager.getDefaultBlogImages();
+        setSelectedImages(defaultImages);
+        setShowImageSelector(true);
+      }
+    } catch (error) {
+      console.error('Error searching images:', error);
+      // Use default images as fallback
+      const defaultImages = imageManager.getDefaultBlogImages();
+      setSelectedImages(defaultImages);
+      setShowImageSelector(true);
     }
   };
 
@@ -146,10 +193,10 @@ const BlogGenerator: React.FC = () => {
       return;
     }
     
-    const result = await saveBlogToJSON(generatedBlog);
+    const result = await saveBlogToSystem(generatedBlog);
     
     if (result.success) {
-      showToastMessage(`Blog saved successfully! ID: ${result.id}`, 'success');
+      showToastMessage(`Blog saved successfully! ID: ${result.blog?.id}`, 'success');
     } else {
       showToastMessage(`Error saving blog: ${result.error}`, 'error');
     }
@@ -512,6 +559,90 @@ const BlogGenerator: React.FC = () => {
                       className="flex-1 py-2 bg-green-600 text-white hover:bg-green-700"
                     >
                       Save to Blog
+                    </Button>
+                  </div>
+
+                  {/* Image Selection Section */}
+                  <div className="mt-6 border-t pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">Featured Image</h3>
+                      <Button
+                        onClick={() => handleImageSearch()}
+                        className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
+                        disabled={!generatedBlog}
+                      >
+                        🖼️ Find Images
+                      </Button>
+                    </div>
+                    
+                    {featuredImage && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Image:</h4>
+                        <div className="featured-image-preview">
+                          <img 
+                            src={featuredImage} 
+                            alt="Featured" 
+                            className="w-64 h-40 object-cover rounded-lg border"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {showImageSelector && (
+                      <div className="image-selector bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-gray-900">Select Featured Image:</h4>
+                          <Button
+                            onClick={() => setShowImageSelector(false)}
+                            className="text-sm text-gray-500 hover:text-gray-700"
+                          >
+                            ✕ Close
+                          </Button>
+                        </div>
+                        <div className="image-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {selectedImages.map((img) => (
+                            <div
+                              key={img.id}
+                              className="relative cursor-pointer group"
+                              onClick={() => {
+                                setFeaturedImage(img.url);
+                                setShowImageSelector(false);
+                              }}
+                            >
+                              <img
+                                src={img.thumb}
+                                alt={img.alt}
+                                className="w-full h-24 object-cover rounded-lg border-2 border-transparent group-hover:border-blue-500 transition-colors"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
+                                <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
+                                  Select
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 text-xs text-gray-500">
+                          Images provided by Unsplash. Click to select featured image.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="flex-1 py-2 bg-gray-600 text-white hover:bg-gray-700"
+                    >
+                      {showPreview ? 'Hide' : 'Show'} Full Preview
+                    </Button>
+                    <Button
+                      onClick={handleSaveBlog}
+                      className="flex-1 py-2 bg-green-600 text-white hover:bg-green-700"
+                      disabled={isSaving}
+                    >
+                      {isSaving ? 'Publishing...' : '🚀 Publish Blog'}
                     </Button>
                   </div>
                 </div>
