@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';
-import { ImageManager } from '../../lib/imageUtils';
-import type { UnsplashImage } from '../../lib/imageUtils';
 
 // Mock function since aiPrompts utility was removed
 const generateTopicSuggestions = async (keyword: string): Promise<string[]> => {
@@ -81,12 +79,7 @@ const BlogGenerator: React.FC = () => {
   const [contentQuality, setContentQuality] = useState<any>(null);
   const [_optimizedContent, setOptimizedContent] = useState<string>('');
   const [savedBlogs, setSavedBlogs] = useState<any[]>([]);
-  const [showImageSelector, setShowImageSelector] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<UnsplashImage[]>([]);
-  const [featuredImage, setFeaturedImage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
-  const imageManager = new ImageManager();
 
   const lengthOptions = [
     { value: 'short', label: 'Short (800-1200 words)' },
@@ -115,20 +108,13 @@ const BlogGenerator: React.FC = () => {
       setIsSaving(true);
       console.log('💾 Saving blog to system...');
       
-      // Add featured image to blog data
-      const blogWithImages = {
-        ...blogData,
-        featuredImage: featuredImage,
-        galleryImages: selectedImages.map(img => img.url)
-      };
-      
       // Save via API route
       const response = await fetch('/api/blog/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(blogWithImages)
+        body: JSON.stringify(blogData)
       });
 
       if (!response.ok) {
@@ -145,8 +131,6 @@ const BlogGenerator: React.FC = () => {
         setSavedBlogs(prev => [result.blog, ...prev]);
         
         // Reset form
-        setFeaturedImage('');
-        setSelectedImages([]);
         
         showToastMessage(`Blog published successfully! View at: /blog/${result.blog?.slug}`, 'success');
         return { success: true, blog: result.blog };
@@ -159,30 +143,6 @@ const BlogGenerator: React.FC = () => {
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Image selection functionality
-  const handleImageSearch = async (query?: string) => {
-    try {
-      const searchQuery = query || generatedBlog?.primaryKeyword || 'blog';
-      const result = await imageManager.getUnsplashImages(searchQuery);
-      
-      if (result.success && result.images) {
-        setSelectedImages(result.images);
-        setShowImageSelector(true);
-      } else {
-        // Fallback to default images if Unsplash fails
-        const defaultImages = imageManager.getDefaultBlogImages();
-        setSelectedImages(defaultImages);
-        setShowImageSelector(true);
-      }
-    } catch (error) {
-      console.error('Error searching images:', error);
-      // Use default images as fallback
-      const defaultImages = imageManager.getDefaultBlogImages();
-      setSelectedImages(defaultImages);
-      setShowImageSelector(true);
     }
   };
 
@@ -560,73 +520,6 @@ const BlogGenerator: React.FC = () => {
                     >
                       Save to Blog
                     </Button>
-                  </div>
-
-                  {/* Image Selection Section */}
-                  <div className="mt-6 border-t pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">Featured Image</h3>
-                      <Button
-                        onClick={() => handleImageSearch()}
-                        className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700"
-                        disabled={!generatedBlog}
-                      >
-                        🖼️ Find Images
-                      </Button>
-                    </div>
-                    
-                    {featuredImage && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Image:</h4>
-                        <div className="featured-image-preview">
-                          <img 
-                            src={featuredImage} 
-                            alt="Featured" 
-                            className="w-64 h-40 object-cover rounded-lg border"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {showImageSelector && (
-                      <div className="image-selector bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium text-gray-900">Select Featured Image:</h4>
-                          <Button
-                            onClick={() => setShowImageSelector(false)}
-                            className="text-sm text-gray-500 hover:text-gray-700"
-                          >
-                            ✕ Close
-                          </Button>
-                        </div>
-                        <div className="image-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                          {selectedImages.map((img) => (
-                            <div
-                              key={img.id}
-                              className="relative cursor-pointer group"
-                              onClick={() => {
-                                setFeaturedImage(img.url);
-                                setShowImageSelector(false);
-                              }}
-                            >
-                              <img
-                                src={img.thumb}
-                                alt={img.alt}
-                                className="w-full h-24 object-cover rounded-lg border-2 border-transparent group-hover:border-blue-500 transition-colors"
-                              />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
-                                <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
-                                  Select
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 text-xs text-gray-500">
-                          Images provided by Unsplash. Click to select featured image.
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Enhanced Action Buttons */}
