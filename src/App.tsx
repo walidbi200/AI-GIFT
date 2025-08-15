@@ -19,6 +19,7 @@ import BlogGenerator from './components/admin/BlogGenerator';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
+import RecentSearches from './components/RecentSearches';
 import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 // --- Lazy-loaded Components ---
