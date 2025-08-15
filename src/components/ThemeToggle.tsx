@@ -1,7 +1,7 @@
 // FILE: src/components/ThemeToggle.tsx
 // This is the final, corrected version with proper z-index and theme-aware colors.
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
