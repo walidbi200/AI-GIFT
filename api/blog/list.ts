@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { BlogManager } from '../../src/lib/blogUtils';
+import { BlogManager } from '../../src/lib/blogUtils.ts';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

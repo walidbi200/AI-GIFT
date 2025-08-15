@@ -1,5 +1,5 @@
 import React from 'react';
-import type { BlogPost as BlogPostType } from '../../lib/blogUtils';
+import type { BlogPost as BlogPostType } from '../../lib/blogUtils.ts';
 
 interface BlogPostProps {
   blog: BlogPostType;
