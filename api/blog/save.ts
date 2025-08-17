@@ -1,14 +1,19 @@
 import { sql } from '@vercel/postgres';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// This function generates a URL-friendly slug from a title
+// This function now generates a UNIQUE URL-friendly slug from a title
 function generateSlug(title: string): string {
-    return title
+    const baseSlug = title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
         .replace(/\s+/g, '-')         // Replace spaces with hyphens
         .replace(/-+/g, '-')          // Replace multiple hyphens with a single one
         .trim();                      // Trim leading/trailing hyphens
+
+    // Append a short unique identifier based on the current time
+    const uniqueId = Date.now().toString(36).slice(-6);
+
+    return `${baseSlug}-${uniqueId}`;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -37,8 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const slug = generateSlug(title);
 
-        // The key change is adding "RETURNING *" to the end of the SQL query.
-        // This tells Postgres to return the entire row that was just inserted.
+        // The RETURNING * clause tells Postgres to return the entire row that was just inserted.
         const { rows } = await sql`
             INSERT INTO posts (
                 slug, title, description, content, tags, primary_keyword,
