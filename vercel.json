@@ -33,7 +33,7 @@
     }
   ],
   "functions": {
-    "api/generate-blog.ts": {
+    "api/blog/generate-blog.ts": {
       "maxDuration": 60
     }
   }
