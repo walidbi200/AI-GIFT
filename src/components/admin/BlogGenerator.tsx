@@ -173,8 +173,8 @@ const BlogGenerator: React.FC = () => {
 
 
 
-  const generateTopicSuggestion = () => {
-    const suggestions = generateTopicSuggestions('general', 'gift-guide');
+  const generateTopicSuggestion = async () => {
+    const suggestions = await generateTopicSuggestions('gifts');
     const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
     handleInputChange('topic', randomSuggestion);
   };
