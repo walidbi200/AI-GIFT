@@ -1,100 +1,70 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Helper function to generate SEO-friendly slug
+// This function generates a URL-friendly slug from a title
 function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-// Helper function to calculate word count
-function calculateWordCount(content: string): number {
-  return content.trim().split(/\s+/).length;
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-')         // Replace spaces with hyphens
+        .replace(/-+/g, '-')          // Replace multiple hyphens with a single one
+        .trim();                      // Trim leading/trailing hyphens
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    console.log('📝 Saving blog via API...');
-    console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
-    
-    const {
-      title,
-      description,
-      content,
-      tags = [],
-      primaryKeyword,
-      secondaryKeywords,
-      targetAudience,
-      toneOfVoice,
-      featuredImage
-    } = req.body;
-
-    // Validate required fields
-    if (!title || !content) {
-      return res.status(400).json({
-        success: false,
-        error: 'Title and content are required'
-      });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, error: 'Method not allowed' });
     }
 
-    const slug = generateSlug(title);
-    const wordCount = calculateWordCount(content);
+    try {
+        console.log('📝 Saving blog via API...');
+        const {
+            title,
+            description,
+            content,
+            tags,
+            primaryKeyword,
+            wordCount,
+            targetAudience,
+            toneOfVoice,
+            featuredImage
+        } = req.body;
 
-    // Insert the blog post into the database
-    const result = await sql`
-      INSERT INTO posts (
-        slug, title, description, content, tags, 
-        primary_keyword, word_count, target_audience, 
-        tone_of_voice, featured_image, status
-      ) VALUES (
-        ${slug}, ${title}, ${description}, ${content}, ${tags}, 
-        ${primaryKeyword}, ${wordCount}, ${targetAudience}, 
-        ${toneOfVoice}, ${featuredImage}, 'published'
-      ) RETURNING *
-    `;
+        // Basic validation
+        if (!title || !content) {
+            return res.status(400).json({ success: false, error: 'Title and content are required.' });
+        }
 
-    const savedPost = result.rows[0];
+        const slug = generateSlug(title);
 
-    console.log('✅ Blog saved successfully:', savedPost.id);
-    
-    return res.status(200).json({
-      success: true,
-      blog: {
-        id: savedPost.id,
-        slug: savedPost.slug,
-        title: savedPost.title,
-        description: savedPost.description,
-        content: savedPost.content,
-        tags: savedPost.tags,
-        primaryKeyword: savedPost.primary_keyword,
-        wordCount: savedPost.word_count,
-        status: savedPost.status,
-        createdAt: savedPost.created_at,
-        updatedAt: savedPost.updated_at
-      }
-    });
+        // The key change is adding "RETURNING *" to the end of the SQL query.
+        // This tells Postgres to return the entire row that was just inserted.
+        const { rows } = await sql`
+            INSERT INTO posts (
+                slug, title, description, content, tags, primary_keyword,
+                word_count, status, target_audience, tone_of_voice, featured_image
+            )
+            VALUES (
+                ${slug}, ${title}, ${description}, ${content}, ${tags}, ${primaryKeyword},
+                ${wordCount}, 'published', ${targetAudience}, ${toneOfVoice}, ${featuredImage}
+            )
+            RETURNING *;
+        `;
 
-  } catch (error) {
-    console.error('🔥 API Error:', error);
-    
-    // Handle unique constraint violation (duplicate slug)
-    if (error instanceof Error && error.message.includes('duplicate key')) {
-      return res.status(409).json({
-        success: false,
-        error: 'A blog post with this title already exists'
-      });
+        // The newly created blog post is now in rows[0]
+        const newPost = rows[0];
+
+        console.log('✅ Blog saved successfully to DB with ID:', newPost.id);
+
+        // We now return the complete blog object, including the new ID
+        return res.status(200).json({ success: true, blog: newPost });
+
+    } catch (error) {
+        console.error('🔥 API Error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
-
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
 }
