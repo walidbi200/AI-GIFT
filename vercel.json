@@ -31,5 +31,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/generate-blog.ts": {
+      "maxDuration": 60
+    }
+  }
 }
