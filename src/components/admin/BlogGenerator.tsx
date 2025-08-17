@@ -91,7 +91,7 @@ const BlogGenerator: React.FC = () => {
     setGeneratedBlog(null);
 
     try {
-      const response = await fetch('/api/generate-blog', {
+      const response = await fetch('/api/blog/generate-blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
