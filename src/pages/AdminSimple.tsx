@@ -1,6 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
+
+interface BlogStats {
+  totalPosts: number;
+  monthlyPosts: number;
+  weeklyPosts: number;
+}
 
 const AdminSimple: React.FC = () => {
+  const [blogStats, setBlogStats] = useState<BlogStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  
+  const { uniqueVisitors, isLoading: isAnalyticsLoading } = useGoogleAnalytics();
+
+  // Fetch blog statistics from the API
+  const fetchBlogStats = async () => {
+    try {
+      setIsLoadingStats(true);
+      setStatsError(null);
+      
+      const response = await fetch('/api/blog/stats');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setBlogStats(data.stats);
+      } else {
+        throw new Error(data.error || 'Failed to fetch blog stats');
+      }
+    } catch (error) {
+      console.error('Error fetching blog stats:', error);
+      setStatsError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
+  // Load blog stats on component mount
+  useEffect(() => {
+    fetchBlogStats();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('nextauth.session-token');
     localStorage.removeItem('adminToken');
@@ -150,23 +195,47 @@ const AdminSimple: React.FC = () => {
 
           {/* Stats Overview */}
           <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Stats</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Quick Stats</h3>
+              <button
+                onClick={fetchBlogStats}
+                disabled={isLoadingStats}
+                className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              >
+                {isLoadingStats ? 'Refreshing...' : '🔄 Refresh'}
+              </button>
+            </div>
+            
+            {statsError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                Error loading stats: {statsError}
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">5</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {isLoadingStats ? '...' : blogStats?.totalPosts || 0}
+                </div>
                 <div className="text-sm text-gray-500">Blog Posts</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">1,234</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {isAnalyticsLoading ? '...' : uniqueVisitors.toLocaleString()}
+                </div>
                 <div className="text-sm text-gray-500">Monthly Visitors</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">15</div>
-                <div className="text-sm text-gray-500">AI Generations</div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {isLoadingStats ? '...' : blogStats?.monthlyPosts || 0}
+                </div>
+                <div className="text-sm text-gray-500">This Month</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">89%</div>
-                <div className="text-sm text-gray-500">SEO Score</div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {isLoadingStats ? '...' : blogStats?.weeklyPosts || 0}
+                </div>
+                <div className="text-sm text-gray-500">This Week</div>
               </div>
             </div>
           </div>
@@ -197,11 +266,10 @@ const AdminSimple: React.FC = () => {
                 onClick={() => window.open('https://console.cloud.google.com', '_blank')}
                 className="w-full text-left px-4 py-3 bg-gray-50 rounded hover:bg-gray-100"
               >
-                📊 Google Search Console
+                📊 Google Analytics
               </button>
             </div>
           </div>
-
         </div>
       </main>
     </div>
