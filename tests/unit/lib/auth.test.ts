@@ -1,241 +1,260 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { 
-  generateToken, 
-  verifyToken, 
-  extractTokenFromHeader, 
-  authenticateRequest,
-  hasRole,
-  generateSecureToken
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  generateToken,
+  verifyToken,
+  hashPassword,
+  verifyPassword,
+  extractTokenFromHeader,
+  generateNonce,
+  hasPermission,
+  type User,
+  type TokenPayload
 } from '../../../lib/auth';
 
-// Mock environment variables
-vi.mock('process.env', () => ({
-  JWT_SECRET: 'test-jwt-secret',
-  JWT_EXPIRES_IN: '1h'
-}));
-
 describe('Authentication Functions', () => {
+  let testUser: User;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    testUser = {
+      id: 'user123',
+      email: 'test@example.com',
+      role: 'user',
+      createdAt: new Date('2024-01-01T00:00:00Z')
+    };
   });
 
   describe('generateToken', () => {
     it('should generate a valid JWT token', () => {
-      const userId = 'user123';
-      const email = 'test@example.com';
-      const role = 'user';
-
-      const token = generateToken(userId, email, role);
-
+      const token = generateToken(testUser);
+      
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
       expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
     });
 
-    it('should generate token with minimal data', () => {
-      const userId = 'user123';
-      const token = generateToken(userId);
-
-      expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
+    it('should generate different tokens for different users', () => {
+      const user1 = { ...testUser, id: 'user1' };
+      const user2 = { ...testUser, id: 'user2' };
+      
+      const token1 = generateToken(user1);
+      const token2 = generateToken(user2);
+      
+      expect(token1).not.toBe(token2);
     });
 
-    it('should generate different tokens for different users', () => {
-      const token1 = generateToken('user1');
-      const token2 = generateToken('user2');
-
-      expect(token1).not.toBe(token2);
+    it('should include user information in token', () => {
+      const token = generateToken(testUser);
+      const decoded = verifyToken(token);
+      
+      expect(decoded).not.toBeNull();
+      if (decoded) {
+        expect(decoded.userId).toBe(testUser.id);
+        expect(decoded.email).toBe(testUser.email);
+        expect(decoded.role).toBe(testUser.role);
+      }
     });
   });
 
   describe('verifyToken', () => {
     it('should verify a valid token', () => {
-      const userId = 'user123';
-      const email = 'test@example.com';
-      const role = 'user';
-
-      const token = generateToken(userId, email, role);
+      const token = generateToken(testUser);
       const decoded = verifyToken(token);
-
-      expect(decoded).toBeDefined();
-      expect(decoded?.userId).toBe(userId);
-      expect(decoded?.email).toBe(email);
-      expect(decoded?.role).toBe(role);
+      
+      expect(decoded).not.toBeNull();
+      if (decoded) {
+        expect(decoded.userId).toBe(testUser.id);
+        expect(decoded.email).toBe(testUser.email);
+        expect(decoded.role).toBe(testUser.role);
+        expect(decoded.iat).toBeDefined();
+        expect(decoded.exp).toBeDefined();
+      }
     });
 
-    it('should return null for invalid token', () => {
+    it('should reject invalid token', () => {
       const invalidToken = 'invalid.token.here';
       const decoded = verifyToken(invalidToken);
-
+      
       expect(decoded).toBeNull();
     });
 
-    it('should return null for malformed token', () => {
+    it('should reject malformed token', () => {
       const malformedToken = 'not-a-jwt-token';
       const decoded = verifyToken(malformedToken);
-
+      
       expect(decoded).toBeNull();
     });
 
-    it('should return null for empty token', () => {
+    it('should reject empty token', () => {
       const decoded = verifyToken('');
-
+      
       expect(decoded).toBeNull();
+    });
+  });
+
+  describe('hashPassword', () => {
+    it('should hash a password', async () => {
+      const password = 'testPassword123';
+      const hashedPassword = await hashPassword(password);
+      
+      expect(hashedPassword).toBeDefined();
+      expect(typeof hashedPassword).toBe('string');
+      expect(hashedPassword).not.toBe(password);
+      expect(hashedPassword.length).toBeGreaterThan(password.length);
+    });
+
+    it('should generate different hashes for the same password', async () => {
+      const password = 'testPassword123';
+      const hash1 = await hashPassword(password);
+      const hash2 = await hashPassword(password);
+      
+      expect(hash1).not.toBe(hash2);
+    });
+
+    it('should handle empty password', async () => {
+      const hashedPassword = await hashPassword('');
+      
+      expect(hashedPassword).toBeDefined();
+      expect(typeof hashedPassword).toBe('string');
+    });
+  });
+
+  describe('verifyPassword', () => {
+    it('should verify correct password', async () => {
+      const password = 'testPassword123';
+      const hashedPassword = await hashPassword(password);
+      
+      const isValid = await verifyPassword(password, hashedPassword);
+      expect(isValid).toBe(true);
+    });
+
+    it('should reject incorrect password', async () => {
+      const password = 'testPassword123';
+      const wrongPassword = 'wrongPassword123';
+      const hashedPassword = await hashPassword(password);
+      
+      const isValid = await verifyPassword(wrongPassword, hashedPassword);
+      expect(isValid).toBe(false);
+    });
+
+    it('should handle empty password', async () => {
+      const hashedPassword = await hashPassword('');
+      
+      const isValid = await verifyPassword('', hashedPassword);
+      expect(isValid).toBe(true);
     });
   });
 
   describe('extractTokenFromHeader', () => {
     it('should extract token from valid Authorization header', () => {
-      const authHeader = 'Bearer valid.jwt.token';
+      const authHeader = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature';
       const token = extractTokenFromHeader(authHeader);
-
-      expect(token).toBe('valid.jwt.token');
+      
+      expect(token).toBe('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature');
     });
 
     it('should return null for missing Authorization header', () => {
       const token = extractTokenFromHeader(null);
-
-      expect(token).toBeNull();
-    });
-
-    it('should return null for invalid Authorization header format', () => {
-      const authHeader = 'InvalidFormat valid.jwt.token';
-      const token = extractTokenFromHeader(authHeader);
-
-      expect(token).toBeNull();
-    });
-
-    it('should return null for Authorization header without token', () => {
-      const authHeader = 'Bearer';
-      const token = extractTokenFromHeader(authHeader);
-
+      
       expect(token).toBeNull();
     });
 
     it('should return null for empty Authorization header', () => {
-      const authHeader = '';
-      const token = extractTokenFromHeader(authHeader);
+      const token = extractTokenFromHeader('');
+      
+      expect(token).toBeNull();
+    });
 
+    it('should return null for malformed Authorization header', () => {
+      const token = extractTokenFromHeader('InvalidHeader');
+      
+      expect(token).toBeNull();
+    });
+
+    it('should return null for Authorization header without Bearer', () => {
+      const token = extractTokenFromHeader('Basic dXNlcjpwYXNz');
+      
       expect(token).toBeNull();
     });
   });
 
-  describe('authenticateRequest', () => {
-    it('should authenticate request with valid token', async () => {
-      const userId = 'user123';
-      const token = generateToken(userId);
-      const request = new Request('http://localhost/api/test', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const result = await authenticateRequest(request);
-
-      expect(result.authenticated).toBe(true);
-      expect(result.user?.userId).toBe(userId);
-      expect(result.error).toBeUndefined();
+  describe('generateNonce', () => {
+    it('should generate a nonce', () => {
+      const nonce = generateNonce();
+      
+      expect(nonce).toBeDefined();
+      expect(typeof nonce).toBe('string');
+      expect(nonce.length).toBeGreaterThan(0);
     });
 
-    it('should reject request without Authorization header', async () => {
-      const request = new Request('http://localhost/api/test');
-
-      const result = await authenticateRequest(request);
-
-      expect(result.authenticated).toBe(false);
-      expect(result.error).toBe('No authorization token provided');
-      expect(result.user).toBeUndefined();
+    it('should generate different nonces', () => {
+      const nonce1 = generateNonce();
+      const nonce2 = generateNonce();
+      
+      expect(nonce1).not.toBe(nonce2);
     });
 
-    it('should reject request with invalid token', async () => {
-      const request = new Request('http://localhost/api/test', {
-        headers: {
-          'Authorization': 'Bearer invalid.token.here'
-        }
-      });
-
-      const result = await authenticateRequest(request);
-
-      expect(result.authenticated).toBe(false);
-      expect(result.error).toBe('Invalid or expired token');
-      expect(result.user).toBeUndefined();
-    });
-
-    it('should reject request with malformed Authorization header', async () => {
-      const request = new Request('http://localhost/api/test', {
-        headers: {
-          'Authorization': 'InvalidFormat token'
-        }
-      });
-
-      const result = await authenticateRequest(request);
-
-      expect(result.authenticated).toBe(false);
-      expect(result.error).toBe('No authorization token provided');
-      expect(result.user).toBeUndefined();
+    it('should generate alphanumeric nonces', () => {
+      const nonce = generateNonce();
+      
+      expect(nonce).toMatch(/^[a-zA-Z0-9]+$/);
     });
   });
 
-  describe('hasRole', () => {
-    it('should return true for user with required role', () => {
-      const user = { userId: 'user123', role: 'admin' };
-      const hasAdminRole = hasRole(user, 'admin');
-
-      expect(hasAdminRole).toBe(true);
+  describe('hasPermission', () => {
+    it('should allow admin to access user resources', () => {
+      const adminUser: User = {
+        ...testUser,
+        role: 'admin'
+      };
+      
+      const hasAccess = hasPermission(adminUser, 'user');
+      expect(hasAccess).toBe(true);
     });
 
-    it('should return true for admin user regardless of required role', () => {
-      const user = { userId: 'user123', role: 'admin' };
-      const hasUserRole = hasRole(user, 'user');
-
-      expect(hasUserRole).toBe(true);
+    it('should allow admin to access admin resources', () => {
+      const adminUser: User = {
+        ...testUser,
+        role: 'admin'
+      };
+      
+      const hasAccess = hasPermission(adminUser, 'admin');
+      expect(hasAccess).toBe(true);
     });
 
-    it('should return false for user without required role', () => {
-      const user = { userId: 'user123', role: 'user' };
-      const hasAdminRole = hasRole(user, 'admin');
-
-      expect(hasAdminRole).toBe(false);
+    it('should allow user to access user resources', () => {
+      const hasAccess = hasPermission(testUser, 'user');
+      expect(hasAccess).toBe(true);
     });
 
-    it('should return false for user without role', () => {
-      const user = { userId: 'user123' };
-      const hasAdminRole = hasRole(user, 'admin');
-
-      expect(hasAdminRole).toBe(false);
+    it('should deny user access to admin resources', () => {
+      const hasAccess = hasPermission(testUser, 'admin');
+      expect(hasAccess).toBe(false);
     });
   });
 
-  describe('generateSecureToken', () => {
-    it('should generate a secure token with default length', () => {
-      const token = generateSecureToken();
-
-      expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
-      expect(token.length).toBe(32);
+  describe('Token Payload Interface', () => {
+    it('should have correct structure', () => {
+      const token = generateToken(testUser);
+      const decoded = verifyToken(token);
+      
+      expect(decoded).toMatchObject({
+        userId: expect.any(String),
+        email: expect.any(String),
+        role: expect.any(String),
+        iat: expect.any(Number),
+        exp: expect.any(Number)
+      });
     });
+  });
 
-    it('should generate a secure token with custom length', () => {
-      const length = 16;
-      const token = generateSecureToken(length);
-
-      expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
-      expect(token.length).toBe(length);
-    });
-
-    it('should generate different tokens on each call', () => {
-      const token1 = generateSecureToken();
-      const token2 = generateSecureToken();
-
-      expect(token1).not.toBe(token2);
-    });
-
-    it('should generate tokens with valid characters', () => {
-      const token = generateSecureToken();
-      const validChars = /^[A-Za-z0-9]+$/;
-
-      expect(validChars.test(token)).toBe(true);
+  describe('User Interface', () => {
+    it('should have correct structure', () => {
+      expect(testUser).toMatchObject({
+        id: expect.any(String),
+        email: expect.any(String),
+        role: expect.stringMatching(/^(user|admin)$/),
+        createdAt: expect.any(Date)
+      });
     });
   });
 });

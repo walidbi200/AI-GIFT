@@ -2,13 +2,8 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock environment variables
-vi.mock('process.env', () => ({
-  NODE_ENV: 'test',
-  JWT_SECRET: 'test-jwt-secret',
-  OPENAI_API_KEY: 'test-openai-key',
-  UPSTASH_REDIS_REST_URL: 'https://test.upstash.io',
-  UPSTASH_REDIS_REST_TOKEN: 'test-token'
-}));
+process.env.NODE_ENV = 'test';
+process.env.VITEST = 'true';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -31,27 +26,15 @@ const sessionStorageMock = {
 };
 global.sessionStorage = sessionStorageMock;
 
-// Mock crypto for JWT generation
-Object.defineProperty(global, 'crypto', {
-  value: {
-    getRandomValues: vi.fn((arr) => {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i] = Math.floor(Math.random() * 256);
-      }
-      return arr;
-    })
-  }
-});
-
-// Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+// Mock IntersectionObserver
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
 
-// Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
@@ -64,8 +47,8 @@ Object.defineProperty(window, 'matchMedia', {
     matches: false,
     media: query,
     onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -73,23 +56,20 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock scrollTo
-Object.defineProperty(window, 'scrollTo', {
-  writable: true,
-  value: vi.fn(),
-});
+window.scrollTo = vi.fn();
 
-// Mock console methods to reduce noise in tests
-const originalConsole = { ...console };
+// Mock console methods in tests
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+
 beforeAll(() => {
-  console.log = vi.fn();
-  console.warn = vi.fn();
   console.error = vi.fn();
+  console.warn = vi.fn();
 });
 
 afterAll(() => {
-  console.log = originalConsole.log;
-  console.warn = originalConsole.warn;
-  console.error = originalConsole.error;
+  console.error = originalConsoleError;
+  console.warn = originalConsoleWarn;
 });
 
 // Clean up after each test
