@@ -1,35 +1,39 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
-// JWT secret should be stored in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
-
-export interface JWTPayload {
-  userId: string;
-  email?: string;
-  role?: string;
-  iat?: number;
-  exp?: number;
+// Types
+export interface User {
+  id: string;
+  email: string;
+  role: 'admin' | 'user';
+  createdAt: Date;
 }
 
 export interface AuthResult {
   authenticated: boolean;
-  user?: JWTPayload;
+  user?: User;
   error?: string;
 }
 
-/**
- * Generate a JWT token for a user
- * @param userId - The user's unique identifier
- * @param email - The user's email address
- * @param role - The user's role (optional)
- * @returns JWT token string
- */
-export function generateToken(userId: string, email?: string, role?: string): string {
-  const payload: JWTPayload = {
-    userId,
-    email,
-    role,
+export interface TokenPayload {
+  userId: string;
+  email: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
+
+// Configuration
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_EXPIRES_IN = '24h';
+const SALT_ROUNDS = 12;
+
+// Token generation
+export function generateToken(user: User): string {
+  const payload: Omit<TokenPayload, 'iat' | 'exp'> = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
   };
 
   return jwt.sign(payload, JWT_SECRET, {
@@ -39,17 +43,13 @@ export function generateToken(userId: string, email?: string, role?: string): st
   });
 }
 
-/**
- * Verify and decode a JWT token
- * @param token - The JWT token to verify
- * @returns Decoded payload or null if invalid
- */
-export function verifyToken(token: string): JWTPayload | null {
+// Token verification
+export function verifyToken(token: string): TokenPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET, {
       issuer: 'smartgiftfinder.xyz',
       audience: 'smartgiftfinder-users',
-    }) as JWTPayload;
+    }) as TokenPayload;
     
     return decoded;
   } catch (error) {
@@ -58,84 +58,33 @@ export function verifyToken(token: string): JWTPayload | null {
   }
 }
 
-/**
- * Extract token from Authorization header
- * @param authHeader - The Authorization header value
- * @returns Token string or null if not found
- */
+// Password hashing
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+// Password verification
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword);
+}
+
+// Extract token from Authorization header
 export function extractTokenFromHeader(authHeader: string | null): string | null {
-  if (!authHeader) return null;
-  
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
   
-  return parts[1];
+  return authHeader.substring(7); // Remove 'Bearer ' prefix
 }
 
-/**
- * Authenticate a request using JWT token
- * @param request - The incoming request
- * @returns Authentication result with user info if successful
- */
-export async function authenticateRequest(request: Request): Promise<AuthResult> {
-  try {
-    const authHeader = request.headers.get('Authorization');
-    const token = extractTokenFromHeader(authHeader);
-    
-    if (!token) {
-      return {
-        authenticated: false,
-        error: 'No authorization token provided'
-      };
-    }
-    
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return {
-        authenticated: false,
-        error: 'Invalid or expired token'
-      };
-    }
-    
-    return {
-      authenticated: true,
-      user: decoded
-    };
-  } catch (error) {
-    console.error('Authentication error:', error);
-    return {
-      authenticated: false,
-      error: 'Authentication failed'
-    };
-  }
+// Generate secure random string for nonces
+export function generateNonce(): string {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-/**
- * Check if user has required role
- * @param user - The authenticated user
- * @param requiredRole - The role required for access
- * @returns True if user has required role
- */
-export function hasRole(user: JWTPayload, requiredRole: string): boolean {
-  return user.role === requiredRole || user.role === 'admin';
+// Validate user permissions
+export function hasPermission(user: User, requiredRole: 'admin' | 'user'): boolean {
+  const roleHierarchy = { user: 1, admin: 2 };
+  return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
 }
 
-/**
- * Generate a secure random token for password reset or email verification
- * @param length - Length of the token (default: 32)
- * @returns Secure random token
- */
-export function generateSecureToken(length: number = 32): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const randomArray = new Uint8Array(length);
-  crypto.getRandomValues(randomArray);
-  
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(randomArray[i] % chars.length);
-  }
-  
-  return result;
-}

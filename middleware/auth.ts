@@ -1,80 +1,83 @@
-import { authenticateRequest, AuthResult, JWTPayload } from '../lib/auth';
-
-export interface AuthenticatedRequest extends Request {
-  user?: JWTPayload;
-}
+import { verifyToken, extractTokenFromHeader, AuthResult, User } from '../lib/auth';
 
 /**
  * Authentication middleware for API routes
- * @param request - The incoming request
- * @returns Authentication result with user info if successful
+ * Extracts JWT from Authorization header, verifies token, and attaches user info
  */
 export async function verifyAuth(request: Request): Promise<AuthResult> {
-  return await authenticateRequest(request);
+  try {
+    const authHeader = request.headers.get('Authorization');
+    const token = extractTokenFromHeader(authHeader);
+    
+    if (!token) {
+      return {
+        authenticated: false,
+        error: 'No authorization token provided'
+      };
+    }
+    
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return {
+        authenticated: false,
+        error: 'Invalid or expired token'
+      };
+    }
+    
+    // Create user object from token payload
+    const user: User = {
+      id: decoded.userId,
+      email: decoded.email,
+      role: decoded.role as 'admin' | 'user',
+      createdAt: new Date(decoded.iat * 1000), // Convert timestamp to Date
+    };
+    
+    return {
+      authenticated: true,
+      user
+    };
+  } catch (error) {
+    console.error('Authentication middleware error:', error);
+    return {
+      authenticated: false,
+      error: 'Authentication failed'
+    };
+  }
 }
 
 /**
- * Middleware that requires authentication
- * @param request - The incoming request
- * @returns Request with user info attached, or throws error if not authenticated
+ * Require admin role middleware
+ * Returns 403 if user is not an admin
  */
-export async function requireAuth(request: Request): Promise<AuthenticatedRequest> {
+export async function requireAdmin(request: Request): Promise<AuthResult> {
   const authResult = await verifyAuth(request);
   
   if (!authResult.authenticated) {
-    throw new Error(authResult.error || 'Authentication required');
+    return authResult;
   }
   
-  // Attach user info to request
-  (request as AuthenticatedRequest).user = authResult.user;
-  return request as AuthenticatedRequest;
-}
-
-/**
- * Middleware that requires specific role
- * @param request - The incoming request
- * @param requiredRole - The role required for access
- * @returns Request with user info attached, or throws error if not authorized
- */
-export async function requireRole(
-  request: Request, 
-  requiredRole: string
-): Promise<AuthenticatedRequest> {
-  const authResult = await verifyAuth(request);
-  
-  if (!authResult.authenticated) {
-    throw new Error(authResult.error || 'Authentication required');
+  if (authResult.user?.role !== 'admin') {
+    return {
+      authenticated: false,
+      error: 'Admin access required'
+    };
   }
   
-  if (!authResult.user) {
-    throw new Error('User information not available');
-  }
-  
-  // Check if user has required role
-  const hasRequiredRole = authResult.user.role === requiredRole || authResult.user.role === 'admin';
-  
-  if (!hasRequiredRole) {
-    throw new Error(`Access denied. Required role: ${requiredRole}`);
-  }
-  
-  // Attach user info to request
-  (request as AuthenticatedRequest).user = authResult.user;
-  return request as AuthenticatedRequest;
+  return authResult;
 }
 
 /**
  * Optional authentication middleware
- * @param request - The incoming request
- * @returns Request with user info attached if authenticated, otherwise original request
+ * Doesn't fail if no token provided, but validates if present
  */
-export async function optionalAuth(request: Request): Promise<AuthenticatedRequest> {
-  const authResult = await verifyAuth(request);
+export async function optionalAuth(request: Request): Promise<AuthResult> {
+  const authHeader = request.headers.get('Authorization');
   
-  if (authResult.authenticated && authResult.user) {
-    (request as AuthenticatedRequest).user = authResult.user;
+  if (!authHeader) {
+    return { authenticated: false };
   }
   
-  return request as AuthenticatedRequest;
+  return verifyAuth(request);
 }
 
 /**

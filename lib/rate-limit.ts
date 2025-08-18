@@ -1,216 +1,214 @@
-import { Redis } from '@upstash/redis';
+// In-memory rate limiting store
+// In production, use Redis or similar for distributed environments
 
-// Initialize Redis client
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || '',
-});
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
 
-export interface RateLimitConfig {
+interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
-  keyPrefix: string;
 }
 
-export interface RateLimitResult {
-  success: boolean;
-  remaining: number;
-  resetTime: number;
-  retryAfter?: number;
-}
+class RateLimiter {
+  private store: Map<string, RateLimitEntry> = new Map();
+  private cleanupInterval: NodeJS.Timeout;
 
-// Rate limit configurations for different endpoint types
-export const rateLimitConfigs = {
-  // AI generation endpoints (expensive operations)
-  aiGeneration: {
-    maxRequests: 10,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: 'ai_gen'
-  },
-  
-  // Authentication endpoints (security sensitive)
-  auth: {
-    maxRequests: 5,
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    keyPrefix: 'auth'
-  },
-  
-  // Blog operations (moderate usage)
-  blog: {
-    maxRequests: 30,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: 'blog'
-  },
-  
-  // General API endpoints
-  general: {
-    maxRequests: 100,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: 'api'
-  },
-  
-  // File uploads (resource intensive)
-  upload: {
-    maxRequests: 10,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: 'upload'
+  constructor() {
+    // Clean up expired entries every 5 minutes
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup();
+    }, 5 * 60 * 1000);
   }
-};
 
-/**
- * Get client identifier (IP address or user ID)
- * @param request - The incoming request
- * @param userId - Optional user ID from authentication
- * @returns Client identifier string
- */
-function getClientIdentifier(request: Request, userId?: string): string {
-  // If user is authenticated, use their ID
-  if (userId) {
-    return `user:${userId}`;
-  }
-  
-  // Otherwise, use IP address
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIp = request.headers.get('x-real-ip');
-  const ip = forwarded?.split(',')[0] || realIp || 'unknown';
-  
-  return `ip:${ip}`;
-}
+  // Rate limit configurations for different endpoints
+  private readonly configs: Record<string, RateLimitConfig> = {
+    // AI generation endpoints - more restrictive
+    'ai-generation': {
+      maxRequests: 10,
+      windowMs: 60 * 1000, // 1 minute
+    },
+    'blog-generation': {
+      maxRequests: 5,
+      windowMs: 60 * 1000, // 1 minute
+    },
+    // Authentication endpoints - very restrictive
+    'login': {
+      maxRequests: 5,
+      windowMs: 15 * 60 * 1000, // 15 minutes
+    },
+    'register': {
+      maxRequests: 3,
+      windowMs: 60 * 60 * 1000, // 1 hour
+    },
+    // General API endpoints
+    'api': {
+      maxRequests: 100,
+      windowMs: 60 * 1000, // 1 minute
+    },
+    // Blog operations
+    'blog-write': {
+      maxRequests: 20,
+      windowMs: 60 * 1000, // 1 minute
+    },
+    // Default fallback
+    'default': {
+      maxRequests: 50,
+      windowMs: 60 * 1000, // 1 minute
+    },
+  };
 
-/**
- * Check rate limit for a specific endpoint type
- * @param request - The incoming request
- * @param config - Rate limit configuration
- * @param userId - Optional user ID from authentication
- * @returns Rate limit result
- */
-export async function checkRateLimit(
-  request: Request,
-  config: RateLimitConfig,
-  userId?: string
-): Promise<RateLimitResult> {
-  try {
-    const clientId = getClientIdentifier(request, userId);
-    const key = `${config.keyPrefix}:${clientId}`;
+  /**
+   * Check if request is within rate limit
+   * @param identifier - Unique identifier (IP, user ID, etc.)
+   * @param endpointType - Type of endpoint for rate limiting
+   * @returns Rate limit result with remaining requests and reset time
+   */
+  checkLimit(identifier: string, endpointType: string = 'default'): {
+    allowed: boolean;
+    remaining: number;
+    resetTime: number;
+    retryAfter: number;
+  } {
+    const config = this.configs[endpointType] || this.configs.default;
+    const key = `${identifier}:${endpointType}`;
     const now = Date.now();
-    const windowStart = now - config.windowMs;
-    
-    // Get current requests in the window
-    const requests = await redis.zrangebyscore(key, windowStart, '+inf');
-    const currentRequests = requests.length;
-    
-    if (currentRequests >= config.maxRequests) {
-      // Rate limit exceeded
-      const oldestRequest = requests[0];
-      const resetTime = parseInt(oldestRequest) + config.windowMs;
-      const retryAfter = Math.ceil((resetTime - now) / 1000);
-      
-      return {
-        success: false,
-        remaining: 0,
-        resetTime,
-        retryAfter
+
+    // Get or create entry
+    let entry = this.store.get(key);
+    if (!entry || now > entry.resetTime) {
+      entry = {
+        count: 0,
+        resetTime: now + config.windowMs,
       };
     }
-    
-    // Add current request to the window
-    await redis.zadd(key, now, now.toString());
-    await redis.expire(key, Math.ceil(config.windowMs / 1000));
-    
-    return {
-      success: true,
-      remaining: config.maxRequests - currentRequests - 1,
-      resetTime: now + config.windowMs
-    };
-    
-  } catch (error) {
-    console.error('Rate limiting error:', error);
-    // If rate limiting fails, allow the request (fail open)
-    return {
-      success: true,
-      remaining: 999,
-      resetTime: Date.now() + 60000
-    };
-  }
-}
 
-/**
- * Get rate limit headers for response
- * @param result - Rate limit result
- * @returns Headers object
- */
-export function getRateLimitHeaders(result: RateLimitResult): Record<string, string> {
-  const headers: Record<string, string> = {
-    'X-RateLimit-Remaining': result.remaining.toString(),
-    'X-RateLimit-Reset': new Date(result.resetTime).toISOString(),
-  };
-  
-  if (!result.success && result.retryAfter) {
-    headers['Retry-After'] = result.retryAfter.toString();
-  }
-  
-  return headers;
-}
-
-/**
- * Create rate limit error response
- * @param result - Rate limit result
- * @returns Response object
- */
-export function createRateLimitResponse(result: RateLimitResult): Response {
-  const headers = getRateLimitHeaders(result);
-  
-  return new Response(
-    JSON.stringify({
-      success: false,
-      error: 'Rate limit exceeded',
-      message: `Too many requests. Please try again in ${result.retryAfter} seconds.`,
-      retryAfter: result.retryAfter,
-      timestamp: new Date().toISOString()
-    }),
-    {
-      status: 429,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      }
+    // Check if limit exceeded
+    const allowed = entry.count < config.maxRequests;
+    
+    if (allowed) {
+      entry.count++;
+      this.store.set(key, entry);
     }
-  );
-}
 
-/**
- * Rate limit middleware for specific endpoint types
- * @param request - The incoming request
- * @param endpointType - Type of endpoint (aiGeneration, auth, blog, etc.)
- * @param userId - Optional user ID from authentication
- * @returns Rate limit result
- */
-export async function rateLimit(
-  request: Request,
-  endpointType: keyof typeof rateLimitConfigs,
-  userId?: string
-): Promise<RateLimitResult> {
-  const config = rateLimitConfigs[endpointType];
-  return await checkRateLimit(request, config, userId);
-}
+    const remaining = Math.max(0, config.maxRequests - entry.count);
+    const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
 
-/**
- * Clean up old rate limit entries (can be called periodically)
- */
-export async function cleanupRateLimits(): Promise<void> {
-  try {
+    return {
+      allowed,
+      remaining,
+      resetTime: entry.resetTime,
+      retryAfter,
+    };
+  }
+
+  /**
+   * Get rate limit info without incrementing counter
+   * @param identifier - Unique identifier
+   * @param endpointType - Type of endpoint
+   * @returns Rate limit information
+   */
+  getLimitInfo(identifier: string, endpointType: string = 'default'): {
+    remaining: number;
+    resetTime: number;
+    limit: number;
+  } {
+    const config = this.configs[endpointType] || this.configs.default;
+    const key = `${identifier}:${endpointType}`;
     const now = Date.now();
-    
-    for (const [endpointType, config] of Object.entries(rateLimitConfigs)) {
-      const pattern = `${config.keyPrefix}:*`;
-      const keys = await redis.keys(pattern);
-      
-      for (const key of keys) {
-        const windowStart = now - config.windowMs;
-        await redis.zremrangebyscore(key, '-inf', windowStart);
+
+    const entry = this.store.get(key);
+    if (!entry || now > entry.resetTime) {
+      return {
+        remaining: config.maxRequests,
+        resetTime: now + config.windowMs,
+        limit: config.maxRequests,
+      };
+    }
+
+    return {
+      remaining: Math.max(0, config.maxRequests - entry.count),
+      resetTime: entry.resetTime,
+      limit: config.maxRequests,
+    };
+  }
+
+  /**
+   * Reset rate limit for an identifier
+   * @param identifier - Unique identifier
+   * @param endpointType - Type of endpoint
+   */
+  reset(identifier: string, endpointType: string = 'default'): void {
+    const key = `${identifier}:${endpointType}`;
+    this.store.delete(key);
+  }
+
+  /**
+   * Clean up expired entries
+   */
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store.entries()) {
+      if (now > entry.resetTime) {
+        this.store.delete(key);
       }
     }
-  } catch (error) {
-    console.error('Rate limit cleanup error:', error);
+  }
+
+  /**
+   * Get all rate limit configurations
+   */
+  getConfigs(): Record<string, RateLimitConfig> {
+    return { ...this.configs };
+  }
+
+  /**
+   * Update rate limit configuration
+   * @param endpointType - Type of endpoint
+   * @param config - New configuration
+   */
+  updateConfig(endpointType: string, config: RateLimitConfig): void {
+    this.configs[endpointType] = config;
+  }
+
+  /**
+   * Destroy the rate limiter and cleanup
+   */
+  destroy(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+    this.store.clear();
   }
 }
+
+// Create singleton instance
+const rateLimiter = new RateLimiter();
+
+// Export functions for easy use
+export function checkRateLimit(identifier: string, endpointType: string = 'default') {
+  return rateLimiter.checkLimit(identifier, endpointType);
+}
+
+export function getRateLimitInfo(identifier: string, endpointType: string = 'default') {
+  return rateLimiter.getLimitInfo(identifier, endpointType);
+}
+
+export function resetRateLimit(identifier: string, endpointType: string = 'default') {
+  return rateLimiter.reset(identifier, endpointType);
+}
+
+export function getRateLimitConfigs() {
+  return rateLimiter.getConfigs();
+}
+
+export function updateRateLimitConfig(endpointType: string, config: RateLimitConfig) {
+  return rateLimiter.updateConfig(endpointType, config);
+}
+
+// Export the rate limiter instance for advanced usage
+export { rateLimiter };
+
+// Export types
+export type { RateLimitConfig, RateLimitEntry };
