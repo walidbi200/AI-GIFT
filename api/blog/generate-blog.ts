@@ -1,5 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
+import { verifyAuth, createAuthErrorResponse } from '../../middleware/auth';
+import { blogGenerationSchema } from '../../lib/validation/schemas';
+import { aiGenerationRateLimit } from '../../middleware/rate-limit';
+import { z } from 'zod';
 
 // This initializes the OpenAI client with your API key from environment variables
 const openai = new OpenAI({
@@ -8,20 +12,64 @@ const openai = new OpenAI({
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, error: 'Method not allowed' });
+        return res.status(405).json({ 
+            success: false, 
+            error: 'Method not allowed' 
+        });
     }
 
     if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ success: false, error: 'OpenAI API key not configured.' });
+        return res.status(500).json({ 
+            success: false, 
+            error: 'OpenAI API key not configured.' 
+        });
     }
 
     try {
-        const { topic, tone, length, primaryKeyword, secondaryKeywords } = req.body;
-        const audience = req.body.audience || 'gift shoppers';
-
-        if (!topic || !primaryKeyword) {
-            return res.status(400).json({ success: false, error: 'Topic and primary keyword are required.' });
+        console.log('🔐 Verifying authentication and rate limits...');
+        
+        // Check rate limiting first
+        const rateLimitResponse = await aiGenerationRateLimit(req as any);
+        if (rateLimitResponse) {
+            return rateLimitResponse;
         }
+        
+        // Verify authentication
+        const authResult = await verifyAuth(req as any);
+        if (!authResult.authenticated) {
+            return createAuthErrorResponse(authResult.error || 'Authentication required');
+        }
+
+        console.log('🤖 Starting AI blog generation...');
+        
+        // Validate input data using Zod schema
+        let validatedData;
+        try {
+            validatedData = blogGenerationSchema.parse(req.body);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Validation failed',
+                    details: (error as any).errors.map((err: any) => ({
+                        field: err.path.join('.'),
+                        message: err.message
+                    }))
+                });
+            }
+            throw error;
+        }
+
+        const { 
+            topic, 
+            tone, 
+            length, 
+            primaryKeyword, 
+            secondaryKeywords,
+            targetAudience 
+        } = validatedData;
+
+        const audience = targetAudience || 'gift shoppers';
         
         const wordCountMap = {
             short: '800-1200',
@@ -89,14 +137,20 @@ You MUST respond with ONLY a single, minified, valid JSON object. Do not add any
             wordCount: blogContent.content.split(/\s+/).length,
         };
 
-        return res.status(200).json({ success: true, blog: fullBlogData });
+        return res.status(200).json({ 
+            success: true, 
+            blog: fullBlogData,
+            message: 'Blog post generated successfully',
+            timestamp: new Date().toISOString()
+        });
 
     } catch (error) {
         console.error('🔥 AI Blog Generation Error:', error);
         return res.status(500).json({
             success: false,
             error: 'Failed to generate blog post',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString()
         });
     }
 }

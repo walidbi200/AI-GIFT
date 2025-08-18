@@ -1,5 +1,8 @@
 import { sql } from '@vercel/postgres';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { verifyAuth, createAuthErrorResponse } from '../../middleware/auth';
+import { createBlogPostSchema } from '../../lib/validation/schemas';
+import { z } from 'zod';
 
 // This function now generates a UNIQUE URL-friendly slug from a title
 function generateSlug(title: string): string {
@@ -18,27 +21,55 @@ function generateSlug(title: string): string {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, error: 'Method not allowed' });
+        return res.status(405).json({ 
+            success: false, 
+            error: 'Method not allowed' 
+        });
     }
 
     try {
+        console.log('🔐 Verifying authentication...');
+        
+        // Verify authentication
+        const authResult = await verifyAuth(req as any);
+        if (!authResult.authenticated) {
+            return createAuthErrorResponse(authResult.error || 'Authentication required');
+        }
+
         console.log('📝 Saving blog via API...');
+        
+        // Validate input data using Zod schema
+        let validatedData;
+        try {
+            validatedData = createBlogPostSchema.parse(req.body);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Validation failed',
+                                    details: (error as any).errors.map((err: any) => ({
+                    field: err.path.join('.'),
+                    message: err.message
+                }))
+                });
+            }
+            throw error;
+        }
+
         const {
             title,
             description,
             content,
             tags,
             primaryKeyword,
-            wordCount,
             targetAudience,
             toneOfVoice,
-            featuredImage
-        } = req.body;
+            featuredImage,
+            status
+        } = validatedData;
 
-        // Basic validation
-        if (!title || !content) {
-            return res.status(400).json({ success: false, error: 'Title and content are required.' });
-        }
+        // Calculate word count
+        const wordCount = content.trim().split(/\s+/).length;
 
         const slug = generateSlug(title);
 
@@ -46,11 +77,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { rows } = await sql`
             INSERT INTO posts (
                 slug, title, description, content, tags, primary_keyword,
-                word_count, status, target_audience, tone_of_voice, featured_image
+                word_count, status, target_audience, tone_of_voice, featured_image,
+                created_at, updated_at
             )
             VALUES (
                 ${slug}, ${title}, ${description}, ${content}, ${tags}, ${primaryKeyword},
-                ${wordCount}, 'published', ${targetAudience}, ${toneOfVoice}, ${featuredImage}
+                ${wordCount}, ${status}, ${targetAudience}, ${toneOfVoice}, ${featuredImage},
+                NOW(), NOW()
             )
             RETURNING *;
         `;
@@ -61,14 +94,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log('✅ Blog saved successfully to DB with ID:', newPost.id);
 
         // We now return the complete blog object, including the new ID
-        return res.status(200).json({ success: true, blog: newPost });
+        return res.status(200).json({ 
+            success: true, 
+            blog: newPost,
+            message: 'Blog post saved successfully'
+        });
 
     } catch (error) {
         console.error('🔥 API Error:', error);
         return res.status(500).json({
             success: false,
             error: 'Internal server error',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString()
         });
     }
 }
