@@ -28,10 +28,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const post = rows[0];
 
-        // Clean up tags and calculate reading time
+        // Safely handle tags, whether it's an array or a string like "{tag1,tag2}"
+        const cleanedTags = Array.isArray(post.tags)
+            ? post.tags
+            : (post.tags || '').replace(/[{}]/g, '').split(',');
+
         const fullPost = {
             ...post,
-            tags: post.tags ? post.tags.replace(/[{}]/g, '').split(',') : [],
+            tags: cleanedTags,
             readingTime: Math.ceil((post.word_count || 0) / 200)
         };
 
