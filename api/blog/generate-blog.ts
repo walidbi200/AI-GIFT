@@ -1,138 +1,102 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import OpenAI from 'openai';
 
-interface BlogGenerationRequest {
-  topic: string;
-  tone: 'professional' | 'casual' | 'friendly' | 'expert';
-  length: 'short' | 'medium' | 'long';
-  primaryKeyword: string;
-  secondaryKeywords?: string;
-  targetAudience?: string;
-}
-
-interface GeneratedBlog {
-  title: string;
-  description: string;
-  content: string;
-  tags: string[];
-  primaryKeyword: string;
-  wordCount: number;
-  seoAnalysis: {
-    titleLength: number;
-    descriptionLength: number;
-    hasKeywordInTitle: boolean;
-    estimatedReadTime: string;
-  };
-}
+// This initializes the OpenAI client with your API key from environment variables
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    console.log('🤖 Generating blog post...');
-    console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
-    
-    const {
-      topic,
-      tone = 'friendly',
-      length = 'medium',
-      primaryKeyword,
-      secondaryKeywords,
-      targetAudience
-    }: BlogGenerationRequest = req.body;
-
-    // Validate required fields
-    if (!topic || !primaryKeyword) {
-      return res.status(400).json({
-        success: false,
-        error: 'Topic and primary keyword are required'
-      });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, error: 'Method not allowed' });
     }
 
-    // Mock AI blog generation (replace with actual OpenAI integration)
-    const generateBlogContent = (topic: string, tone: string, length: string): string => {
-      const baseContent = `
-        <h2>Introduction</h2>
-        <p>Welcome to our comprehensive guide about ${topic}. This article is designed to provide valuable insights and practical advice for ${targetAudience || 'readers'}.</p>
-        
-        <h2>Key Points</h2>
-        <p>Here are the main aspects we'll cover:</p>
-        <ul>
-          <li>Understanding the basics</li>
-          <li>Best practices and tips</li>
-          <li>Common mistakes to avoid</li>
-          <li>Advanced techniques</li>
-        </ul>
-        
-        <h2>Understanding the Basics</h2>
-        <p>Before diving deep into ${topic}, it's important to understand the fundamental concepts.</p>
-        
-        <h2>Best Practices</h2>
-        <p>Follow these proven strategies to achieve the best results.</p>
-        
-        <h2>Common Mistakes</h2>
-        <p>Avoid these pitfalls that many people encounter.</p>
-        
-        <h2>Advanced Techniques</h2>
-        <p>Once you've mastered the basics, explore these advanced approaches.</p>
-        
-        <h2>Conclusion</h2>
-        <p>${topic} is an important topic that requires careful consideration and proper implementation.</p>
-      `;
+    if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ success: false, error: 'OpenAI API key not configured.' });
+    }
 
-      // Adjust content based on length
-      if (length === 'short') {
-        return baseContent.replace(/<h2>Advanced Techniques<\/h2>[\s\S]*?<h2>Conclusion<\/h2>/g, '<h2>Conclusion</h2>');
-      } else if (length === 'long') {
-        return baseContent + `
-          <h2>Additional Resources</h2>
-          <p>For more information about ${topic}, consider exploring these additional resources.</p>
-          
-          <h2>FAQ Section</h2>
-          <h3>What is the most important thing to remember?</h3>
-          <p>The most important thing is to start with the basics and build from there.</p>
-          
-          <h3>How long does it take to master this?</h3>
-          <p>Mastery depends on your dedication and practice, but most people see significant improvement within a few weeks.</p>
-        `;
-      }
+    try {
+        const { topic, tone, length, primaryKeyword, secondaryKeywords } = req.body;
+        const audience = req.body.audience || 'gift shoppers';
 
-      return baseContent;
-    };
+        if (!topic || !primaryKeyword) {
+            return res.status(400).json({ success: false, error: 'Topic and primary keyword are required.' });
+        }
+        
+        const wordCountMap = {
+            short: '800-1200',
+            medium: '1200-1800',
+            long: '1800+'
+        };
+        
+        // --- The New, Highly-Detailed "Mega-Prompt" ---
+        const megaPrompt = `
+You are an expert content creator and SEO specialist for "Smart Gift Finder," a premier gift recommendation website. Your writing style is engaging, helpful, and human-like.
 
-    const content = generateBlogContent(topic, tone, length);
-    const wordCount = content.trim().split(/\s+/).length;
-    const estimatedReadTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
+Your task is to write a high-quality, comprehensive, and genuinely useful blog post on the topic: **"${topic}"**.
 
-    const generatedBlog: GeneratedBlog = {
-      title: topic,
-      description: `A comprehensive guide about ${topic} for ${tone} readers.`,
-      content: content,
-      tags: [primaryKeyword, 'guide', 'tips', 'best practices'],
-      primaryKeyword: primaryKeyword,
-      wordCount: wordCount,
-      seoAnalysis: {
-        titleLength: topic.length,
-        descriptionLength: 120,
-        hasKeywordInTitle: topic.toLowerCase().includes(primaryKeyword.toLowerCase()),
-        estimatedReadTime: `${estimatedReadTime} min read`
-      }
-    };
+**Target Audience:** ${audience}
+**Tone:** ${tone}
+**Primary SEO Keyword:** "${primaryKeyword}"
+**Secondary SEO Keywords:** "${secondaryKeywords}"
+**Target Word Count:** ${wordCountMap[length as keyof typeof wordCountMap] || '1200-1800'} words
 
-    console.log('✅ Blog post generated successfully');
-    
-    return res.status(200).json({
-      success: true,
-      blog: generatedBlog
-    });
+**CRITICAL INSTRUCTIONS:**
+1.  **Title:** Create a creative, compelling, and SEO-friendly title under 60 characters that includes the primary keyword.
+2.  **Meta Description:** Write an engaging meta description between 120 and 160 characters. It must be enticing and include the primary keyword.
+3.  **Introduction:** Write a captivating introduction that hooks the reader and clearly states the value they will get from the post.
+4.  **Body Content:**
+    * This is the most important part. Generate **5 to 7 specific, named gift ideas** related to the topic.
+    * For each gift idea, create an `<h3>` heading with the product name.
+    * Below each heading, write 2-3 detailed paragraphs explaining **what the product is** and **why it's a great gift** for this specific topic and audience.
+    * Use bullet points (`<ul><li>...</li></ul>`) to list key features or benefits.
+5.  **Structure and Formatting:** Use `<h2>` for main section titles (like "Our Top Gift Picks") and `<h3>` for individual gift ideas. Use paragraphs (`<p>`), lists, and bold tags (`<strong>`) to make the article scannable.
+6.  **Conclusion:** Write a strong concluding paragraph that summarizes the key takeaways and provides a final piece of advice.
+7.  **NO PLACEHOLDERS:** Do not use generic text like "Welcome to our guide..." or "In conclusion...". Every sentence must be original and valuable.
 
-  } catch (error) {
-    console.error('🔥 Blog Generation API Error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
+**OUTPUT FORMAT:**
+You MUST respond with ONLY a single, minified, valid JSON object. Do not add any text before or after it.
+
+{
+  "title": "Your generated title here",
+  "description": "Your generated meta description here",
+  "content": "The full blog post content, formatted as a single, well-structured string of HTML. All newlines must be escaped as \\n.",
+  "tags": ["an", "array", "of", "5-7", "relevant", "lowercase", "tags"]
+}
+`;
+
+        console.log("🚀 Sending new 'Mega-Prompt' to OpenAI...");
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o', // Using a more powerful model for higher quality
+            messages: [{ role: 'user', content: megaPrompt }],
+            temperature: 0.7,
+            response_format: { type: "json_object" },
+        });
+
+        const rawContent = completion.choices[0]?.message?.content;
+        if (!rawContent) {
+            throw new Error('Received an empty response from OpenAI.');
+        }
+
+        console.log("✅ Received high-quality response from OpenAI.");
+
+        const blogContent = JSON.parse(rawContent);
+        
+        const fullBlogData = {
+            ...blogContent,
+            primaryKeyword: primaryKeyword,
+            wordCount: blogContent.content.split(/\s+/).length,
+        };
+
+        return res.status(200).json({ success: true, blog: fullBlogData });
+
+    } catch (error) {
+        console.error('🔥 AI Blog Generation Error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Failed to generate blog post',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
 }
