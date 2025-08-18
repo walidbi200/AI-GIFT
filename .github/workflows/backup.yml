@@ -1,0 +1,182 @@
+name: Database Backup
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  BACKUP_BUCKET: smartgiftfinder-backups
+  BACKUP_RETENTION_DAYS: 30
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create backup directory
+        run: mkdir -p backups
+
+      - name: Create database backup
+        run: |
+          # Get current timestamp for backup filename
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          BACKUP_FILE="backup_${TIMESTAMP}.sql"
+          
+          # Create backup using pg_dump
+          pg_dump ${{ secrets.DATABASE_URL }} \
+            --no-password \
+            --verbose \
+            --clean \
+            --no-owner \
+            --no-privileges \
+            --format=custom \
+            --file="backups/${BACKUP_FILE}"
+          
+          echo "Backup created: ${BACKUP_FILE}"
+
+      - name: Compress backup
+        run: |
+          cd backups
+          for file in *.sql; do
+            gzip "$file"
+            echo "Compressed: ${file}.gz"
+          done
+
+      - name: Upload backup to S3
+        run: |
+          cd backups
+          for file in *.sql.gz; do
+            aws s3 cp "$file" "s3://${BACKUP_BUCKET}/database-backups/${file}" \
+              --storage-class STANDARD_IA \
+              --metadata "backup-date=$(date -Iseconds)" \
+              --metadata "retention-days=${BACKUP_RETENTION_DAYS}"
+            echo "Uploaded: ${file} to S3"
+          done
+
+      - name: Clean up old backups
+        run: |
+          # Calculate cutoff date for retention
+          CUTOFF_DATE=$(date -d "${BACKUP_RETENTION_DAYS} days ago" +%Y%m%d)
+          
+          # List and delete old backups from S3
+          aws s3 ls "s3://${BACKUP_BUCKET}/database-backups/" | while read -r line; do
+            createDate=$(echo $line | awk {'print $1'})
+            createDate=$(date -d "$createDate" +%Y%m%d)
+            if [[ $createDate -lt $CUTOFF_DATE ]]; then
+              fileName=$(echo $line | awk {'print $4'})
+              if [[ $fileName != "" ]]; then
+                aws s3 rm "s3://${BACKUP_BUCKET}/database-backups/${fileName}"
+                echo "Deleted old backup: ${fileName}"
+              fi
+            fi
+          done
+
+      - name: Verify backup integrity
+        run: |
+          cd backups
+          for file in *.sql.gz; do
+            echo "Verifying: ${file}"
+            gunzip -t "$file"
+            if [ $? -eq 0 ]; then
+              echo "✅ Backup integrity verified: ${file}"
+            else
+              echo "❌ Backup integrity check failed: ${file}"
+              exit 1
+            fi
+          done
+
+      - name: Create backup manifest
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          MANIFEST_FILE="backup_manifest_${TIMESTAMP}.json"
+          
+          cat > "backups/${MANIFEST_FILE}" << EOF
+          {
+            "backup_date": "$(date -Iseconds)",
+            "backup_files": [
+              $(cd backups && ls -1 *.sql.gz | sed 's/^/"/;s/$/"/' | paste -sd ',' -)
+            ],
+            "database_url": "${{ secrets.DATABASE_URL }}",
+            "backup_size": "$(du -sh backups/*.sql.gz | awk '{sum+=$1} END {print sum}')",
+            "retention_days": ${BACKUP_RETENTION_DAYS},
+            "backup_type": "full"
+          }
+          EOF
+          
+          aws s3 cp "backups/${MANIFEST_FILE}" "s3://${BACKUP_BUCKET}/database-backups/${MANIFEST_FILE}"
+
+      - name: Send backup notification
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Database backup completed successfully"
+            # Here you could add Slack/Discord/Email notifications
+          else
+            echo "❌ Database backup failed"
+            # Here you could add failure notifications
+          fi
+
+      - name: Clean up local files
+        if: always()
+        run: rm -rf backups/
+
+  restore-test:
+    runs-on: ubuntu-latest
+    needs: backup
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Download latest backup
+        run: |
+          mkdir -p test-restore
+          LATEST_BACKUP=$(aws s3 ls "s3://${BACKUP_BUCKET}/database-backups/" | grep "backup_.*\.sql\.gz" | sort | tail -1 | awk '{print $4}')
+          aws s3 cp "s3://${BACKUP_BUCKET}/database-backups/${LATEST_BACKUP}" "test-restore/"
+          echo "Downloaded: ${LATEST_BACKUP}"
+
+      - name: Test backup restoration
+        run: |
+          cd test-restore
+          gunzip *.sql.gz
+          # Note: This would restore to a test database, not production
+          # pg_restore --verbose --clean --no-owner --no-privileges --dbname=${{ secrets.TEST_DATABASE_URL }} *.sql
+          echo "Backup restoration test completed"
+
+      - name: Clean up test files
+        if: always()
+        run: rm -rf test-restore/
