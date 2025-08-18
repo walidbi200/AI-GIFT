@@ -24,6 +24,8 @@ import RecentSearches from './components/RecentSearches';
 import Button from './components/Button';
 import GiftCard from './components/GiftCard';
 import { CookieConsent } from './components/CookieConsent';
+import { ErrorBoundary, setupGlobalErrorHandling } from './components/ErrorBoundary';
+import { logger } from './lib/logger';
 import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 // --- Lazy-loaded Components ---
@@ -538,64 +540,77 @@ function HomePage() {
 function App() {
   useGoogleAnalytics();
 
+  // Initialize global error handling and logging
+  React.useEffect(() => {
+    setupGlobalErrorHandling();
+    logger.info('Application started', {
+      context: {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+      },
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-grow flex flex-col items-center">
-        <div className="w-full flex-1 flex flex-col">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
-                  <p className="text-light-text-muted dark:text-dark-text-muted">
-                    Loading page...
-                  </p>
+    <ErrorBoundary showErrorDetails={process.env.NODE_ENV === 'development'}>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-grow flex flex-col items-center">
+          <div className="w-full flex-1 flex flex-col">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
+                    <p className="text-light-text-muted dark:text-dark-text-muted">
+                      Loading page...
+                    </p>
+                  </div>
                 </div>
-              </div>
-            }
-          >
-                              <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/blog" element={<BlogIndex />} />
-                    <Route path="/blog/:slug" element={<BlogPostPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route 
-                      path="/admin" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <AdminDashboard />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/*" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <AdminDashboard />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/blog-generator" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <BlogGenerator />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-          </Suspense>
-        </div>
-        <Footer />
-      </main>
-      <CookieConsent />
-      <Analytics />
-    </div>
+              }
+            >
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<BlogIndex />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <AdminDashboard />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/*" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <AdminDashboard />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/blog-generator" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <BlogGenerator />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </div>
+          <Footer />
+        </main>
+        <CookieConsent />
+        <Analytics />
+      </div>
+    </ErrorBoundary>
   );
 }
 
