@@ -6,11 +6,17 @@ import type { ToastType } from '../../types';
 import { BlogEditor } from './BlogEditor';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { SEODashboard } from './SEODashboard';
+import { EnhancedSEODashboard } from './EnhancedSEODashboard';
+import { AnalyticsDashboard } from './AnalyticsDashboard';
+import { Sidebar } from './Sidebar';
+import { DashboardCard } from './DashboardCard';
+import { UserManagement } from './UserManagement';
+import { BackupSecurity } from './BackupSecurity';
+import { GlobalSearch } from './GlobalSearch';
 import BlogList from './BlogList';
 import BlogGenerator from './BlogGenerator';
 import BlogErrorBoundary from '../BlogErrorBoundary';
 import { useSession, signOut } from '../../hooks/useNextAuth';
-import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 interface BlogStats {
   totalPosts: number;
@@ -30,10 +36,39 @@ interface AIGenerationStats {
   estimatedCost: number;
 }
 
+interface Notification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'writer';
+  status: 'active' | 'inactive';
+  lastLogin: string;
+  permissions: string[];
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { data: session } = useSession();
-  const user = session?.user?.name || 'Admin';
+  const user: User = {
+    id: '1',
+    name: session?.user?.name || 'Admin',
+    email: session?.user?.email || 'admin@example.com',
+    role: 'admin',
+    status: 'active',
+    lastLogin: new Date().toISOString(),
+    permissions: ['content.create', 'content.edit', 'content.delete', 'content.publish', 'analytics.view', 'seo.manage', 'users.manage', 'settings.manage', 'backup.manage']
+  };
+  
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [blogStats, setBlogStats] = useState<BlogStats>({
     totalPosts: 0,
@@ -47,6 +82,7 @@ const AdminDashboard: React.FC = () => {
     totalTokens: 0,
     estimatedCost: 0
   });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<ToastType>('success');
@@ -54,6 +90,7 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
+    generateMockNotifications();
   }, []);
 
   const loadDashboardData = async () => {
@@ -89,6 +126,36 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const generateMockNotifications = () => {
+    const mockNotifications: Notification[] = [
+      {
+        id: '1',
+        type: 'info',
+        title: 'New Blog Post Published',
+        message: 'Your blog post "Tech Gifts Guide" has been successfully published.',
+        timestamp: new Date().toISOString(),
+        isRead: false
+      },
+      {
+        id: '2',
+        type: 'warning',
+        title: 'SEO Score Alert',
+        message: '3 blog posts have SEO scores below 70. Consider optimizing them.',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        isRead: false
+      },
+      {
+        id: '3',
+        type: 'success',
+        title: 'Backup Completed',
+        message: 'Database backup completed successfully. Size: 2.4 MB',
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        isRead: true
+      }
+    ];
+    setNotifications(mockNotifications);
+  };
+
   const showToastMessage = (message: string, type: ToastType) => {
     setToastMessage(message);
     setToastType(type);
@@ -101,101 +168,86 @@ const AdminDashboard: React.FC = () => {
     showToastMessage('Logged out successfully', 'success');
   };
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'content', label: 'Content Management', icon: '📝' },
-    { id: 'blog-editor', label: 'Blog Editor', icon: '✏️' },
-    { id: 'bulk-generator', label: 'Bulk Generator', icon: '📦' },
-    { id: 'ai-generator', label: 'AI Generator', icon: '🤖' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'seo', label: 'SEO Monitor', icon: '🔍' },
-    { id: 'blog-list', label: 'Blog List', icon: '📋' }
-  ];
+  const handleNotificationClick = (notificationId: string) => {
+    setNotifications(notifications.map(notification =>
+      notification.id === notificationId
+        ? { ...notification, isRead: true }
+        : notification
+    ));
+  };
+
+  const handleSearchResultClick = (result: any) => {
+    // Navigate to the selected post or handle the result
+    console.log('Search result clicked:', result);
+  };
 
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <span className="text-2xl">📝</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Posts</p>
-              <p className="text-2xl font-bold text-gray-900">{blogStats.totalPosts}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <span className="text-2xl">👁️</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Views</p>
-              <p className="text-2xl font-bold text-gray-900">{blogStats.totalViews.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <span className="text-2xl">🤖</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">AI Generated</p>
-              <p className="text-2xl font-bold text-gray-900">{aiStats.totalGenerated}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <span className="text-2xl">⭐</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Quality</p>
-              <p className="text-2xl font-bold text-gray-900">{aiStats.averageQuality}%</p>
-            </div>
-          </div>
-        </div>
+        <DashboardCard
+          title="Total Posts"
+          value={blogStats.totalPosts}
+          subtitle="Published content"
+          icon="📝"
+          onClick={() => setActiveTab('blog-list')}
+        />
+        <DashboardCard
+          title="Total Views"
+          value={blogStats.totalViews.toLocaleString()}
+          subtitle="Page views this month"
+          icon="👁️"
+          trend={{ value: 12, isPositive: true }}
+          onClick={() => setActiveTab('analytics')}
+        />
+        <DashboardCard
+          title="AI Generated"
+          value={aiStats.totalGenerated}
+          subtitle="Content pieces"
+          icon="🤖"
+          variant="info"
+          onClick={() => setActiveTab('ai-generator')}
+        />
+        <DashboardCard
+          title="Avg Quality"
+          value={`${aiStats.averageQuality}%`}
+          subtitle="Content quality score"
+          icon="⭐"
+          variant="success"
+        />
       </div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Posts</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Performing Posts</h3>
           <div className="space-y-3">
             {blogStats.topPerformingPosts.map((post, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 truncate">{post.title}</p>
-                  <p className="text-sm text-gray-600">{post.views} views • {post.readingTime} min read</p>
+                  <p className="font-medium text-gray-900 dark:text-white truncate">{post.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{post.views} views • {post.readingTime} min read</p>
                 </div>
-                <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">#{index + 1}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Generation Stats</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Generation Stats</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Total Tokens Used:</span>
-              <span className="font-medium">{aiStats.totalTokens.toLocaleString()}</span>
+              <span className="text-gray-600 dark:text-gray-400">Total Tokens Used:</span>
+              <span className="font-medium text-gray-900 dark:text-white">{aiStats.totalTokens.toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Estimated Cost:</span>
-              <span className="font-medium">${aiStats.estimatedCost}</span>
+              <span className="text-gray-600 dark:text-gray-400">Estimated Cost:</span>
+              <span className="font-medium text-gray-900 dark:text-white">${aiStats.estimatedCost}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Average Quality Score:</span>
-              <span className="font-medium text-green-600">{aiStats.averageQuality}%</span>
+              <span className="text-gray-600 dark:text-gray-400">Average Quality Score:</span>
+              <span className="font-medium text-green-600 dark:text-green-400">{aiStats.averageQuality}%</span>
             </div>
             <div className="pt-4">
               <Button
@@ -214,7 +266,7 @@ const AdminDashboard: React.FC = () => {
   const renderContentManagement = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900">Content Management</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Content Management</h2>
         <Button
           onClick={() => setActiveTab('ai-generator')}
           className="bg-blue-600 text-white hover:bg-blue-700"
@@ -223,54 +275,54 @@ const AdminDashboard: React.FC = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">All Blog Posts</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">All Blog Posts</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Reading Time
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {/* Mock data for content management */}
               {[1, 2, 3].map((i) => (
-                <tr key={i} className="hover:bg-gray-50">
+                <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">Sample Post {i}</div>
-                    <div className="text-sm text-gray-500">Description for Sample Post {i}</div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">Sample Post {i}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Description for Sample Post {i}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {new Date().toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     5 min
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                       Published
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">Edit</button>
-                      <button className="text-red-600 hover:text-red-900">Delete</button>
+                      <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">Edit</button>
+                      <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -283,100 +335,15 @@ const AdminDashboard: React.FC = () => {
   );
 
   const renderAnalytics = () => {
-    const analytics = useGoogleAnalytics();
-    
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Analytics Dashboard</h2>
-          <Button
-            onClick={analytics.refreshData}
-            disabled={analytics.isLoading}
-            className="bg-blue-600 text-white hover:bg-blue-700"
-          >
-            {analytics.isLoading ? 'Loading...' : 'Refresh Data'}
-          </Button>
-        </div>
-        
-        {analytics.error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">{analytics.error}</p>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Overview</h3>
-            {analytics.isLoading ? (
-              <div className="space-y-4">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </div>
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                </div>
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </div>
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Page Views (30 days)</span>
-                  <span className="font-medium">{analytics.pageViews.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Unique Visitors</span>
-                  <span className="font-medium">{analytics.uniqueVisitors.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Avg. Session Duration</span>
-                  <span className="font-medium">{Math.floor(analytics.sessionDuration / 60)}m {analytics.sessionDuration % 60}s</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Bounce Rate</span>
-                  <span className={`font-medium ${analytics.bounceRate < 30 ? 'text-green-600' : analytics.bounceRate < 50 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    {analytics.bounceRate}%
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Pages</h3>
-            {analytics.isLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {analytics.topPages.map((page, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 truncate">{page.title}</p>
-                      <p className="text-sm text-gray-600">{page.path}</p>
-                    </div>
-                    <span className="text-sm font-medium text-gray-500">{page.views.toLocaleString()} views</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+    return <AnalyticsDashboard />;
   };
 
   const renderSEOMonitor = () => (
     <SEODashboard />
+  );
+
+  const renderEnhancedSEO = () => (
+    <EnhancedSEODashboard />
   );
 
   const renderBlogEditor = () => (
@@ -403,6 +370,14 @@ const AdminDashboard: React.FC = () => {
     </BlogErrorBoundary>
   );
 
+  const renderUserManagement = () => (
+    <UserManagement currentUser={user} />
+  );
+
+  const renderBackupSecurity = () => (
+    <BackupSecurity />
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -419,8 +394,14 @@ const AdminDashboard: React.FC = () => {
         return renderAnalytics();
       case 'seo':
         return renderSEOMonitor();
+      case 'enhanced-seo':
+        return renderEnhancedSEO();
       case 'blog-list':
         return renderBlogList();
+      case 'users':
+        return renderUserManagement();
+      case 'backup-security':
+        return renderBackupSecurity();
       default:
         return renderOverview();
     }
@@ -428,65 +409,64 @@ const AdminDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      {/* Sidebar */}
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        notifications={notifications}
+        onNotificationClick={handleNotificationClick}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage your blog content and AI generation</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">Welcome, {user}</p>
-              <p className="text-xs text-gray-500">Administrator</p>
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
             </div>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
-            </button>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-md mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {tabs.map(tab => (
+            
+            <div className="flex items-center space-x-4">
+              {/* Global Search */}
+              <GlobalSearch onResultClick={handleSearchResultClick} />
+              
+              {/* User Menu */}
+              <div className="flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Welcome, {user.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                </div>
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  onClick={handleLogout}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.label}
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
                 </button>
-              ))}
-            </nav>
+              </div>
+            </div>
           </div>
-        </div>
+        </header>
 
-        {/* Content */}
-        {renderContent()}
+        {/* Content Area */}
+        <main className="flex-1 overflow-auto">
+          <div className="p-6">
+            {renderContent()}
+          </div>
+        </main>
       </div>
 
       {/* Toast Notification */}

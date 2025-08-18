@@ -25,6 +25,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     }
 
+    // Check if streaming is requested
+    const { stream } = req.body;
+    const shouldStream = stream === true;
+
     try {
         console.log('🔐 Verifying authentication and rate limits...');
         
@@ -115,42 +119,81 @@ You MUST respond with ONLY a single, minified, valid JSON object. Do not add any
 
         console.log("🚀 Sending new 'Mega-Prompt' to OpenAI...");
 
-        const completion = await openai.chat.completions.create({
-            model: 'gpt-4o', // Using a more powerful model for higher quality
-            messages: [{ role: 'user', content: megaPrompt }],
-            temperature: 0.7,
-            response_format: { type: "json_object" },
-        });
+        if (shouldStream) {
+            // Set up streaming response
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-        const rawContent = completion.choices[0]?.message?.content;
-        if (!rawContent) {
-            throw new Error('Received an empty response from OpenAI.');
+            // Send initial status
+            res.write(`data: ${JSON.stringify({ type: 'status', message: 'Starting generation...' })}\n\n`);
+
+            const stream = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [{ role: 'user', content: megaPrompt }],
+                temperature: 0.7,
+                stream: true,
+            });
+
+            let fullContent = '';
+            for await (const chunk of stream) {
+                const content = chunk.choices[0]?.delta?.content || '';
+                if (content) {
+                    fullContent += content;
+                    res.write(`data: ${JSON.stringify({ type: 'content', content })}\n\n`);
+                }
+            }
+
+            // Send completion signal
+            res.write(`data: ${JSON.stringify({ type: 'complete', fullContent })}\n\n`);
+            res.end();
+        } else {
+            // Non-streaming response (original behavior)
+            const completion = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [{ role: 'user', content: megaPrompt }],
+                temperature: 0.7,
+                response_format: { type: "json_object" },
+            });
+
+            const rawContent = completion.choices[0]?.message?.content;
+            if (!rawContent) {
+                throw new Error('Received an empty response from OpenAI.');
+            }
+
+            console.log("✅ Received high-quality response from OpenAI.");
+
+            const blogContent = JSON.parse(rawContent);
+            
+            const fullBlogData = {
+                ...blogContent,
+                primaryKeyword: primaryKeyword,
+                wordCount: blogContent.content.split(/\s+/).length,
+            };
+
+            return res.status(200).json({ 
+                success: true, 
+                blog: fullBlogData,
+                message: 'Blog post generated successfully',
+                timestamp: new Date().toISOString()
+            });
         }
-
-        console.log("✅ Received high-quality response from OpenAI.");
-
-        const blogContent = JSON.parse(rawContent);
-        
-        const fullBlogData = {
-            ...blogContent,
-            primaryKeyword: primaryKeyword,
-            wordCount: blogContent.content.split(/\s+/).length,
-        };
-
-        return res.status(200).json({ 
-            success: true, 
-            blog: fullBlogData,
-            message: 'Blog post generated successfully',
-            timestamp: new Date().toISOString()
-        });
 
     } catch (error) {
         console.error('🔥 AI Blog Generation Error:', error);
-        return res.status(500).json({
-            success: false,
-            error: 'Failed to generate blog post',
-            message: error instanceof Error ? error.message : 'Unknown error',
-            timestamp: new Date().toISOString()
-        });
+        
+        if (shouldStream) {
+            res.write(`data: ${JSON.stringify({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error' })}\n\n`);
+            res.end();
+        } else {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to generate blog post',
+                message: error instanceof Error ? error.message : 'Unknown error',
+                timestamp: new Date().toISOString()
+            });
+        }
     }
 }

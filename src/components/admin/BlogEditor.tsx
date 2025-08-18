@@ -25,6 +25,13 @@ interface EditorState {
   seoSuggestions: string[];
   imageUploadProgress: number;
   isImageUploading: boolean;
+  // Optimistic UI state
+  optimisticSave: boolean;
+  optimisticPublish: boolean;
+  lastSavedContent: string;
+  hasUnsavedChanges: boolean;
+  autoSaveEnabled: boolean;
+  autoSaveInterval: number | null;
 }
 
 export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
@@ -45,6 +52,13 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
     seoSuggestions: [],
     imageUploadProgress: 0,
     isImageUploading: false,
+    // Optimistic UI state
+    optimisticSave: false,
+    optimisticPublish: false,
+    lastSavedContent: post?.content || '',
+    hasUnsavedChanges: false,
+    autoSaveEnabled: true,
+    autoSaveInterval: null,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +79,36 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
   useEffect(() => {
     analyzeSEO();
   }, [state.title, state.description, state.content, state.tags]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = state.content !== state.lastSavedContent;
+    setState(prev => ({ ...prev, hasUnsavedChanges: hasChanges }));
+  }, [state.content, state.lastSavedContent]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (state.autoSaveEnabled && state.hasUnsavedChanges && state.content.length > 100) {
+      const interval = setTimeout(() => {
+        handleAutoSave();
+      }, 30000); // Auto-save every 30 seconds
+
+      setState(prev => ({ ...prev, autoSaveInterval: interval as any }));
+
+      return () => {
+        if (interval) clearTimeout(interval);
+      };
+    }
+  }, [state.content, state.hasUnsavedChanges, state.autoSaveEnabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (state.autoSaveInterval) {
+        clearTimeout(state.autoSaveInterval);
+      }
+    };
+  }, [state.autoSaveInterval]);
 
   const analyzeSEO = () => {
     const suggestions: string[] = [];
@@ -177,8 +221,61 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
     }));
   };
 
+  const handleAutoSave = async () => {
+    if (!state.hasUnsavedChanges || state.content.length < 100) return;
+
+    try {
+      // Optimistic update - show saved state immediately
+      setState(prev => ({ 
+        ...prev, 
+        optimisticSave: true,
+        lastSavedContent: prev.content,
+        hasUnsavedChanges: false
+      }));
+
+      const postData: Post = {
+        slug: state.slug,
+        title: state.title,
+        description: state.description,
+        date: new Date().toISOString(),
+        author: state.author,
+        tags: state.tags,
+        readTime: Math.ceil(state.content.split(/\s+/).length / 200),
+        featured: state.featured,
+        image: state.image,
+        content: state.content,
+        url: `/blog/${state.slug}`,
+        body: state.content,
+      };
+
+      // Simulate auto-save API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Hide optimistic indicator after successful save
+      setTimeout(() => {
+        setState(prev => ({ ...prev, optimisticSave: false }));
+      }, 2000);
+
+    } catch (error) {
+      // Revert optimistic update on error
+      setState(prev => ({ 
+        ...prev, 
+        optimisticSave: false,
+        hasUnsavedChanges: true
+      }));
+      console.error('Auto-save failed:', error);
+    }
+  };
+
   const handleSave = async () => {
-    setState(prev => ({ ...prev, isSaving: true }));
+    // Optimistic update
+    setState(prev => ({ 
+      ...prev, 
+      isSaving: true,
+      optimisticSave: true,
+      lastSavedContent: prev.content,
+      hasUnsavedChanges: false
+    }));
     
     try {
       const postData: Post = {
@@ -200,14 +297,35 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       onSave?.(postData);
-      setState(prev => ({ ...prev, isSaving: false }));
+      
+      // Hide optimistic indicator after successful save
+      setTimeout(() => {
+        setState(prev => ({ 
+          ...prev, 
+          isSaving: false,
+          optimisticSave: false
+        }));
+      }, 2000);
     } catch (error) {
-      setState(prev => ({ ...prev, isSaving: false }));
+      // Revert optimistic update on error
+      setState(prev => ({ 
+        ...prev, 
+        isSaving: false,
+        optimisticSave: false,
+        hasUnsavedChanges: true
+      }));
     }
   };
 
   const handlePublish = async () => {
-    setState(prev => ({ ...prev, isPublishing: true }));
+    // Optimistic update
+    setState(prev => ({ 
+      ...prev, 
+      isPublishing: true,
+      optimisticPublish: true,
+      lastSavedContent: prev.content,
+      hasUnsavedChanges: false
+    }));
     
     try {
       const postData: Post = {
@@ -229,9 +347,23 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       onPublish?.(postData);
-      setState(prev => ({ ...prev, isPublishing: false }));
+      
+      // Hide optimistic indicator after successful publish
+      setTimeout(() => {
+        setState(prev => ({ 
+          ...prev, 
+          isPublishing: false,
+          optimisticPublish: false
+        }));
+      }, 2000);
     } catch (error) {
-      setState(prev => ({ ...prev, isPublishing: false }));
+      // Revert optimistic update on error
+      setState(prev => ({ 
+        ...prev, 
+        isPublishing: false,
+        optimisticPublish: false,
+        hasUnsavedChanges: true
+      }));
     }
   };
 
@@ -265,6 +397,27 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
               <p className="mt-2 text-gray-600">
                 Write, edit, and optimize your blog content
               </p>
+              {/* Optimistic UI indicators */}
+              <div className="mt-2 flex items-center space-x-4">
+                {state.optimisticSave && (
+                  <div className="flex items-center text-green-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                    <span className="text-sm">Auto-saving...</span>
+                  </div>
+                )}
+                {state.optimisticPublish && (
+                  <div className="flex items-center text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    <span className="text-sm">Publishing...</span>
+                  </div>
+                )}
+                {state.hasUnsavedChanges && (
+                  <div className="flex items-center text-orange-600">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full mr-2"></div>
+                    <span className="text-sm">Unsaved changes</span>
+                  </div>
+                )}
+              </div>
             </div>
             <Link
               to="/admin"
@@ -561,18 +714,43 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                 <button
                   onClick={handleSave}
                   disabled={state.isSaving || !state.title || !state.content}
-                  className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                    state.optimisticSave 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-600 text-white hover:bg-gray-700'
+                  }`}
                 >
-                  {state.isSaving ? 'Saving...' : 'Save Draft'}
+                  {state.optimisticSave ? '✓ Saved!' : state.isSaving ? 'Saving...' : 'Save Draft'}
                 </button>
                 
                 <button
                   onClick={handlePublish}
                   disabled={state.isPublishing || !state.title || !state.content}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                    state.optimisticPublish 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  {state.isPublishing ? 'Publishing...' : 'Publish Post'}
+                  {state.optimisticPublish ? '✓ Published!' : state.isPublishing ? 'Publishing...' : 'Publish Post'}
                 </button>
+
+                {/* Auto-save toggle */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                  <span className="text-sm text-gray-600">Auto-save</span>
+                  <button
+                    onClick={() => setState(prev => ({ ...prev, autoSaveEnabled: !prev.autoSaveEnabled }))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      state.autoSaveEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        state.autoSaveEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
 

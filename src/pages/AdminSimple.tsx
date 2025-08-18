@@ -192,7 +192,7 @@ const AdminSimple: React.FC = () => {
                 </div>
                 <div className="mt-4">
                   <button
-                    onClick={() => window.open('/admin/seo-dashboard', '_blank')}
+                    onClick={() => window.location.href = '/admin/seo-dashboard'}
                     className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
                   >
                     Open SEO Tools

@@ -1,9 +1,13 @@
 // Blog post types and interfaces
 export interface Post {
+  id?: string;
   slug: string;
   title: string;
   description: string;
+  excerpt?: string;
   date: string;
+  createdAt?: string;
+  updatedAt?: string;
   author: string;
   tags: string[];
   readTime: number;
@@ -12,6 +16,7 @@ export interface Post {
   content: string;
   url: string;
   body: string;
+  status?: 'published' | 'draft' | 'scheduled';
 }
 
 export interface SEO {

@@ -15,11 +15,14 @@ import BlogIndex from './pages/BlogIndex';
 import BlogPostPage from './pages/BlogPostPage';
 import Login from './pages/Login';
 import AdminSimple from './pages/AdminSimple';
+import AdminDashboard from './pages/AdminDashboard';
 import BlogGenerator from './components/admin/BlogGenerator';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
 import RecentSearches from './components/RecentSearches';
+import Button from './components/Button';
+import GiftCard from './components/GiftCard';
 import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 // --- Lazy-loaded Components ---
@@ -562,7 +565,15 @@ function App() {
                       path="/admin" 
                       element={
                         <SimpleProtectedRoute>
-                          <AdminSimple />
+                          <AdminDashboard />
+                        </SimpleProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <SimpleProtectedRoute>
+                          <AdminDashboard />
                         </SimpleProtectedRoute>
                       } 
                     />

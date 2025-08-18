@@ -28,6 +28,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             readingTime: Math.ceil((post.word_count || 0) / 200)
         }));
 
+        // Add cache headers for edge caching
+        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+        res.setHeader('CDN-Cache-Control', 'max-age=3600');
+        res.setHeader('Vary', 'Accept-Encoding');
+
         return res.status(200).json({ posts: postsWithReadingTime });
 
     } catch (error) {

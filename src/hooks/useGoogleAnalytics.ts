@@ -5,6 +5,19 @@ interface AnalyticsData {
   uniqueVisitors: number;
   sessionDuration: number; // in seconds
   bounceRate: number; // as a percentage
+  sessions: number;
+  topPages: Array<{
+    path: string;
+    title: string;
+    views: number;
+  }>;
+  recentActivity: Array<{
+    timestamp: string;
+    action: string;
+    page?: string;
+    occasion?: string;
+    post?: string;
+  }>;
 }
 
 interface UseAnalyticsReturn extends AnalyticsData {
@@ -19,6 +32,9 @@ export function useGoogleAnalytics(): UseAnalyticsReturn {
     uniqueVisitors: 0,
     sessionDuration: 0,
     bounceRate: 0,
+    sessions: 0,
+    topPages: [],
+    recentActivity: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +47,24 @@ export function useGoogleAnalytics(): UseAnalyticsReturn {
       if (!response.ok) {
         throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
       }
-      const analytics: AnalyticsData = await response.json();
-      setData(analytics);
+      const result = await response.json();
+      if (result.success && result.data) {
+        setData(result.data);
+      } else {
+        throw new Error('Invalid analytics data format');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       // Fallback to zeroed data on error
-      setData({ pageViews: 0, uniqueVisitors: 0, sessionDuration: 0, bounceRate: 0 });
+      setData({ 
+        pageViews: 0, 
+        uniqueVisitors: 0, 
+        sessionDuration: 0, 
+        bounceRate: 0,
+        sessions: 0,
+        topPages: [],
+        recentActivity: [],
+      });
     } finally {
       setIsLoading(false);
     }
