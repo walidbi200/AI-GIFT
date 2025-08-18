@@ -2,37 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 
 const AdminSimple: React.FC = () => {
+  // Destructure all required values, including isLoading
   const { uniqueVisitors, isLoading: isAnalyticsLoading, refreshData } = useGoogleAnalytics();
   const [blogPostCount, setBlogPostCount] = useState<number | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     const fetchBlogStats = async () => {
+      setIsLoadingStats(true);
       try {
         const response = await fetch('/api/blog/stats');
         if (response.ok) {
           const data = await response.json();
           setBlogPostCount(data.count);
-        }
-      } catch (error) {
-        console.error("Failed to fetch blog stats", error);
-        setBlogPostCount(0); // Set to 0 on error
-      } finally {
-        setIsLoadingStats(false);
-      }
-    };
-
-    fetchBlogStats();
-  }, []);
-
-  const handleRefresh = () => {
-    setIsLoadingStats(true);
-    const fetchBlogStats = async () => {
-      try {
-        const response = await fetch('/api/blog/stats');
-        if (response.ok) {
-          const data = await response.json();
-          setBlogPostCount(data.count);
+        } else {
+          setBlogPostCount(0);
         }
       } catch (error) {
         console.error("Failed to fetch blog stats", error);
@@ -41,6 +25,25 @@ const AdminSimple: React.FC = () => {
         setIsLoadingStats(false);
       }
     };
+
+    fetchBlogStats();
+  }, []);
+
+
+  const handleRefresh = () => {
+    // Re-fetch both data sources
+    const fetchBlogStats = async () => {
+        setIsLoadingStats(true);
+        try {
+          const response = await fetch('/api/blog/stats');
+          if (response.ok) {
+            const data = await response.json();
+            setBlogPostCount(data.count);
+          }
+        } finally {
+          setIsLoadingStats(false);
+        }
+      };
     fetchBlogStats();
     refreshData();
   };
@@ -52,11 +55,11 @@ const AdminSimple: React.FC = () => {
     window.location.href = '/login';
   };
 
-  // Static stats for now
-  const aiGenerations = 15;
-  const seoScore = 89;
-  const thisMonthVisitors = isAnalyticsLoading ? '...' : uniqueVisitors.toLocaleString();
-  const thisWeekVisitors = isAnalyticsLoading ? '...' : Math.round(uniqueVisitors / 4).toLocaleString();
+  // Safely handle loading state before calling toLocaleString()
+  const monthlyVisitorsDisplay = isAnalyticsLoading ? '...' : (uniqueVisitors || 0).toLocaleString();
+  const thisMonthVisitors = isAnalyticsLoading ? '...' : (uniqueVisitors || 0).toLocaleString();
+  const thisWeekVisitors = isAnalyticsLoading ? '...' : Math.round((uniqueVisitors || 0) / 4).toLocaleString();
+  const blogPostCountDisplay = isLoadingStats ? '...' : blogPostCount;
 
 
   return (
@@ -213,13 +216,13 @@ const AdminSimple: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-blue-600">
-                    {isLoadingStats ? '...' : blogPostCount}
+                    {blogPostCountDisplay}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">Blog Posts</div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-green-600">
-                    {isAnalyticsLoading ? '...' : uniqueVisitors.toLocaleString()}
+                    {monthlyVisitorsDisplay}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">Monthly Visitors</div>
               </div>
