@@ -1,6 +1,9 @@
 /* FILE: src/index.css */
 /* This version removes the conflicting default styles. */
 
+/* Import Medium-style blog typography */
+@import './styles/blog.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

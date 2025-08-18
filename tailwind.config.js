@@ -6,7 +6,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Inter", "Helvetica", "Arial", "sans-serif"],
+        serif: ["Merriweather", "Georgia", "serif"],
         display: ["Poppins", "sans-serif"],
       },
       colors: {
@@ -93,5 +94,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 };
