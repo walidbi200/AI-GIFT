@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             long: '1800+'
         };
         
-        // --- The New, Highly-Detailed "Mega-Prompt" ---
+        // --- The New, Highly-Detailed "Mega-Prompt" is now embedded directly ---
         const megaPrompt = `
 You are an expert content creator and SEO specialist for "Smart Gift Finder," a premier gift recommendation website. Your writing style is engaging, helpful, and human-like.
 
@@ -47,10 +47,10 @@ Your task is to write a high-quality, comprehensive, and genuinely useful blog p
 3.  **Introduction:** Write a captivating introduction that hooks the reader and clearly states the value they will get from the post.
 4.  **Body Content:**
     * This is the most important part. Generate **5 to 7 specific, named gift ideas** related to the topic.
-    * For each gift idea, create an `<h3>` heading with the product name.
+    * For each gift idea, create an \`<h3>\` heading with the product name.
     * Below each heading, write 2-3 detailed paragraphs explaining **what the product is** and **why it's a great gift** for this specific topic and audience.
-    * Use bullet points (`<ul><li>...</li></ul>`) to list key features or benefits.
-5.  **Structure and Formatting:** Use `<h2>` for main section titles (like "Our Top Gift Picks") and `<h3>` for individual gift ideas. Use paragraphs (`<p>`), lists, and bold tags (`<strong>`) to make the article scannable.
+    * Use bullet points (\`<ul><li>...</li></ul>\`) to list key features or benefits.
+5.  **Structure and Formatting:** Use \`<h2>\` for main section titles (like "Our Top Gift Picks") and \`<h3>\` for individual gift ideas. Use paragraphs (\`<p>\`), lists, and bold tags (\`<strong>\`) to make the article scannable.
 6.  **Conclusion:** Write a strong concluding paragraph that summarizes the key takeaways and provides a final piece of advice.
 7.  **NO PLACEHOLDERS:** Do not use generic text like "Welcome to our guide..." or "In conclusion...". Every sentence must be original and valuable.
 
@@ -60,7 +60,7 @@ You MUST respond with ONLY a single, minified, valid JSON object. Do not add any
 {
   "title": "Your generated title here",
   "description": "Your generated meta description here",
-  "content": "The full blog post content, formatted as a single, well-structured string of HTML. All newlines must be escaped as \\n.",
+  "content": "The full blog post content, formatted as a single, well-structured string of HTML. All newlines must be escaped as \\\\n.",
   "tags": ["an", "array", "of", "5-7", "relevant", "lowercase", "tags"]
 }
 `;
