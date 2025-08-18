@@ -17,12 +17,13 @@ import Login from './pages/Login';
 import AdminSimple from './pages/AdminSimple';
 import AdminDashboard from './pages/AdminDashboard';
 import BlogGenerator from './components/admin/BlogGenerator';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import { PrivacyPolicy } from './pages/privacy';
 import NotFound from './pages/NotFound';
 import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
 import RecentSearches from './components/RecentSearches';
 import Button from './components/Button';
 import GiftCard from './components/GiftCard';
+import { CookieConsent } from './components/CookieConsent';
 import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
 
 // --- Lazy-loaded Components ---
@@ -585,14 +586,15 @@ function App() {
                         </SimpleProtectedRoute>
                       } 
                     />
-                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
           </Suspense>
         </div>
         <Footer />
       </main>
-              <Analytics />
+      <CookieConsent />
+      <Analytics />
     </div>
   );
 }

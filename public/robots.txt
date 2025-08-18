@@ -1,4 +1,48 @@
 User-agent: *
 Allow: /
-Disallow: /node_modules/
-Sitemap: https://www.smartgiftfinder.xyz/sitemap.xml
+
+# Allow crawling of main pages
+Allow: /gift-finder
+Allow: /blog
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Allow crawling of gift categories
+Allow: /gifts/
+Allow: /occasions/
+Allow: /relationships/
+Allow: /budget/
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /private/
+Disallow: /internal/
+
+# Disallow search and filter pages with parameters
+Disallow: /*?*
+Disallow: /*search*
+Disallow: /*filter*
+
+# Disallow temporary and development pages
+Disallow: /temp/
+Disallow: /dev/
+Disallow: /test/
+Disallow: /staging/
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://smartgiftfinder.xyz/sitemap.xml
+
+# Additional sitemaps for specific content types
+Sitemap: https://smartgiftfinder.xyz/sitemap-blog.xml
+Sitemap: https://smartgiftfinder.xyz/sitemap-gifts.xml
+
+# Host directive
+Host: https://smartgiftfinder.xyz
