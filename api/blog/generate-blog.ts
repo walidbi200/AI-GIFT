@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             long: '1800+'
         };
         
-        // --- The New, Highly-Detailed "Mega-Prompt" is now embedded directly ---
+        // --- The New, Highly-Detailed "Mega-Prompt" ---
         const megaPrompt = `
 You are an expert content creator and SEO specialist for "Smart Gift Finder," a premier gift recommendation website. Your writing style is engaging, helpful, and human-like.
 
