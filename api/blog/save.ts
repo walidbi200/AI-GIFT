@@ -1,7 +1,8 @@
 import { sql } from '@vercel/postgres';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifyAuth, createAuthErrorResponse } from '../../middleware/auth';
+import { verifyAuth } from '../../middleware/auth';
 import { createBlogPostSchema } from '../../lib/validation/schemas';
+import { withRateLimit } from '../../middleware/rate-limit';
 import { z } from 'zod';
 
 // This function now generates a UNIQUE URL-friendly slug from a title
@@ -33,7 +34,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Verify authentication
         const authResult = await verifyAuth(req as any);
         if (!authResult.authenticated) {
-            return createAuthErrorResponse(authResult.error || 'Authentication required');
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required',
+                message: authResult.error || 'Please provide valid authentication credentials',
+                timestamp: new Date().toISOString()
+            });
         }
 
         console.log('📝 Saving blog via API...');
@@ -47,10 +53,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(400).json({
                     success: false,
                     error: 'Validation failed',
-                                    details: (error as any).errors.map((err: any) => ({
-                    field: err.path.join('.'),
-                    message: err.message
-                }))
+                    details: (error as any).errors.map((err: any) => ({
+                        field: err.path.join('.'),
+                        message: err.message
+                    }))
                 });
             }
             throw error;
