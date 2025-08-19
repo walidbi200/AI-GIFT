@@ -265,6 +265,11 @@ async function generateBlog(req: VercelRequest, res: VercelResponse) {
 
         const audience = targetAudience || 'gift shoppers';
         
+        // Handle secondaryKeywords array properly
+        const formattedSecondaryKeywords = secondaryKeywords && Array.isArray(secondaryKeywords) 
+            ? secondaryKeywords.join(', ') 
+            : '';
+        
         const wordCountMap = {
             short: '800-1200',
             medium: '1200-1800',
@@ -279,7 +284,7 @@ Your task is to write a high-quality, comprehensive, and genuinely useful blog p
 **Target Audience:** ${audience}
 **Tone:** ${tone}
 **Primary SEO Keyword:** "${primaryKeyword}"
-**Secondary SEO Keywords:** "${secondaryKeywords}"
+**Secondary SEO Keywords:** "${formattedSecondaryKeywords}"
 **Target Word Count:** ${wordCountMap[length as keyof typeof wordCountMap] || '1200-1800'} words
 
 **CRITICAL INSTRUCTIONS:**
@@ -431,6 +436,9 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
         const wordCount = content.trim().split(/\s+/).length;
         const slug = generateSlug(title);
 
+        // Handle tags array properly for database storage
+        const formattedTags = tags && Array.isArray(tags) ? tags : [];
+
         const { rows } = await sql`
             INSERT INTO posts (
                 slug, title, description, content, tags, primary_keyword,
@@ -438,7 +446,7 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
                 created_at, updated_at
             )
             VALUES (
-                ${slug}, ${title}, ${description}, ${content}, ${tags}, ${primaryKeyword},
+                ${slug}, ${title}, ${description}, ${content}, ${formattedTags}, ${primaryKeyword},
                 ${wordCount}, ${status}, ${targetAudience}, ${toneOfVoice}, ${featuredImage},
                 NOW(), NOW()
             )
