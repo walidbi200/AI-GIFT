@@ -110,10 +110,16 @@ async function getAllPosts(res: VercelResponse) {
             ORDER BY created_at DESC;
         `;
 
-        const postsWithReadingTime = posts.map(post => ({
-            ...post,
-            readingTime: Math.ceil((post.word_count || 0) / 200)
-        }));
+        const postsWithReadingTime = posts.map(post => {
+            // Convert comma-separated tags string back to array
+            const tagsArray = post.tags ? post.tags.split(',').filter(tag => tag.trim()) : [];
+            
+            return {
+                ...post,
+                tags: tagsArray,
+                readingTime: Math.ceil((post.word_count || 0) / 200)
+            };
+        });
 
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
         res.setHeader('CDN-Cache-Control', 'max-age=3600');
@@ -145,13 +151,12 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
         }
 
         const post = rows[0];
-        const cleanedTags = Array.isArray(post.tags)
-            ? post.tags
-            : (post.tags || '').replace(/[{}]/g, '').split(',');
+        // Convert comma-separated tags string back to array
+        const tagsArray = post.tags ? post.tags.split(',').filter(tag => tag.trim()) : [];
 
         const fullPost = {
             ...post,
-            tags: cleanedTags,
+            tags: tagsArray,
             readingTime: Math.ceil((post.word_count || 0) / 200)
         };
 
@@ -436,8 +441,8 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
         const wordCount = content.trim().split(/\s+/).length;
         const slug = generateSlug(title);
 
-        // Handle tags array properly for database storage
-        const formattedTags = tags && Array.isArray(tags) ? tags : [];
+        // Handle tags array properly for database storage - convert to comma-separated string
+        const formattedTags = tags && Array.isArray(tags) ? tags.join(',') : '';
 
         const { rows } = await sql`
             INSERT INTO posts (
