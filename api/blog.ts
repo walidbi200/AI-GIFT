@@ -111,8 +111,8 @@ async function getAllPosts(res: VercelResponse) {
         `;
 
         const postsWithReadingTime = posts.map(post => {
-            // Convert comma-separated tags string back to array
-            const tagsArray = post.tags ? post.tags.split(',').filter(tag => tag.trim()) : [];
+            // Handle tags - ensure it's always an array
+            const tagsArray = Array.isArray(post.tags) ? post.tags : [];
             
             return {
                 ...post,
@@ -151,8 +151,8 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
         }
 
         const post = rows[0];
-        // Convert comma-separated tags string back to array
-        const tagsArray = post.tags ? post.tags.split(',').filter(tag => tag.trim()) : [];
+        // Handle tags - ensure it's always an array
+        const tagsArray = Array.isArray(post.tags) ? post.tags : [];
 
         const fullPost = {
             ...post,
@@ -441,8 +441,8 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
         const wordCount = content.trim().split(/\s+/).length;
         const slug = generateSlug(title);
 
-        // Handle tags array properly for database storage - convert to comma-separated string
-        const formattedTags = tags && Array.isArray(tags) ? tags.join(',') : '';
+        // Handle tags array properly for database storage
+        const formattedTags = tags && Array.isArray(tags) ? tags : [];
 
         const { rows } = await sql`
             INSERT INTO posts (
