@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql } from '@vercel/postgres';
+import { prisma } from '../lib/prisma';
 import OpenAI from 'openai';
 import { verifyAuth, createAuthErrorResponse } from '../middleware/auth';
 import { 
@@ -95,31 +95,30 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
 // Helper functions
 async function getAllPosts(res: VercelResponse) {
     try {
-        const { rows: posts } = await sql`
-            SELECT 
-                id, 
-                slug, 
-                title, 
-                description, 
-                tags, 
-                featured_image, 
-                created_at, 
-                word_count
-            FROM posts 
-            WHERE status = 'published' 
-            ORDER BY created_at DESC;
-        `;
-
-        const postsWithReadingTime = posts.map(post => {
-            // Handle tags - ensure it's always an array
-            const tagsArray = Array.isArray(post.tags) ? post.tags : [];
-            
-            return {
-                ...post,
-                tags: tagsArray,
-                readingTime: Math.ceil((post.word_count || 0) / 200)
-            };
+        const posts = await prisma.post.findMany({
+            where: {
+                status: 'published'
+            },
+            select: {
+                id: true,
+                slug: true,
+                title: true,
+                description: true,
+                tags: true,
+                featuredImage: true,
+                createdAt: true,
+                wordCount: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
+
+        const postsWithReadingTime = posts.map(post => ({
+            ...post,
+            created_at: post.createdAt,
+            readingTime: Math.ceil((post.wordCount || 0) / 200)
+        }));
 
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
         res.setHeader('CDN-Cache-Control', 'max-age=3600');
@@ -137,27 +136,33 @@ async function getAllPosts(res: VercelResponse) {
 
 async function getPostBySlug(slug: string, res: VercelResponse) {
     try {
-        const { rows } = await sql`
-            SELECT 
-                id, slug, title, description, content, tags, 
-                featured_image, created_at, word_count, primary_keyword
-            FROM posts 
-            WHERE slug = ${slug} AND status = 'published'
-            LIMIT 1;
-        `;
+        const post = await prisma.post.findFirst({
+            where: {
+                slug: slug,
+                status: 'published'
+            },
+            select: {
+                id: true,
+                slug: true,
+                title: true,
+                description: true,
+                content: true,
+                tags: true,
+                featuredImage: true,
+                createdAt: true,
+                wordCount: true,
+                primaryKeyword: true
+            }
+        });
 
-        if (rows.length === 0) {
+        if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const post = rows[0];
-        // Handle tags - ensure it's always an array
-        const tagsArray = Array.isArray(post.tags) ? post.tags : [];
-
         const fullPost = {
             ...post,
-            tags: tagsArray,
-            readingTime: Math.ceil((post.word_count || 0) / 200)
+            created_at: post.createdAt,
+            readingTime: Math.ceil((post.wordCount || 0) / 200)
         };
 
         return res.status(200).json({ post: fullPost });
@@ -174,27 +179,29 @@ async function getStats(res: VercelResponse) {
     try {
         console.log('📊 Fetching blog statistics...');
         
-        const countResult = await sql`
-            SELECT COUNT(*) as total FROM posts WHERE status = 'published'
-        `;
-        
-        const totalPosts = parseInt(countResult.rows[0].total);
+        const totalPosts = await prisma.post.count({
+            where: {
+                status: 'published'
+            }
+        });
 
-        const monthlyResult = await sql`
-            SELECT COUNT(*) as monthly FROM posts 
-            WHERE status = 'published' 
-            AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
-        `;
-        
-        const monthlyPosts = parseInt(monthlyResult.rows[0].monthly);
+        const monthlyPosts = await prisma.post.count({
+            where: {
+                status: 'published',
+                createdAt: {
+                    gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+                }
+            }
+        });
 
-        const weeklyResult = await sql`
-            SELECT COUNT(*) as weekly FROM posts 
-            WHERE status = 'published' 
-            AND created_at >= DATE_TRUNC('week', CURRENT_DATE)
-        `;
-        
-        const weeklyPosts = parseInt(weeklyResult.rows[0].weekly);
+        const weeklyPosts = await prisma.post.count({
+            where: {
+                status: 'published',
+                createdAt: {
+                    gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                }
+            }
+        });
 
         console.log(`✅ Blog stats fetched: ${totalPosts} total, ${monthlyPosts} this month, ${weeklyPosts} this week`);
         
@@ -444,21 +451,30 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
         // Handle tags array properly for database storage
         const formattedTags = tags && Array.isArray(tags) ? tags : [];
 
-        const { rows } = await sql`
-            INSERT INTO posts (
-                slug, title, description, content, tags, primary_keyword,
-                word_count, status, target_audience, tone_of_voice, featured_image,
-                created_at, updated_at
-            )
-            VALUES (
-                ${slug}, ${title}, ${description}, ${content}, ${formattedTags}, ${primaryKeyword},
-                ${wordCount}, ${status}, ${targetAudience}, ${toneOfVoice}, ${featuredImage},
-                NOW(), NOW()
-            )
-            RETURNING *;
-        `;
+        // Validate inputs before creating post
+        if (!slug || !title || !content) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields',
+                message: 'Slug, title, and content are required'
+            });
+        }
 
-        const newPost = rows[0];
+        const newPost = await prisma.post.create({
+            data: {
+                slug,
+                title,
+                description: description || '',
+                content,
+                tags: formattedTags,
+                primaryKeyword: primaryKeyword || '',
+                wordCount,
+                status: status || 'draft',
+                targetAudience: targetAudience || '',
+                toneOfVoice: toneOfVoice || '',
+                featuredImage: featuredImage || ''
+            }
+        });
 
         console.log('✅ Blog saved successfully to DB with ID:', newPost.id);
 
@@ -470,6 +486,18 @@ async function saveBlog(req: VercelRequest, res: VercelResponse) {
 
     } catch (error) {
         console.error('🔥 API Error:', error);
+        
+        // Handle Prisma-specific errors
+        if (error instanceof Error) {
+            if (error.message.includes('Unique constraint')) {
+                return res.status(409).json({
+                    success: false,
+                    error: 'Duplicate slug',
+                    message: 'A post with this title already exists'
+                });
+            }
+        }
+        
         return res.status(500).json({
             success: false,
             error: 'Internal server error',
@@ -509,20 +537,23 @@ async function deleteBlog(req: VercelRequest, res: VercelResponse) {
 
         const { blogId } = validatedData;
 
-        const checkResult = await sql`
-            SELECT id, title FROM posts WHERE id = ${blogId}
-        `;
+        // Check if post exists
+        const existingPost = await prisma.post.findUnique({
+            where: { id: blogId },
+            select: { id: true, title: true }
+        });
 
-        if (checkResult.rows.length === 0) {
+        if (!existingPost) {
             return res.status(404).json({
                 success: false,
                 error: 'Blog post not found'
             });
         }
 
-        await sql`
-            DELETE FROM posts WHERE id = ${blogId}
-        `;
+        // Delete the post
+        await prisma.post.delete({
+            where: { id: blogId }
+        });
 
         console.log(`✅ Blog post deleted successfully: ${blogId}`);
         
@@ -530,8 +561,8 @@ async function deleteBlog(req: VercelRequest, res: VercelResponse) {
             success: true,
             message: 'Blog post deleted successfully',
             deletedPost: {
-                id: checkResult.rows[0].id,
-                title: checkResult.rows[0].title
+                id: existingPost.id,
+                title: existingPost.title
             },
             timestamp: new Date().toISOString()
         });

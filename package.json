@@ -29,7 +29,12 @@
         "test:all": "npm run test:ci && npm run test:e2e",
         "test:security": "npm audit && snyk test",
         "test:performance": "lighthouse http://localhost:5173 --output=json --output-path=./test-results/lighthouse.json",
-        "test:accessibility": "axe-core --dir ./dist --report --output ./test-results/accessibility.json"
+        "test:accessibility": "axe-core --dir ./dist --report --output ./test-results/accessibility.json",
+        "db:generate": "prisma generate",
+        "db:push": "prisma db push",
+        "db:migrate": "prisma migrate dev",
+        "db:studio": "prisma studio",
+        "db:reset": "prisma migrate reset"
     },
     "dependencies": {
         "@emailjs/browser": "^4.4.1",
@@ -39,6 +44,7 @@
         "@fullcalendar/react": "^6.1.19",
         "@fullcalendar/timegrid": "^6.1.19",
         "@google-analytics/data": "^5.2.0",
+        "@prisma/client": "^6.14.0",
         "@tinymce/tinymce-react": "^6.3.0",
         "@types/bcryptjs": "^2.4.6",
         "@types/jsonwebtoken": "^9.0.10",
@@ -53,6 +59,7 @@
         "jsonwebtoken": "^9.0.2",
         "openai": "^5.12.2",
         "postcss": "^8.4.49",
+        "prisma": "^6.14.0",
         "react": "^18.3.1",
         "react-chartjs-2": "^5.3.0",
         "react-dom": "^18.3.1",
