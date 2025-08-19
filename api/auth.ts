@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import jwt from 'jsonwebtoken';
 
 interface LoginRequest {
   username: string;
@@ -34,10 +35,15 @@ export default async function handler(
         return;
     }
   } catch (error) {
-    console.error('Auth API Error:', error);
+    console.error('🔥 AUTH API ERROR:', error);
+    console.error('🔥 Error type:', typeof error);
+    console.error('🔥 Error constructor:', error?.constructor?.name);
+    console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+    console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      timestamp: new Date().toISOString()
     });
   }
 }
@@ -98,7 +104,6 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
       console.log('✅ Admin login successful');
       
       // Generate JWT token
-      const jwt = require('jsonwebtoken');
       const token = jwt.sign(
         { 
           id: 'admin',
@@ -129,10 +134,15 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
       });
     }
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('🔥 ADMIN LOGIN FAILED:', error);
+    console.error('🔥 Error type:', typeof error);
+    console.error('🔥 Error constructor:', error?.constructor?.name);
+    console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+    console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      timestamp: new Date().toISOString()
     });
   }
 }
@@ -150,7 +160,6 @@ async function handleValidate(req: VercelRequest, res: VercelResponse) {
     }
 
     // Verify JWT token
-    const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
 
     if (decoded && decoded.role === 'admin') {
@@ -170,10 +179,15 @@ async function handleValidate(req: VercelRequest, res: VercelResponse) {
       });
     }
   } catch (error) {
-    console.error('Token validation error:', error);
+    console.error('🔥 TOKEN VALIDATION ERROR:', error);
+    console.error('🔥 Error type:', typeof error);
+    console.error('🔥 Error constructor:', error?.constructor?.name);
+    console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+    console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
     res.status(401).json({
       success: false,
-      message: 'Invalid token'
+      message: 'Invalid token',
+      timestamp: new Date().toISOString()
     });
   }
 }
