@@ -539,7 +539,7 @@ async function deleteBlog(req: VercelRequest, res: VercelResponse) {
 
         // Check if post exists
         const existingPost = await prisma.post.findUnique({
-            where: { id: blogId },
+            where: { id: blogId.toString() },
             select: { id: true, title: true }
         });
 
@@ -552,7 +552,7 @@ async function deleteBlog(req: VercelRequest, res: VercelResponse) {
 
         // Delete the post
         await prisma.post.delete({
-            where: { id: blogId }
+            where: { id: blogId.toString() }
         });
 
         console.log(`✅ Blog post deleted successfully: ${blogId}`);
