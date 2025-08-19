@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.props.onError?.(error, errorInfo);
 
     // Send error to external monitoring service (if configured)
-    this.sendErrorToMonitoring(error, errorInfo);
+    this.sendErrorToMonitoring(error);
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -69,7 +69,7 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
-  private sendErrorToMonitoring(error: Error, errorInfo: ErrorInfo) {
+  private sendErrorToMonitoring(error: Error) {
     // Send to external monitoring service (e.g., Sentry, LogRocket, etc.)
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'exception', {

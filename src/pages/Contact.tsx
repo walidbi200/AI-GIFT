@@ -4,10 +4,9 @@ import emailjs from "@emailjs/browser";
 import Button from "../components/Button";
 import Toast from "../components/Toast";
 import type { ToastType } from "../types";
-import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
+
 
 const Contact: React.FC = () => {
-  const { trackFormSubmission } = useGoogleAnalytics();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -113,7 +112,7 @@ const Contact: React.FC = () => {
       );
       setIsSubmitted(true);
       setFormData({ name: "", email: "", message: "" });
-      trackFormSubmission("contact");
+
     } catch (error) {
       showToastMessage(
         "Failed to send message. Please try again or email us directly at Bichriwalid1@gmail.com",

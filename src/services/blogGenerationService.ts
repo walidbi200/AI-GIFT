@@ -33,28 +33,7 @@ interface BlogPost {
   content: string;
 }
 
-interface HumanizationChecklist {
-  removeRepetitivePhrases: boolean;
-  replaceVagueWords: boolean;
-  addPersonalTouches: boolean;
-  varySentenceLengths: boolean;
-  useContractions: boolean;
-  avoidRoboticTransitions: boolean;
-  warmNaturalTone: boolean;
-}
 
-interface SEOChecklist {
-  titleLength: boolean;
-  metaDescription: boolean;
-  keywordInHeadings: boolean;
-  internalLinks: boolean;
-  externalLinks: boolean;
-  imageAltTags: boolean;
-  urlOptimized: boolean;
-  mobileFriendly: boolean;
-  proofread: boolean;
-  humanized: boolean;
-}
 
 export class BlogGenerationService {
   private configPath: string;
@@ -76,54 +55,7 @@ export class BlogGenerationService {
     return JSON.parse(content);
   }
 
-  private async readEditorialBrief(): Promise<EditorialBrief> {
-    const filePath = path.join(this.templatesPath, 'editorial_brief.md');
-    const content = fs.readFileSync(filePath, 'utf-8');
-    
-    // Parse the markdown brief into structured data
-    const lines = content.split('\n');
-    const brief: EditorialBrief = {
-      title: '',
-      targetAudience: '',
-      goal: '',
-      primaryKeyword: '',
-      secondaryKeywords: [],
-      toneOfVoice: '',
-      outline: [],
-      references: [],
-      specialNotes: []
-    };
 
-    let currentSection = '';
-    for (const line of lines) {
-      if (line.includes('**Title:**')) {
-        brief.title = line.split('**Title:**')[1]?.trim() || '';
-      } else if (line.includes('**Target Audience:**')) {
-        brief.targetAudience = line.split('**Target Audience:**')[1]?.trim() || '';
-      } else if (line.includes('**Goal:**')) {
-        brief.goal = line.split('**Goal:**')[1]?.trim() || '';
-      } else if (line.includes('**Primary Keyword:**')) {
-        brief.primaryKeyword = line.split('**Primary Keyword:**')[1]?.trim() || '';
-      } else if (line.includes('**Secondary Keywords:**')) {
-        const keywords = line.split('**Secondary Keywords:**')[1]?.trim() || '';
-        brief.secondaryKeywords = keywords.split(',').map(k => k.trim());
-      } else if (line.includes('**Tone of Voice:**')) {
-        brief.toneOfVoice = line.split('**Tone of Voice:**')[1]?.trim() || '';
-      } else if (line.includes('**References & Sources:**')) {
-        currentSection = 'references';
-      } else if (line.includes('**Special Notes:**')) {
-        currentSection = 'notes';
-      } else if (line.startsWith('- ') && currentSection === 'references') {
-        brief.references.push(line.substring(2).trim());
-      } else if (line.startsWith('- ') && currentSection === 'notes') {
-        brief.specialNotes.push(line.substring(2).trim());
-      } else if (line.match(/^\d+\./) && line.includes('[')) {
-        brief.outline.push(line.trim());
-      }
-    }
-
-    return brief;
-  }
 
   private async readBlogPrompt(): Promise<string> {
     const filePath = path.join(this.templatesPath, 'blog_prompt.txt');
@@ -135,15 +67,7 @@ export class BlogGenerationService {
     return fs.readFileSync(filePath, 'utf-8');
   }
 
-  private async readHumanizationChecklist(): Promise<string> {
-    const filePath = path.join(this.contentPath, 'humanization_checklist.md');
-    return fs.readFileSync(filePath, 'utf-8');
-  }
 
-  private async readSEOPublishChecklist(): Promise<string> {
-    const filePath = path.join(this.contentPath, 'seo_publish_checklist.md');
-    return fs.readFileSync(filePath, 'utf-8');
-  }
 
   // Generate initial blog draft using OpenAI
   private async generateInitialDraft(brief: EditorialBrief, promptTemplate: string): Promise<string> {
@@ -196,14 +120,14 @@ export class BlogGenerationService {
 
   // Apply humanization to the draft
   private async humanizeContent(content: string): Promise<string> {
-    const checklist = await this.readHumanizationChecklist();
+
     
     let humanizedContent = content;
 
     // Remove repetitive phrases
     humanizedContent = humanizedContent
       .replace(/\b(In conclusion|Overall|Moreover|Furthermore|Additionally)\b/gi, '')
-      .replace(/\b(things|stuff)\b/gi, (match) => {
+      .replace(/\b(things|stuff)\b/gi, () => {
         const alternatives = ['items', 'elements', 'aspects', 'components'];
         return alternatives[Math.floor(Math.random() * alternatives.length)];
       });
@@ -261,8 +185,7 @@ export class BlogGenerationService {
     humanizationWarnings: string[];
     autoFixAttempted: boolean;
   }> {
-    const seoChecklist = await this.readSEOPublishChecklist();
-    const humanizationChecklist = await this.readHumanizationChecklist();
+
     
     const warnings = {
       seoWarnings: [] as string[],

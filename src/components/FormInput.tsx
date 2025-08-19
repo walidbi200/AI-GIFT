@@ -31,7 +31,6 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
   className = "",
   onKeyDown,
   id,
-  index,
 }) => {
   // Generate a unique ID: use provided id, or label + random string
   const inputId =

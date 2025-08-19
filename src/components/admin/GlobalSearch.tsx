@@ -117,15 +117,15 @@ export function GlobalSearch({ onResultClick }: GlobalSearchProps) {
 
       if (relevance > 0) {
         results.push({
-          id: post.id,
+          id: post.id || post.slug,
           type: 'post',
           title: post.title,
           content: post.content,
           excerpt: post.excerpt || '',
           slug: post.slug,
           tags: post.tags,
-          status: post.status,
-          lastModified: post.updatedAt || post.createdAt,
+          status: post.status || 'draft',
+          lastModified: post.updatedAt || post.createdAt || new Date().toISOString(),
           relevance
         });
       }

@@ -1,0 +1,49 @@
+Hello Cursor,
+
+My project is failing to build with 136 TypeScript errors. Please analyze the following npm run build error log and fix all issues across the entire codebase.
+
+The primary goal is to resolve every error so that the npm run build command completes successfully.
+
+TypeScript
+
+// PASTE THE FULL ERROR LOG HERE (I've included it below for context)
+
+PS C:\Users\bichr\Downloads\Music\AI-GFT> npm run build
+
+> ai-gift-recommender@0.0.0 build
+> tsc && vite build
+
+src/App.tsx:11:22 - error TS2307: Cannot find module './pages/HomePage' or its corresponding type declarations.
+// ... (and all the other 135 errors) ...
+
+Found 136 errors in 28 files.
+Please follow this prioritized action plan to resolve the issues systematically:
+
+Phase 1: Critical Build Fixes (Highest Priority)
+These errors are breaking the entire module structure and must be fixed first.
+
+Resolve Module Not Found Errors (TS2307): Correct all import paths where a module cannot be found. Verify that the file exists and that the path, filename, and capitalization are correct.
+
+Fix Default Export Errors (TS2613): For every module that "has no default export," change the corresponding import statement from a default import (e.g., import SEODashboard from ...) to a named import (e.g., import { SEODashboard } from ...).
+
+Correct React.lazy Imports (TS2322): Refactor all components that are loaded with React.lazy() to ensure they have a default export. This will resolve the type error related to "Property 'default' is missing."
+
+Phase 2: Resolve Declaration & Type Errors
+Once the module structure is intact, fix data and naming conflicts.
+
+Eliminate Naming Conflicts (TS2440, TS2300): Resolve all "Import declaration conflicts with local declaration" and "Duplicate identifier" errors. Find where variables, functions, or imports are declared twice within the same scope (like useGoogleAnalytics in App.tsx) and remove the redundant declarations.
+
+Fix Property and Type Errors (TS2339, TS2304):
+
+Correct all "Property does not exist on type" errors. Inspect the type definitions for the objects in question (e.g., the UseAnalyticsReturn type) and ensure you are only accessing properties that exist.
+
+Fix all "Cannot find name" errors by importing the required types and interfaces (e.g., import the Post type into BlogList.tsx).
+
+Phase 3: Code Cleanup & Quality
+Finally, clean up the remaining issues.
+
+Remove Unused Code (TS6133): Go through all files and remove every unused import, variable, function, and parameter that is "declared but its value is never read." This will significantly clean up the codebase.
+
+Add Explicit Types (TS7006): Resolve all "implicitly has an 'any' type" errors by adding explicit types to all function parameters and variables that require them.
+
+After applying all fixes, please confirm that the project builds successfully.

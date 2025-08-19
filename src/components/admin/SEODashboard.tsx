@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Post } from '../../types/post';
-import Button from '../Button';
-import Toast from '../Toast';
-import type { ToastType } from '../../types';
 
 // Mock functions since blogContent utility was removed
 const getAllPosts = async () => {
@@ -12,7 +9,7 @@ const getAllPosts = async () => {
 };
 
 // Mock functions since seoUtils utility was removed
-const calculateSEOScore = (content: string, keywords: string[]) => ({
+const calculateSEOScore = () => ({
   overall: 85,
   title: 90,
   description: 80,
@@ -20,34 +17,29 @@ const calculateSEOScore = (content: string, keywords: string[]) => ({
   readability: 82
 });
 
-const analyzeKeywordDensity = (content: string, keywords: string[]) => ({
+const analyzeKeywordDensity = () => ({
   primary: 2.1,
   secondary: 1.5,
   suggestions: ['Increase primary keyword usage']
 });
 
-const checkContentQuality = (content: string) => ({
-  score: 88,
-  readability: 'Good',
-  structure: 'Excellent',
-  engagement: 'High'
-});
 
-const generateMetaDescription = (content: string, keywords: string[]) => 
+
+const generateMetaDescription = () => 
   'A comprehensive guide about the topic with valuable insights and practical advice.';
 
-const suggestInternalLinks = (content: string, existingPosts: any[]) => [
+const suggestInternalLinks = () => [
   { text: 'related topic', url: '/blog/related-topic' },
   { text: 'similar guide', url: '/blog/similar-guide' }
 ];
 
-const analyzeCompetitors = (keyword: string) => ({
+const analyzeCompetitors = () => ({
   difficulty: 'Medium',
   volume: 'High',
   opportunities: ['Long-tail variations', 'Local SEO']
 });
 
-const findContentGaps = (keyword: string, existingContent: any[]) => [
+const findContentGaps = () => [
   'Missing FAQ section',
   'No video content',
   'Lack of case studies'
@@ -59,6 +51,12 @@ interface SEOMetrics {
   description: string;
   keywords: string[];
   suggestions: string[];
+  pageViews: number;
+  organicTraffic: number;
+  clickThroughRate: number;
+  bounceRate: number;
+  averageTimeOnPage: number;
+  keywordRankings: Record<string, number>;
 }
 
 interface SEODashboardProps {
@@ -90,8 +88,8 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
     }
   }, [selectedPost]);
 
-  const loadPosts = () => {
-    const allPosts = getAllPosts();
+  const loadPosts = async () => {
+    const allPosts = await getAllPosts();
     setPosts(allPosts);
     
     // Set default target keywords
@@ -104,39 +102,47 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
     
     try {
       // Calculate SEO score
-      const seoScore = calculateSEOScore(post.content, targetKeywords);
+      const seoScore = calculateSEOScore();
       
       // Analyze keyword optimization
-      const optimizations = analyzeKeywordDensity(post.content, targetKeywords);
+      const optimizations = analyzeKeywordDensity();
       
       // Generate internal link suggestions
-      const linkSuggestions = suggestInternalLinks(post.content, posts);
+      const linkSuggestions = suggestInternalLinks();
       
       // Get SEO metrics
       const metrics = {
         score: 85,
         title: 'Sample Title',
-        description: generateMetaDescription(post.content, targetKeywords),
+        description: generateMetaDescription(),
         keywords: ['gift', 'birthday', 'christmas'],
         suggestions: ['Optimize title length', 'Add meta description']
       };
       
       // Generate meta description
-      const metaDescription = generateMetaDescription(post.content, targetKeywords);
+      const metaDescription = generateMetaDescription();
       
       setSeoAnalysis({
         score: seoScore.overall,
         suggestions: generateSEOSuggestions(post, seoScore.overall),
         metaDescription,
         keywordDensity: {},
-        internalLinks: linkSuggestions.map(s => s.url),
+        internalLinks: linkSuggestions.map((s: any) => s.url),
         contentGaps: [],
         competitorInsights: []
       });
       
-      setKeywordOptimizations(optimizations);
+      setKeywordOptimizations([optimizations]);
       setInternalLinkSuggestions(linkSuggestions);
-      setSeoMetrics(metrics);
+      setSeoMetrics({
+        ...metrics,
+        pageViews: 1000,
+        organicTraffic: 500,
+        clickThroughRate: 2.5,
+        bounceRate: 45.2,
+        averageTimeOnPage: 120,
+        keywordRankings: { 'gift ideas': 15, 'birthday gifts': 8 }
+      });
       
     } catch (error) {
       console.error('Error analyzing SEO:', error);
@@ -170,14 +176,11 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
   };
 
   const analyzeContentGapsForAllPosts = () => {
-    const gaps = findContentGaps('gift ideas', posts);
+    const gaps = findContentGaps();
     setContentGaps(gaps);
   };
 
-  const analyzeCompetitors = () => {
-    const insights = analyzeCompetitors('gift ideas');
-    setCompetitorInsights(insights);
-  };
+
 
   const addKeyword = () => {
     if (newKeyword.trim() && !targetKeywords.includes(newKeyword.trim())) {
@@ -243,7 +246,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             <div className="text-sm text-gray-600">Find missing content opportunities</div>
           </button>
           <button
-            onClick={analyzeCompetitors}
+            onClick={() => setCompetitorInsights([analyzeCompetitors()])}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-left"
           >
             <div className="font-medium text-gray-900">Competitor Analysis</div>
@@ -257,7 +260,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">SEO Suggestions</h3>
           <ul className="space-y-2">
-            {seoAnalysis.suggestions.map((suggestion, index) => (
+            {seoAnalysis.suggestions.map((suggestion: string, index: number) => (
               <li key={index} className="flex items-start">
                 <span className="text-red-500 mr-2">•</span>
                 <span className="text-gray-700">{suggestion}</span>
@@ -291,7 +294,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {targetKeywords.map((keyword) => (
+                      {targetKeywords.map((keyword: string) => (
             <span
               key={keyword}
               className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
@@ -313,7 +316,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Keyword Optimization</h3>
           <div className="space-y-4">
-            {keywordOptimizations.map((optimization, index) => (
+            {keywordOptimizations.map((optimization: any, index: number) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-gray-900">{optimization.primaryKeyword}</h4>
@@ -340,7 +343,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
                   <div>
                     <div className="text-sm font-medium text-gray-700 mb-1">Suggestions:</div>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {optimization.suggestions.map((suggestion, idx) => (
+                      {optimization.suggestions.map((suggestion: string, idx: number) => (
                         <li key={idx} className="flex items-start">
                           <span className="text-blue-500 mr-1">•</span>
                           {suggestion}
@@ -376,7 +379,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Missing Keywords</h4>
               <div className="flex flex-wrap gap-2">
-                {contentGaps.map((gap, index) => (
+                {contentGaps.map((gap: string, index: number) => (
                   <span key={index} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
                     {gap}
                   </span>
@@ -388,7 +391,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Low Competition Opportunities</h4>
               <div className="flex flex-wrap gap-2">
-                {contentGaps.map((gap, index) => (
+                {contentGaps.map((gap: string, index: number) => (
                   <span key={index} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
                     {gap}
                   </span>
@@ -400,7 +403,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Trending Topics</h4>
               <div className="flex flex-wrap gap-2">
-                {contentGaps.map((gap, index) => (
+                {contentGaps.map((gap: string, index: number) => (
                   <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                     {gap}
                   </span>
@@ -412,7 +415,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Seasonal Opportunities</h4>
               <div className="flex flex-wrap gap-2">
-                {contentGaps.map((gap, index) => (
+                {contentGaps.map((gap: string, index: number) => (
                   <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
                     {gap}
                   </span>
@@ -435,7 +438,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Competitor Analysis</h3>
           <button
-            onClick={analyzeCompetitors}
+            onClick={() => setCompetitorInsights([analyzeCompetitors()])}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Analyze Competitors
@@ -444,7 +447,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         
         {competitorInsights.length > 0 ? (
           <div className="space-y-4">
-            {competitorInsights.map((insight, index) => (
+            {competitorInsights.map((insight: any, index: number) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-gray-900">{insight.keyword}</h4>
@@ -461,7 +464,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
                   <div>
                     <h5 className="font-medium text-gray-700 mb-1">Content Gaps:</h5>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {insight.contentGaps.map((gap, idx) => (
+                      {insight.contentGaps.map((gap: string, idx: number) => (
                         <li key={idx} className="flex items-start">
                           <span className="text-red-500 mr-1">•</span>
                           {gap}
@@ -473,7 +476,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
                   <div>
                     <h5 className="font-medium text-gray-700 mb-1">Opportunities:</h5>
                     <ul className="text-sm text-gray-600 space-y-1">
-                      {insight.opportunities.map((opportunity, idx) => (
+                      {insight.opportunities.map((opportunity: string, idx: number) => (
                         <li key={idx} className="flex items-start">
                           <span className="text-green-500 mr-1">•</span>
                           {opportunity}
@@ -501,7 +504,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         
         {internalLinkSuggestions.length > 0 ? (
           <div className="space-y-4">
-            {internalLinkSuggestions.map((suggestion, index) => (
+            {internalLinkSuggestions.map((suggestion: any, index: number) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>
@@ -642,7 +645,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Choose a blog post...</option>
-            {posts.map((post) => (
+            {posts.map((post: Post) => (
               <option key={post.slug} value={post.slug}>
                 {post.title}
               </option>
@@ -654,7 +657,7 @@ export function SEODashboard({ selectedPost }: SEODashboardProps) {
         <div className="bg-white rounded-lg shadow-md mb-8">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
-              {tabs.map(tab => (
+              {tabs.map((tab: any) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

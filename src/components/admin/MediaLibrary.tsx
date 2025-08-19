@@ -22,9 +22,7 @@ interface MediaLibraryProps {
 const MediaLibrary: React.FC<MediaLibraryProps> = ({
   onSelect,
   onUpload,
-  onDelete,
-  onUpdateTags,
-  onUpdateCategory
+  onDelete
 }) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([
     {
@@ -60,7 +58,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = ['all', 'hero', 'demos', 'blog', 'products', 'backgrounds'];
-  const allTags = Array.from(new Set(mediaItems.flatMap(item => item.tags)));
+
 
   const filteredItems = mediaItems.filter(item => {
     const matchesType = filter === 'all' || item.type === filter;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Post } from '../../types/post';
 
@@ -308,11 +308,7 @@ export function EnhancedSEODashboard() {
     return 'text-red-600';
   };
 
-  const getScoreBgColor = (score: number) => {
-    if (score >= 80) return 'bg-green-100';
-    if (score >= 60) return 'bg-yellow-100';
-    return 'bg-red-100';
-  };
+
 
   const renderOnPageAnalysis = () => (
     <div className="space-y-6">

@@ -8,40 +8,30 @@ import { Analytics } from '@vercel/analytics/react';
 
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import HomePage from './pages/HomePage';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import BlogIndex from './pages/BlogIndex';
-import BlogPostPage from './pages/BlogPostPage';
-import Login from './pages/Login';
-import AdminSimple from './pages/AdminSimple';
-import AdminDashboard from './pages/AdminDashboard';
-import BlogGenerator from './components/admin/BlogGenerator';
 import { PrivacyPolicy } from './pages/privacy';
 import NotFound from './pages/NotFound';
-import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
 import RecentSearches from './components/RecentSearches';
 import Button from './components/Button';
 import GiftCard from './components/GiftCard';
 import { CookieConsent } from './components/CookieConsent';
 import { ErrorBoundary, setupGlobalErrorHandling } from './components/ErrorBoundary';
 import { logger } from './lib/logger';
-import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
+import GiftLoadingScreen from './components/GiftLoadingScreen';
+import GiftBoxLoader from './components/GiftBoxLoader';
 
 // --- Lazy-loaded Components ---
+const HomePage = React.lazy(() => import("./pages/HomePage"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const BlogIndex = React.lazy(() => import("./pages/BlogIndex"));
 const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
 const Login = React.lazy(() => import("./pages/Login"));
-const AdminDashboard = React.lazy(() => import("./components/admin/AdminDashboard"));
-const AdminSimple = React.lazy(() => import("./pages/AdminSimple"));
+const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
 const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
-const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
 const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
 
 // --- Your Actual Hook and Service Imports ---
-import type { GiftSuggestion, FormErrors, ToastType } from "./types";
+import type { GiftSuggestion, FormErrors } from "./types";
 import { GiftService } from "./services/giftService";
 import { useRecentSearches } from "./hooks/useLocalStorage";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
@@ -54,46 +44,11 @@ const REFINE_OPTIONS = [
   { label: "More Unique", value: "unique" },
   { label: "More Luxurious", value: "luxury" },
 ];
-const SURPRISE_PERSONAS = [
-  {
-    age: 45,
-    relationship: "Parent",
-    occasion: "Birthday",
-    interests: ["astronomy", "baking"],
-    budget: "100",
-    negativeKeywords: "socks, mugs",
-  },
-  {
-    age: 22,
-    relationship: "Friend",
-    occasion: "Graduation",
-    interests: ["gaming", "travel"],
-    budget: "50",
-    negativeKeywords: "books",
-  },
-];
-const POPULAR_TAGS = [
-  "tech",
-  "gaming",
-  "reading",
-  "cooking",
-  "travel",
-  "movies",
-  "music",
-  "sports",
-  "fitness",
-  "fashion",
-  "art",
-  "photography",
-  "gardening",
-  "diy crafts",
-  "hiking",
-  "makeup",
-];
+
+
 
 // This is the component for your main gift finder page
-function HomePage() {
-  const { trackGiftGeneration } = useGoogleAnalytics();
+function GiftFinder() {
   const TOTAL_STEPS = 6;
   const [step, setStep] = useState(1);
   const [age, setAge] = useState(25);
@@ -104,17 +59,11 @@ function HomePage() {
   const [relationship, setRelationship] = useState("");
   const [negativeKeywords, setNegativeKeywords] = useState("");
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<ToastType>("success");
-  const [isUsingMockData, setIsUsingMockData] = useState(false);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [hasGeneratedSuggestions, setHasGeneratedSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<GiftSuggestion[]>([]);
+
 
   // Update filtered suggestions when suggestions or activeFilters change
   useEffect(() => {
@@ -177,16 +126,12 @@ function HomePage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const showToastMessage = (message: string, type: ToastType) => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-  };
+
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validateForm()) {
-      showToastMessage("Please fix the errors in the form", "error");
+
       return;
     }
     setLoading(true);
@@ -210,19 +155,13 @@ function HomePage() {
       const generatedSuggestions = await response.json();
       if (Array.isArray(generatedSuggestions)) {
         setSuggestions(generatedSuggestions);
-        showToastMessage(
-          `🎉 Found ${generatedSuggestions.length} gift suggestions!`,
-          "success",
-        );
-        trackGiftGeneration(occasion, relationship, interests.length);
+
+
       } else {
         throw new Error("Invalid data format received from API.");
       }
     } catch (error) {
-      showToastMessage(
-        "Failed to generate suggestions. Please try again.",
-        "error",
-      );
+
       const mockSuggestions = await GiftService.generateMockSuggestions({
         age,
         relationship,
@@ -231,31 +170,14 @@ function HomePage() {
         budget,
       });
       setSuggestions(mockSuggestions);
-      setIsUsingMockData(true);
+
     } finally {
       setLoading(false);
-      setHasGeneratedSuggestions(true);
+
     }
   };
 
-  const handleRefine = (refineValue: string) => {
-    if (!interests.includes(refineValue.toLowerCase())) {
-      setInterests([...interests, refineValue.toLowerCase()]);
-    }
-    setTimeout(() => handleSubmit(), 0);
-  };
 
-  const handleSurpriseMe = () => {
-    const persona =
-      SURPRISE_PERSONAS[Math.floor(Math.random() * SURPRISE_PERSONAS.length)];
-    setAge(persona.age);
-    setRelationship(persona.relationship);
-    setOccasion(persona.occasion);
-    setInterests(persona.interests);
-    setBudget(persona.budget);
-    setNegativeKeywords(persona.negativeKeywords);
-    setTimeout(() => handleSubmit(), 0);
-  };
 
   const copyToClipboard = async () => {
     try {
@@ -263,24 +185,12 @@ function HomePage() {
         .map((s: GiftSuggestion) => `${s.name} – ${s.description}`)
         .join("\n");
       await navigator.clipboard.writeText(text);
-      showToastMessage("Gift list copied to clipboard!", "success");
+
     } catch (error) {
-      showToastMessage("Failed to copy to clipboard", "error");
+
     }
   };
-  const clearForm = () => {
-    setAge(25);
-    setOccasion("");
-    setInterests([]);
-    setCurrentInterest("");
-    setBudget("");
-    setRelationship("");
-    setNegativeKeywords("");
-    setSuggestions([]);
-    setErrors({});
-    setIsUsingMockData(false);
-    setHasGeneratedSuggestions(false);
-  };
+
   const handleSelectRecentSearch = (search: any) => {
     setAge(search.age);
     setRelationship(search.relationship || "");
@@ -290,19 +200,13 @@ function HomePage() {
     setNegativeKeywords(search.negativeKeywords || "");
     setErrors({});
   };
-  const handleFeedbackSubmit = async (rating: number, feedback: string) => {
-    try {
-      showToastMessage("Thank you for your feedback!", "success");
-    } catch (error) {
-      showToastMessage("Failed to submit feedback", "error");
-    }
-  };
+
 
   // Progress bar width calculation
   const progressPercent = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
   // Fade-in animation class
-  const fadeInClass = 'transition-all duration-500 opacity-0 translate-y-4 animate-fade-in-up';
+
 
   // Popular interests for step 4
   const popularInterests = [
@@ -410,7 +314,7 @@ function HomePage() {
                   {interests.map((interest, index) => (
                     <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" style={{ margin: '4px' }}>
                       {interest}
-                      <button type="button" onClick={e => { if (window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }} className="ml-1 text-primary hover:opacity-70 focus:outline-none" aria-label={`Remove ${interest} interest`}>&times;</button>
+                      <button type="button" onClick={() => { if (window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }} className="ml-1 text-primary hover:opacity-70 focus:outline-none" aria-label={`Remove ${interest} interest`}>&times;</button>
                     </span>
                   ))}
                 </div>
@@ -420,7 +324,7 @@ function HomePage() {
                 <p className="text-xs text-text-secondary mb-2">Or select from popular interests:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {popularInterests.map((quickInterest) => (
-                    <button key={quickInterest} type="button" onClick={e => { if (window.navigator.vibrate) window.navigator.vibrate([50]); const lowerCaseInterest = quickInterest.toLowerCase(); if (!interests.includes(lowerCaseInterest)) { setInterests([...interests, lowerCaseInterest]); } }} className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`Interest: ${quickInterest}`}>{quickInterest}</button>
+                    <button key={quickInterest} type="button" onClick={() => { if (window.navigator.vibrate) window.navigator.vibrate([50]); const lowerCaseInterest = quickInterest.toLowerCase(); if (!interests.includes(lowerCaseInterest)) { setInterests([...interests, lowerCaseInterest]); } }} className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`Interest: ${quickInterest}`}>{quickInterest}</button>
                   ))}
                 </div>
               </div>
@@ -459,9 +363,9 @@ function HomePage() {
         </form>
       </section>
 
-      {isLoading && <GiftBoxLoader />}
+      {loading && <GiftBoxLoader />}
       {/* Results Section */}
-      {!isLoading && suggestions.length > 0 && (
+              {!loading && suggestions.length > 0 && (
         <section className="animate-fade-in-up w-full">
           <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4 text-center">
             🎉 Here are a few ideas!
@@ -506,7 +410,7 @@ function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-light-border dark:border-dark-border">
             <Button
               onClick={() => handleSubmit()}
-              disabled={isLoading}
+              disabled={loading}
               variant="secondary"
               fullWidth
               className="font-bold"
@@ -522,7 +426,7 @@ function HomePage() {
               📄 Copy List
             </Button>
             <Button
-              onClick={() => setShowFeedbackModal(true)}
+
               variant="outline"
               fullWidth
               className="font-bold"
@@ -571,6 +475,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/gift-finder" element={<GiftFinder />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<BlogIndex />} />

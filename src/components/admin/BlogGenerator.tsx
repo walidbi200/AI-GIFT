@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';

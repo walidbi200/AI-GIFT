@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, Session, User } from '../lib/auth';
+import { auth, Session } from '../lib/auth';
 
 export interface UseSessionReturn {
   data: Session | null;

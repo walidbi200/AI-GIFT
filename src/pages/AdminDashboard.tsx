@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 import AdvancedBlogEditor from '../components/admin/AdvancedBlogEditor';
-import ContentCalendar from '../components/admin/ContentCalendar';
+import { ContentCalendar } from '../components/admin/ContentCalendar';
 import MediaLibrary from '../components/admin/MediaLibrary';
-import SEODashboard from '../components/admin/SEODashboard';
+import { SEODashboard } from '../components/admin/SEODashboard';
 
 type View = 'overview' | 'editor' | 'calendar' | 'media' | 'seo' | 'analytics' | 'settings';
 
@@ -11,12 +11,7 @@ const AdminDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: '2 drafts pending review', type: 'warning' },
-    { id: 2, message: 'New SEO issues detected', type: 'error' }
-  ]);
-
-  const { uniqueVisitors, isLoading: isAnalyticsLoading, refreshData } = useGoogleAnalytics();
+  const { uniqueVisitors, isLoading: isAnalyticsLoading } = useGoogleAnalytics();
   const [blogStats, setBlogStats] = useState({
     total: 0,
     published: 0,
@@ -75,10 +70,7 @@ const AdminDashboard: React.FC = () => {
     console.log('Updating media category:', id, category);
   };
 
-  const handleBulkAction = async (action: string, postIds: number[]) => {
-    // Implementation for bulk actions
-    console.log('Bulk action:', action, postIds);
-  };
+
 
   const renderContent = () => {
     switch (currentView) {
@@ -93,16 +85,13 @@ const AdminDashboard: React.FC = () => {
       case 'calendar':
         return (
           <ContentCalendar
-            posts={[]} // Add actual posts data
-            onPostClick={(post) => console.log('Post clicked:', post)}
-            onDateSelect={(start, end) => console.log('Date selected:', start, end)}
-            onBulkAction={handleBulkAction}
+            events={[]} // Add actual events data
           />
         );
       case 'media':
         return (
           <MediaLibrary
-            onSelect={(item) => console.log('Media selected:', item)}
+            onSelect={(item: any) => console.log('Media selected:', item)}
             onUpload={handleMediaUpload}
             onDelete={handleMediaDelete}
             onUpdateTags={handleMediaUpdateTags}
@@ -334,11 +323,7 @@ const AdminDashboard: React.FC = () => {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 006 3h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z" />
                   </svg>
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  )}
+
                 </button>
               </div>
 

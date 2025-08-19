@@ -233,21 +233,6 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
         hasUnsavedChanges: false
       }));
 
-      const postData: Post = {
-        slug: state.slug,
-        title: state.title,
-        description: state.description,
-        date: new Date().toISOString(),
-        author: state.author,
-        tags: state.tags,
-        readTime: Math.ceil(state.content.split(/\s+/).length / 200),
-        featured: state.featured,
-        image: state.image,
-        content: state.content,
-        url: `/blog/${state.slug}`,
-        body: state.content,
-      };
-
       // Simulate auto-save API call
       await new Promise(resolve => setTimeout(resolve, 500));
       

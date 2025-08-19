@@ -253,7 +253,7 @@ const AdvancedBlogEditor: React.FC<AdvancedBlogEditorProps> = ({
               {/* Rich Text Editor */}
               <div className="p-6">
                 <Editor
-                  onInit={(_evt, editor) => editorRef.current = editor}
+                  onInit={(_evt: any, editor: any) => editorRef.current = editor}
                   value={post.content}
                   onEditorChange={handleContentChange}
                   init={{

@@ -1,4 +1,4 @@
-import { CookieManager } from '../components/CookieConsent';
+
 
 // Log levels
 export enum LogLevel {
@@ -140,7 +140,7 @@ class Logger {
             }
             if (entry.entryType === 'first-input') {
               this.info('FID measured', {
-                data: { fid: entry.processingStart - entry.startTime },
+                data: { fid: (entry as any).processingStart - entry.startTime },
                 context: { url: window.location.href, sessionId: this.sessionId },
               });
             }
@@ -148,7 +148,7 @@ class Logger {
         });
         observer.observe({ entryTypes: ['largest-contentful-paint', 'first-input'] });
       } catch (error) {
-        this.warn('Performance monitoring setup failed', { error });
+        this.warn('Performance monitoring setup failed', { error: error as Error });
       }
     }
   }

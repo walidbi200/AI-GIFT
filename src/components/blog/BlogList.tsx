@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import type { Post } from '../../types/post';
 
 // Mock functions since blogContent utility was removed
 const formatPostDate = (date: string) => new Date(date).toLocaleDateString();
@@ -16,7 +17,6 @@ interface BlogListProps {
 
 const BlogList: React.FC<BlogListProps> = ({
   posts,
-  featuredPosts,
   selectedTag,
   searchQuery,
   onTagSelect,
@@ -24,7 +24,7 @@ const BlogList: React.FC<BlogListProps> = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
   const postsPerPage = 6;
 
   // Update allPosts when posts prop changes
@@ -49,7 +49,7 @@ const BlogList: React.FC<BlogListProps> = ({
     
     allPosts.forEach(post => {
       if (Array.isArray(post.tags)) {
-        post.tags.forEach(tag => tags.add(tag));
+        post.tags.forEach((tag: string) => tags.add(tag));
       }
     });
     return Array.from(tags).sort();
@@ -68,17 +68,17 @@ const BlogList: React.FC<BlogListProps> = ({
       filtered = filtered.filter(post =>
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+        (Array.isArray(post.tags) && post.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
       );
     }
 
     if (selectedTag) {
       filtered = filtered.filter(post =>
-        Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
+        Array.isArray(post.tags) && post.tags.some((tag: string) => tag.toLowerCase() === selectedTag.toLowerCase())
       );
     }
 
-    return filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [allPosts, searchQuery, selectedTag]);
 
   // Pagination with defensive slice
@@ -99,16 +99,7 @@ const BlogList: React.FC<BlogListProps> = ({
     setCurrentPage(1);
   };
 
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading blog posts...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -264,7 +255,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
       <div className="p-6">
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {safeTags.slice(0, 3).map(tag => (
+          {safeTags.slice(0, 3).map((tag: string) => (
             <span
               key={tag}
               className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
@@ -296,8 +287,8 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
 
         {/* Meta Information */}
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <span>{formatPostDate(post.publishedAt)}</span>
-          <span>{formatReadTime(post.readingTime)}</span>
+          <span>{formatPostDate(post.date)}</span>
+          <span>{formatReadTime(post.readTime)}</span>
         </div>
 
         {/* Read More Link */}

@@ -36,7 +36,7 @@ const permissions = {
 
 export function UserManagement({ currentUser }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   const [showAddUser, setShowAddUser] = useState(false);
   const [newUser, setNewUser] = useState({
     name: '',
