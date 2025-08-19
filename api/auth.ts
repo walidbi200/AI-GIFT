@@ -5,19 +5,8 @@ interface LoginRequest {
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  token?: string;
-}
-
 interface ValidateRequest {
   token: string;
-}
-
-interface ValidateResponse {
-  valid: boolean;
-  message: string;
 }
 
 export default async function handler(
@@ -99,35 +88,41 @@ async function handleLogin(req: VercelRequest, res: VercelResponse) {
       console.error('Admin credentials not configured in environment variables');
       res.status(500).json({ 
         success: false, 
-        message: 'Server configuration error - please check environment variables' 
+        message: 'Server configuration error' 
       });
       return;
     }
 
-    // Compare credentials (case-sensitive)
-    const usernameMatch = username === adminUser;
-    const passwordMatch = password === adminPass;
-
-    console.log('Credential check:', { 
-      usernameMatch, 
-      passwordMatch,
-      providedUsername: username,
-      expectedUsername: adminUser
-    });
-
-    if (usernameMatch && passwordMatch) {
-      // Generate a simple session token (in production, use JWT)
-      const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+    // Verify credentials
+    if (username === adminUser && password === adminPass) {
+      console.log('✅ Admin login successful');
       
-      console.log('Login successful for user:', username);
-      
+      // Generate JWT token
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { 
+          id: 'admin',
+          email: username,
+          role: 'admin',
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+        },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { algorithm: 'HS256' }
+      );
+
       res.status(200).json({
         success: true,
         message: 'Login successful',
-        token
+        token,
+        user: {
+          id: 'admin',
+          email: username,
+          role: 'admin'
+        }
       });
     } else {
-      console.log('Login failed - invalid credentials');
+      console.log('❌ Admin login failed - invalid credentials');
       res.status(401).json({
         success: false,
         message: 'Invalid username or password'
@@ -147,42 +142,38 @@ async function handleValidate(req: VercelRequest, res: VercelResponse) {
     const { token }: ValidateRequest = req.body;
 
     if (!token) {
-      res.status(400).json({ valid: false, message: 'Token is required' });
+      res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
       return;
     }
 
-    // Decode the token to check if it's valid
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const [username, timestamp] = decoded.split(':');
-      
-      if (!username || !timestamp) {
-        res.status(401).json({ valid: false, message: 'Invalid token format' });
-        return;
-      }
+    // Verify JWT token
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
 
-      // Check if token is not too old (24 hours)
-      const tokenAge = Date.now() - parseInt(timestamp);
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-      if (tokenAge > maxAge) {
-        res.status(401).json({ valid: false, message: 'Token expired' });
-        return;
-      }
-
-      // Verify username matches admin user
-      const adminUser = process.env.ADMIN_USER;
-      if (username !== adminUser) {
-        res.status(401).json({ valid: false, message: 'Invalid token' });
-        return;
-      }
-
-      res.status(200).json({ valid: true, message: 'Token is valid' });
-    } catch (decodeError) {
-      res.status(401).json({ valid: false, message: 'Invalid token' });
+    if (decoded && decoded.role === 'admin') {
+      res.status(200).json({
+        success: true,
+        message: 'Token is valid',
+        user: {
+          id: decoded.id,
+          email: decoded.email,
+          role: decoded.role
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
     }
   } catch (error) {
     console.error('Token validation error:', error);
-    res.status(500).json({ valid: false, message: 'Internal server error' });
+    res.status(401).json({
+      success: false,
+      message: 'Invalid token'
+    });
   }
 }

@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Process the response
         const rows = response.rows || [];
-        const topPages = rows.slice(0, 5).map((row, index) => ({
+        const topPages = rows.slice(0, 5).map((row) => ({
           path: row.dimensionValues?.[0]?.value || '',
           title: row.dimensionValues?.[1]?.value || '',
           views: parseInt(row.metricValues?.[0]?.value || '0'),

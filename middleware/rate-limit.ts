@@ -1,4 +1,4 @@
-import { checkRateLimit, getRateLimitInfo } from '../lib/rate-limit';
+import { checkRateLimit } from '../lib/rate-limit';
 import { verifyAuth } from './auth';
 
 /**
@@ -147,13 +147,22 @@ export const rateLimitMiddleware = {
 };
 
 /**
+ * AI generation rate limit function
+ * @param request - The incoming request
+ * @returns Rate limit result
+ */
+export async function aiGenerationRateLimit(request: Request) {
+  return rateLimit(request, 'ai-generation');
+}
+
+/**
  * Apply rate limiting to API handler
  * @param request - The incoming request
  * @param endpointType - Type of endpoint
  * @param handler - The actual API handler
  * @returns Response from handler or rate limit error
  */
-export async function withRateLimit<T>(
+export async function withRateLimit(
   request: Request,
   endpointType: string,
   handler: (request: Request) => Promise<Response>

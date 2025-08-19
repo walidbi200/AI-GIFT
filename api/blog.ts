@@ -507,7 +507,7 @@ async function deleteBlog(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        const result = await sql`
+        await sql`
             DELETE FROM posts WHERE id = ${blogId}
         `;
 

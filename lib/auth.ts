@@ -83,7 +83,7 @@ export function generateNonce(): string {
 }
 
 // Validate user permissions (admin only)
-export function hasPermission(user: User, requiredRole: 'admin'): boolean {
+export function hasPermission(user: User): boolean {
   return user.role === 'admin';
 }
 

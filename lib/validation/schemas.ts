@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-// Common validation patterns
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const urlRegex = /^https?:\/\/.+/;
-const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
 // Blog post creation schema
 export const createBlogPostSchema = z.object({
   title: z.string()
@@ -41,6 +36,27 @@ export const createBlogPostSchema = z.object({
     .optional(),
   status: z.enum(['draft', 'published', 'archived'])
     .default('draft'),
+});
+
+// Blog generation schema for AI content generation
+export const blogGenerationSchema = z.object({
+  topic: z.string()
+    .min(1, 'Topic is required')
+    .max(200, 'Topic must be less than 200 characters'),
+  tone: z.enum(['professional', 'casual', 'friendly', 'formal', 'conversational'])
+    .default('professional'),
+  length: z.enum(['short', 'medium', 'long'])
+    .default('medium'),
+  primaryKeyword: z.string()
+    .min(1, 'Primary keyword is required')
+    .max(100, 'Primary keyword must be less than 100 characters'),
+  secondaryKeywords: z.array(z.string().min(1).max(100))
+    .max(10, 'Maximum 10 secondary keywords allowed')
+    .optional(),
+  targetAudience: z.string()
+    .min(1, 'Target audience is required')
+    .max(200, 'Target audience must be less than 200 characters')
+    .optional(),
 });
 
 // Blog post update schema
@@ -85,8 +101,6 @@ export const loginSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password must be less than 128 characters'),
 });
-
-
 
 // Blog post deletion schema
 export const deleteBlogPostSchema = z.object({
@@ -171,6 +185,7 @@ export const apiResponseSchema = z.union([errorResponseSchema, successResponseSc
 export const schemas = {
   createBlogPost: createBlogPostSchema,
   updateBlogPost: updateBlogPostSchema,
+  blogGeneration: blogGenerationSchema,
   giftSearch: giftSearchSchema,
   login: loginSchema,
   deleteBlogPost: deleteBlogPostSchema,
