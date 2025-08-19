@@ -1,4 +1,4 @@
-import { verifyToken, extractTokenFromHeader, AuthResult, User } from '../lib/auth';
+import { verifyToken, extractTokenFromHeader, AuthResult, User } from '../lib/auth.js';
 
 /**
  * Authentication middleware for API routes

@@ -1,5 +1,5 @@
-import { checkRateLimit } from '../lib/rate-limit';
-import { verifyAuth } from './auth';
+import { checkRateLimit } from '../lib/rate-limit.js';
+import { verifyAuth } from './auth.js';
 
 /**
  * Get client identifier from request
