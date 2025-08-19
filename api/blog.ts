@@ -15,6 +15,13 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Log environment variables (without sensitive data)
+console.log('🔧 Environment check:');
+console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+console.log('🔧 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('🔧 OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+console.log('🔧 Prisma client initialized:', !!prisma);
+
 // Helper function to generate unique slug
 function generateSlug(title: string): string {
     const baseSlug = title
@@ -30,16 +37,24 @@ function generateSlug(title: string): string {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { method } = req;
+    
+    console.log(`🚀 Blog API called with method: ${method}`);
+    console.log(`🚀 Request URL: ${req.url}`);
+    console.log(`🚀 Request query:`, req.query);
 
     try {
         switch (method) {
             case 'GET':
+                console.log('📖 Handling GET request...');
                 return await handleGet(req, res);
             case 'POST':
+                console.log('📝 Handling POST request...');
                 return await handlePost(req, res);
             case 'DELETE':
+                console.log('🗑️ Handling DELETE request...');
                 return await handleDelete(req, res);
             default:
+                console.log(`❌ Method not allowed: ${method}`);
                 return res.status(405).json({ 
                     success: false, 
                     error: 'Method not allowed' 
@@ -47,6 +62,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
     } catch (error) {
         console.error('🔥 Blog API Error:', error);
+        console.error('🔥 Error type:', typeof error);
+        console.error('🔥 Error constructor:', error?.constructor?.name);
+        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
+        console.error('🔥 Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+        
         return res.status(500).json({
             success: false,
             error: 'Internal server error',
@@ -59,19 +80,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 // GET - Handle list, single post, and stats
 async function handleGet(req: VercelRequest, res: VercelResponse) {
     const { slug, action } = req.query;
+    
+    console.log('🔍 handleGet called with query params:', { slug, action });
 
-    // Handle specific post by slug
-    if (slug && typeof slug === 'string') {
-        return await getPostBySlug(slug, res);
+    try {
+        // Handle specific post by slug
+        if (slug && typeof slug === 'string') {
+            console.log(`🔍 Fetching specific post with slug: ${slug}`);
+            return await getPostBySlug(slug, res);
+        }
+
+        // Handle stats
+        if (action === 'stats') {
+            console.log('📊 Fetching blog stats...');
+            return await getStats(res);
+        }
+
+        // Default: get all posts
+        console.log('📖 Fetching all published posts...');
+        return await getAllPosts(res);
+    } catch (error) {
+        console.error('🔥 ERROR IN handleGet:', error);
+        console.error('🔥 Error type:', typeof error);
+        console.error('🔥 Error constructor:', error?.constructor?.name);
+        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
+        
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+            message: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString()
+        });
     }
-
-    // Handle stats
-    if (action === 'stats') {
-        return await getStats(res);
-    }
-
-    // Default: get all posts
-    return await getAllPosts(res);
 }
 
 // POST - Handle blog generation and saving
@@ -95,6 +136,9 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
 // Helper functions
 async function getAllPosts(res: VercelResponse) {
     try {
+        console.log('🔍 Starting getAllPosts function...');
+        console.log('🔍 Attempting to connect to database...');
+        
         const posts = await prisma.post.findMany({
             where: {
                 status: 'published'
@@ -114,22 +158,34 @@ async function getAllPosts(res: VercelResponse) {
             }
         });
 
+        console.log(`✅ Successfully fetched ${posts.length} posts from database`);
+
         const postsWithReadingTime = posts.map(post => ({
             ...post,
             created_at: post.createdAt,
             readingTime: Math.ceil((post.wordCount || 0) / 200)
         }));
 
+        console.log('✅ Processed posts with reading time');
+
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
         res.setHeader('CDN-Cache-Control', 'max-age=3600');
         res.setHeader('Vary', 'Accept-Encoding');
 
+        console.log('✅ Setting response headers');
         return res.status(200).json({ posts: postsWithReadingTime });
     } catch (error) {
-        console.error('Error fetching blog posts:', error);
+        console.error('🔥 ERROR FETCHING BLOG POSTS:', error);
+        console.error('🔥 Error type:', typeof error);
+        console.error('🔥 Error constructor:', error?.constructor?.name);
+        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
+        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
+        console.error('🔥 Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+        
         return res.status(500).json({
             error: 'Internal server error',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString()
         });
     }
 }
