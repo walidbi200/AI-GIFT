@@ -279,7 +279,7 @@ async function generateBlog(req: VercelRequest, res: VercelResponse) {
         
         // Handle secondaryKeywords array properly
         const formattedSecondaryKeywords = secondaryKeywords && Array.isArray(secondaryKeywords) 
-            ? secondaryKeywords.join(', ') 
+            ? (secondaryKeywords as string[]).join(', ') 
             : '';
         
         const wordCountMap = {
