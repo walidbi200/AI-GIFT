@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// A simple interface for the post objects
+// A simple interface for the post objects ( changfe)
 interface Post {
   id: number;
   slug: string;
