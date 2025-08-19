@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import OpenAI from 'openai';
-import { verifyAuth, createAuthErrorResponse } from '../middleware/auth';
+import { verifyAuth, createAuthErrorResponse } from '../middleware/auth.js';
 import { 
     createBlogPostSchema, 
     deleteBlogPostSchema, 
     blogGenerationSchema 
-} from '../lib/validation/schemas';
-import { aiGenerationRateLimit } from '../middleware/rate-limit';
+} from '../lib/validation/schemas.js';
+import { aiGenerationRateLimit } from '../middleware/rate-limit.js';
 import { z } from 'zod';
 
 // Initialize OpenAI client
