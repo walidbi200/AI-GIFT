@@ -45,7 +45,7 @@ describe('Blog API Integration Tests', () => {
     await sql`DELETE FROM posts WHERE title LIKE 'Test Post%'`;
   });
 
-  describe('POST /api/blog/save', () => {
+  describe('POST /api/blog', () => {
     it('should create a new blog post with valid data', async () => {
       const postData = {
         title: 'Test Post - Create',
@@ -58,7 +58,7 @@ describe('Blog API Integration Tests', () => {
         status: 'draft'
       };
 
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ describe('Blog API Integration Tests', () => {
         content: 'This should fail'
       };
 
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -105,7 +105,7 @@ describe('Blog API Integration Tests', () => {
         content: 'This has no title'
       };
 
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ describe('Blog API Integration Tests', () => {
       };
 
       // Create first post
-      const response1 = await fetch('/api/blog/save', {
+      const response1 = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ describe('Blog API Integration Tests', () => {
       const slug1 = result1.blog.slug;
 
       // Create second post with same title
-      const response2 = await fetch('/api/blog/save', {
+      const response2 = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ describe('Blog API Integration Tests', () => {
     });
   });
 
-  describe('GET /api/blog/list', () => {
+  describe('GET /api/blog', () => {
     beforeEach(async () => {
       // Create test posts
       const posts = [
@@ -180,7 +180,7 @@ describe('Blog API Integration Tests', () => {
       ];
 
       for (const post of posts) {
-        await fetch('/api/blog/save', {
+        await fetch('/api/blog', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should list all posts with pagination', async () => {
-      const response = await fetch('/api/blog/list?page=1&limit=10');
+      const response = await fetch('/api/blog?page=1&limit=10');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -206,7 +206,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should filter posts by status', async () => {
-      const response = await fetch('/api/blog/list?status=published');
+      const response = await fetch('/api/blog?status=published');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -221,7 +221,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should search posts by title', async () => {
-      const response = await fetch('/api/blog/list?search=List 1');
+      const response = await fetch('/api/blog?search=List 1');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -235,7 +235,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should handle pagination correctly', async () => {
-      const response = await fetch('/api/blog/list?page=1&limit=2');
+      const response = await fetch('/api/blog?page=1&limit=2');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -247,7 +247,7 @@ describe('Blog API Integration Tests', () => {
     });
   });
 
-  describe('DELETE /api/blog/delete', () => {
+  describe('DELETE /api/blog', () => {
     let deletePostId: number;
 
     beforeEach(async () => {
@@ -257,7 +257,7 @@ describe('Blog API Integration Tests', () => {
         content: 'This post will be deleted'
       };
 
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -271,7 +271,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should delete a blog post with valid ID', async () => {
-      const response = await fetch('/api/blog/delete', {
+      const response = await fetch('/api/blog', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -288,7 +288,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should reject deletion without authentication', async () => {
-      const response = await fetch('/api/blog/delete', {
+      const response = await fetch('/api/blog', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -302,7 +302,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should handle deletion of non-existent post', async () => {
-      const response = await fetch('/api/blog/delete', {
+      const response = await fetch('/api/blog', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -317,7 +317,7 @@ describe('Blog API Integration Tests', () => {
     });
   });
 
-  describe('GET /api/blog/stats', () => {
+  describe('GET /api/blog?action=stats', () => {
     beforeEach(async () => {
       // Create test posts with different dates
       const posts = [
@@ -334,7 +334,7 @@ describe('Blog API Integration Tests', () => {
       ];
 
       for (const post of posts) {
-        await fetch('/api/blog/save', {
+        await fetch('/api/blog', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -346,7 +346,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should return blog statistics', async () => {
-      const response = await fetch('/api/blog/stats');
+      const response = await fetch('/api/blog?action=stats');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -359,7 +359,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should include monthly and weekly counts', async () => {
-      const response = await fetch('/api/blog/stats');
+      const response = await fetch('/api/blog?action=stats');
       
       expect(response.status).toBe(200);
       const result = await response.json();
@@ -380,7 +380,7 @@ describe('Blog API Integration Tests', () => {
       };
 
       const requests = Array(11).fill(null).map(() => 
-        fetch('/api/blog/save', {
+        fetch('/api/blog', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -411,7 +411,7 @@ describe('Blog API Integration Tests', () => {
         content: 'Test content'
       };
 
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -425,7 +425,7 @@ describe('Blog API Integration Tests', () => {
     });
 
     it('should return proper error format', async () => {
-      const response = await fetch('/api/blog/save', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

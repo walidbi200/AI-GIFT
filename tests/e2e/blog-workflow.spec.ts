@@ -296,7 +296,7 @@ This concludes our test blog post.
 
     test('should handle network errors during save', async ({ page }) => {
       // Mock network failure
-      await page.route('/api/blog/save', route => route.abort());
+      await page.route('/api/blog', route => route.abort());
       
       await page.click('text=Blog Generator');
       await page.fill('[data-testid="blog-title"]', 'Network Error Test');
