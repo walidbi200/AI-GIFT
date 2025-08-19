@@ -53,7 +53,7 @@ export function GlobalSearch({ onResultClick }: GlobalSearchProps) {
 
       try {
         // Fetch posts from API
-        const response = await fetch('/api/blog/list');
+        const response = await fetch('/api/blog');
         if (response.ok) {
           const data = await response.json();
           const posts = data.posts || [];

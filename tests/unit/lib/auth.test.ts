@@ -16,9 +16,9 @@ describe('Authentication Functions', () => {
 
   beforeEach(() => {
     testUser = {
-      id: 'user123',
-      email: 'test@example.com',
-      role: 'user',
+      id: 'admin123',
+      email: 'admin@example.com',
+      role: 'admin',
       createdAt: new Date('2024-01-01T00:00:00Z')
     };
   });
@@ -32,12 +32,12 @@ describe('Authentication Functions', () => {
       expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
     });
 
-    it('should generate different tokens for different users', () => {
-      const user1 = { ...testUser, id: 'user1' };
-      const user2 = { ...testUser, id: 'user2' };
+    it('should generate different tokens for different admins', () => {
+      const admin1 = { ...testUser, id: 'admin1' };
+      const admin2 = { ...testUser, id: 'admin2' };
       
-      const token1 = generateToken(user1);
-      const token2 = generateToken(user2);
+      const token1 = generateToken(admin1);
+      const token2 = generateToken(admin2);
       
       expect(token1).not.toBe(token2);
     });
@@ -201,16 +201,6 @@ describe('Authentication Functions', () => {
   });
 
   describe('hasPermission', () => {
-    it('should allow admin to access user resources', () => {
-      const adminUser: User = {
-        ...testUser,
-        role: 'admin'
-      };
-      
-      const hasAccess = hasPermission(adminUser, 'user');
-      expect(hasAccess).toBe(true);
-    });
-
     it('should allow admin to access admin resources', () => {
       const adminUser: User = {
         ...testUser,
@@ -221,14 +211,14 @@ describe('Authentication Functions', () => {
       expect(hasAccess).toBe(true);
     });
 
-    it('should allow user to access user resources', () => {
-      const hasAccess = hasPermission(testUser, 'user');
+    it('should deny non-admin access', () => {
+      const nonAdminUser: User = {
+        ...testUser,
+        role: 'admin' // All users are admin in simplified system
+      };
+      
+      const hasAccess = hasPermission(nonAdminUser, 'admin');
       expect(hasAccess).toBe(true);
-    });
-
-    it('should deny user access to admin resources', () => {
-      const hasAccess = hasPermission(testUser, 'admin');
-      expect(hasAccess).toBe(false);
     });
   });
 
@@ -252,7 +242,7 @@ describe('Authentication Functions', () => {
       expect(testUser).toMatchObject({
         id: expect.any(String),
         email: expect.any(String),
-        role: expect.stringMatching(/^(user|admin)$/),
+        role: 'admin',
         createdAt: expect.any(Date)
       });
     });

@@ -4,7 +4,6 @@ import {
   updateBlogPostSchema,
   giftSearchSchema,
   loginSchema,
-  registerSchema,
   deleteBlogPostSchema,
   paginationSchema,
   searchSchema,
@@ -239,49 +238,7 @@ describe('Authentication Validation', () => {
     });
   });
 
-  describe('registerSchema', () => {
-    it('should accept valid registration data', () => {
-      const validData = {
-        email: 'test@example.com',
-        password: 'SecurePass123',
-        confirmPassword: 'SecurePass123',
-        name: 'John Doe'
-      };
 
-      const result = registerSchema.safeParse(validData);
-      expect(result.success).toBe(true);
-    });
-
-    it('should reject mismatched passwords', () => {
-      const invalidData = {
-        email: 'test@example.com',
-        password: 'SecurePass123',
-        confirmPassword: 'DifferentPass123',
-        name: 'John Doe'
-      };
-
-      const result = registerSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe("Passwords don't match");
-      }
-    });
-
-    it('should reject weak password', () => {
-      const invalidData = {
-        email: 'test@example.com',
-        password: 'weak',
-        confirmPassword: 'weak',
-        name: 'John Doe'
-      };
-
-      const result = registerSchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Password must contain at least one lowercase letter, one uppercase letter, and one number');
-      }
-    });
-  });
 });
 
 describe('API Validation', () => {

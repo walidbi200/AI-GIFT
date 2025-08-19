@@ -43,7 +43,7 @@ export function useGoogleAnalytics(): UseAnalyticsReturn {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/analytics/ga');
+      const response = await fetch('/api/ga');
       if (!response.ok) {
         throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
       }

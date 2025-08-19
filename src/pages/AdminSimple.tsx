@@ -11,10 +11,10 @@ const AdminSimple: React.FC = () => {
     const fetchBlogStats = async () => {
       setIsLoadingStats(true);
       try {
-        const response = await fetch('/api/blog/stats');
+        const response = await fetch('/api/blog?action=stats');
         if (response.ok) {
           const data = await response.json();
-          setBlogPostCount(data.count);
+          setBlogPostCount(data.stats.totalPosts);
         } else {
           setBlogPostCount(0);
         }
@@ -35,10 +35,10 @@ const AdminSimple: React.FC = () => {
     const fetchBlogStats = async () => {
         setIsLoadingStats(true);
         try {
-          const response = await fetch('/api/blog/stats');
+          const response = await fetch('/api/blog?action=stats');
           if (response.ok) {
             const data = await response.json();
-            setBlogPostCount(data.count);
+            setBlogPostCount(data.stats.totalPosts);
           }
         } finally {
           setIsLoadingStats(false);

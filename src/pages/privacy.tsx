@@ -35,7 +35,6 @@ export function PrivacyPolicy() {
                     We collect information you provide directly to us, such as when you:
                   </p>
                   <ul className="list-disc list-inside mt-2 text-gray-700 space-y-1">
-                    <li>Create an account or profile</li>
                     <li>Use our gift recommendation services</li>
                     <li>Subscribe to our newsletter</li>
                     <li>Contact us for support</li>

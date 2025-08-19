@@ -25,7 +25,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchBlogStats = async () => {
     try {
-      const response = await fetch('/api/blog/stats');
+              const response = await fetch('/api/blog?action=stats');
       if (response.ok) {
         const data = await response.json();
         setBlogStats(data.stats);

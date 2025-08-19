@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 export interface User {
   id: string;
   email: string;
-  role: 'admin' | 'user';
+  role: 'admin';
   createdAt: Date;
 }
 
@@ -18,7 +18,7 @@ export interface AuthResult {
 export interface TokenPayload {
   userId: string;
   email: string;
-  role: string;
+  role: 'admin';
   iat: number;
   exp: number;
 }
@@ -82,9 +82,8 @@ export function generateNonce(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-// Validate user permissions
-export function hasPermission(user: User, requiredRole: 'admin' | 'user'): boolean {
-  const roleHierarchy = { user: 1, admin: 2 };
-  return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+// Validate user permissions (admin only)
+export function hasPermission(user: User, requiredRole: 'admin'): boolean {
+  return user.role === 'admin';
 }
 

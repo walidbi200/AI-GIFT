@@ -86,23 +86,7 @@ export const loginSchema = z.object({
     .max(128, 'Password must be less than 128 characters'),
 });
 
-export const registerSchema = z.object({
-  email: z.string()
-    .email('Invalid email address')
-    .min(1, 'Email is required'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be less than 128 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number'),
-  confirmPassword: z.string()
-    .min(1, 'Please confirm your password'),
-  name: z.string()
-    .min(1, 'Name is required')
-    .max(100, 'Name must be less than 100 characters'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+
 
 // Blog post deletion schema
 export const deleteBlogPostSchema = z.object({
@@ -189,7 +173,6 @@ export const schemas = {
   updateBlogPost: updateBlogPostSchema,
   giftSearch: giftSearchSchema,
   login: loginSchema,
-  register: registerSchema,
   deleteBlogPost: deleteBlogPostSchema,
   pagination: paginationSchema,
   search: searchSchema,

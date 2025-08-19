@@ -60,7 +60,7 @@ export function EnhancedSEODashboard() {
 
   const loadPosts = async () => {
     try {
-      const response = await fetch('/api/blog/list');
+              const response = await fetch('/api/blog');
       if (response.ok) {
         const data = await response.json();
         setPosts(data.posts || []);

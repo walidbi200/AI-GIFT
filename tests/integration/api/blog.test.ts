@@ -190,19 +190,19 @@ describe('Blog API Integration Tests', () => {
       expect(authResult.user?.role).toBe('admin');
     });
 
-    it('should authenticate regular user', async () => {
+    it('should authenticate admin user', async () => {
       (verifyAuth as any).mockResolvedValue({
         authenticated: true,
         user: {
-          id: 'user123',
-          email: 'user@example.com',
-          role: 'user'
+          id: 'admin123',
+          email: 'admin@example.com',
+          role: 'admin'
         }
       });
 
       const authResult = await verifyAuth(mockRequest);
       expect(authResult.authenticated).toBe(true);
-      expect(authResult.user?.role).toBe('user');
+      expect(authResult.user?.role).toBe('admin');
     });
 
     it('should reject unauthenticated request', async () => {

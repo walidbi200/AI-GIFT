@@ -25,7 +25,7 @@ export function useAuth() {
         if (token && user) {
           // Validate token with server (optional but recommended)
           try {
-            const response = await fetch('/api/auth/validate', {
+            const response = await fetch('/api/auth?action=validate', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

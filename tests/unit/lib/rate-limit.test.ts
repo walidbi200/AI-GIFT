@@ -154,7 +154,7 @@ describe('Rate Limiting', () => {
       expect(configs).toHaveProperty('ai-generation');
       expect(configs).toHaveProperty('blog-generation');
       expect(configs).toHaveProperty('login');
-      expect(configs).toHaveProperty('register');
+
       expect(configs).toHaveProperty('api');
       expect(configs).toHaveProperty('blog-write');
       expect(configs).toHaveProperty('default');

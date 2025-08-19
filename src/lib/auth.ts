@@ -50,7 +50,6 @@ export interface AuthConfig {
 }
 
 class AuthClient {
-  private config: AuthConfig;
   private session: Session | null = null;
   private callbacks: {
     onSignIn?: (user: User) => void;
@@ -58,8 +57,7 @@ class AuthClient {
     onSessionChange?: (session: Session | null) => void;
   } = {};
 
-  constructor(config: AuthConfig) {
-    this.config = config;
+  constructor() {
     this.loadSession();
   }
 
@@ -84,30 +82,30 @@ class AuthClient {
     }
   }
 
-  private generateToken(user: User): string {
-    const payload = {
-      user,
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
-      iat: Math.floor(Date.now() / 1000)
-    };
-    
-    // Simple base64 encoding (in production, use proper JWT library)
-    return btoa(JSON.stringify(payload));
-  }
+
 
   async signIn(credentials: { username: string; password: string }): Promise<{ success: boolean; error?: string }> {
     try {
-      const user = await this.config.providers.credentials.authorize(credentials);
-      
-      if (user) {
-        const token = this.generateToken(user);
+      // Use the new consolidated API directly
+      const response = await fetch('/api/auth?action=login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.token) {
+        const user = { id: 'admin', name: 'Admin' };
         this.session = {
           user,
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          accessToken: token
+          accessToken: result.token
         };
         
-        localStorage.setItem('nextauth.session-token', token);
+        localStorage.setItem('nextauth.session-token', result.token);
         
         if (this.callbacks.onSignIn) {
           this.callbacks.onSignIn(user);
@@ -119,7 +117,7 @@ class AuthClient {
         
         return { success: true };
       } else {
-        return { success: false, error: 'Invalid credentials' };
+        return { success: false, error: result.message || 'Invalid credentials' };
       }
     } catch (error) {
       console.error('Sign in error:', error);
@@ -164,45 +162,8 @@ class AuthClient {
   }
 }
 
-// Create the auth client with NextAuth-like configuration
-export const auth = new AuthClient({
-  providers: {
-    credentials: {
-      name: 'Admin Login',
-      credentials: {
-        username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' }
-      },
-      async authorize(credentials) {
-        // Debug logging
-        console.log('Auth attempt:', { 
-          username: credentials?.username,
-          hasPassword: !!credentials?.password,
-          envUser: import.meta.env.VITE_ADMIN_USER,
-          envPass: import.meta.env.VITE_ADMIN_PASS ? '***' : 'NOT_SET'
-        });
-
-        const isValid =
-          credentials?.username === import.meta.env.VITE_ADMIN_USER &&
-          credentials?.password === import.meta.env.VITE_ADMIN_PASS;
-
-        console.log('Auth result:', { isValid });
-
-        if (isValid) {
-          return { id: 'admin', name: 'Admin' };
-        }
-        return null;
-      }
-    }
-  },
-  session: {
-    strategy: 'jwt'
-  },
-  secret: import.meta.env.VITE_NEXTAUTH_SECRET || 'your-secret-key',
-  pages: {
-    signIn: '/login'
-  }
-});
+// Create the auth client
+export const auth = new AuthClient();
 
 // Export NextAuth-like hooks and functions
 export const useSession = () => auth.useSession();

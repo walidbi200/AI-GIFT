@@ -24,11 +24,11 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
       };
     }
     
-    // Create user object from token payload
+    // Create user object from token payload (admin only)
     const user: User = {
       id: decoded.userId,
       email: decoded.email,
-      role: decoded.role as 'admin' | 'user',
+      role: 'admin',
       createdAt: new Date(decoded.iat * 1000), // Convert timestamp to Date
     };
     
@@ -47,7 +47,7 @@ export async function verifyAuth(request: Request): Promise<AuthResult> {
 
 /**
  * Require admin role middleware
- * Returns 403 if user is not an admin
+ * Returns 403 if user is not authenticated as admin
  */
 export async function requireAdmin(request: Request): Promise<AuthResult> {
   const authResult = await verifyAuth(request);
@@ -56,13 +56,7 @@ export async function requireAdmin(request: Request): Promise<AuthResult> {
     return authResult;
   }
   
-  if (authResult.user?.role !== 'admin') {
-    return {
-      authenticated: false,
-      error: 'Admin access required'
-    };
-  }
-  
+  // Since we only support admin users, any authenticated user is an admin
   return authResult;
 }
 

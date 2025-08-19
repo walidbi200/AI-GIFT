@@ -38,10 +38,7 @@ class RateLimiter {
       maxRequests: 5,
       windowMs: 15 * 60 * 1000, // 15 minutes
     },
-    'register': {
-      maxRequests: 3,
-      windowMs: 60 * 60 * 1000, // 1 hour
-    },
+
     // General API endpoints
     'api': {
       maxRequests: 100,

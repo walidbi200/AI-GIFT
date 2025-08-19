@@ -25,7 +25,7 @@ const BlogPostPage: React.FC = () => {
         setError(null);
         
         // Fetch the main post
-        const response = await fetch(`/api/blog/post?slug=${slug}`);
+        const response = await fetch(`/api/blog?slug=${slug}`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -40,7 +40,7 @@ const BlogPostPage: React.FC = () => {
 
         // Fetch related posts
         try {
-          const relatedResponse = await fetch('/api/blog/list?limit=6');
+          const relatedResponse = await fetch('/api/blog?limit=6');
           if (relatedResponse.ok) {
             const relatedData = await relatedResponse.json();
             const filteredRelated = relatedData.posts
@@ -54,7 +54,7 @@ const BlogPostPage: React.FC = () => {
 
         // Fetch navigation posts (previous/next)
         try {
-          const allPostsResponse = await fetch('/api/blog/list?limit=100');
+          const allPostsResponse = await fetch('/api/blog?limit=100');
           if (allPostsResponse.ok) {
             const allPostsData = await allPostsResponse.json();
             const currentIndex = allPostsData.posts.findIndex((p: BlogPostType) => p.slug === slug);

@@ -91,7 +91,7 @@ const BlogGenerator: React.FC = () => {
     setGeneratedBlog(null);
 
     try {
-      const response = await fetch('/api/blog/generate-blog', {
+      const response = await fetch('/api/blog?action=generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -122,7 +122,7 @@ const BlogGenerator: React.FC = () => {
     
     setIsSaving(true);
     try {
-        const response = await fetch('/api/blog/save', {
+        const response = await fetch('/api/blog', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(generatedBlog)

@@ -20,9 +20,9 @@ describe('Blog API Integration Tests', () => {
   };
 
   const regularUser: User = {
-    id: 'user-123',
-    email: 'user@test.com',
-    role: 'user',
+    id: 'admin-123',
+    email: 'admin@test.com',
+    role: 'admin',
     createdAt: new Date()
   };
 

@@ -134,7 +134,7 @@ export const rateLimitMiddleware = {
   
   // Authentication endpoints
   login: (request: Request) => rateLimit(request, 'login'),
-  register: (request: Request) => rateLimit(request, 'register'),
+
   
   // Blog write operations
   blogWrite: (request: Request) => rateLimit(request, 'blog-write'),
