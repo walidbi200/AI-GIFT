@@ -8,33 +8,45 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Smart Gift Finder',
         short_name: 'GiftFinder',
         description: 'An AI-powered tool to find the perfect gift for any occasion.',
-        theme_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
         background_color: '#f8fafc',
+        theme_color: '#ffffff',
+        orientation: 'portrait-primary',
+        scope: '/',
+        lang: 'en',
+        categories: ['lifestyle', 'productivity', 'utilities'],
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'maskable any'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          },
+            type: 'image/png',
+            purpose: 'maskable any'
+          }
+        ],
+        shortcuts: [
           {
-            src: 'pwa-192x192.webp',
-            sizes: '192x192',
-            type: 'image/webp'
-          },
-          {
-            src: 'pwa-512x512.webp',
-            sizes: '512x512',
-            type: 'image/webp'
+            name: 'Find Gifts',
+            short_name: 'Gifts',
+            description: 'Start finding personalized gift recommendations',
+            url: '/',
+            icons: [
+              {
+                src: '/pwa-192x192.png',
+                sizes: '192x192'
+              }
+            ]
           }
         ]
       }
@@ -46,6 +58,7 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       }
     }
   },

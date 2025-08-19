@@ -82,13 +82,24 @@ app.post('/api/generate-gifts', (req, res) => {
 });
 
 // Mock GA API endpoint
-app.post('/api/ga', (req, res) => {
+app.all('/api/ga', (req, res) => {
   res.json({
     success: true,
     data: {
       pageViews: 100,
       uniqueVisitors: 50,
-      bounceRate: 0.3
+      sessionDuration: 180,
+      bounceRate: 0.3,
+      sessions: 25,
+      topPages: [
+        { path: '/', title: 'Home', views: 50 },
+        { path: '/blog', title: 'Blog', views: 30 },
+        { path: '/admin', title: 'Admin', views: 20 }
+      ],
+      recentActivity: [
+        { timestamp: new Date().toISOString(), action: 'page_view', page: '/' },
+        { timestamp: new Date().toISOString(), action: 'gift_search', occasion: 'birthday' }
+      ]
     }
   });
 });
