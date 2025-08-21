@@ -61,11 +61,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 });
         }
     } catch (error) {
-        console.error('🔥 Blog API Error:', error);
+        console.error('🔥 Blog API Error:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack',
+            name: error instanceof Error ? error.name : 'No name',
+            timestamp: new Date().toISOString()
+        });
         console.error('🔥 Error type:', typeof error);
         console.error('🔥 Error constructor:', error?.constructor?.name);
-        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
-        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
         console.error('🔥 Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
         
         return res.status(500).json({
@@ -100,11 +103,14 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         console.log('📖 Fetching all published posts...');
         return await getAllPosts(res);
     } catch (error) {
-        console.error('🔥 ERROR IN handleGet:', error);
+        console.error('🔥 ERROR IN handleGet:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack',
+            name: error instanceof Error ? error.name : 'No name',
+            timestamp: new Date().toISOString()
+        });
         console.error('🔥 Error type:', typeof error);
         console.error('🔥 Error constructor:', error?.constructor?.name);
-        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
-        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
         
         return res.status(500).json({
             success: false,
@@ -137,8 +143,23 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
 async function getAllPosts(res: VercelResponse) {
     try {
         console.log('🔍 Starting getAllPosts function...');
+        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+        console.log('🔍 Prisma client status:', !!prisma);
         console.log('🔍 Attempting to connect to database...');
         
+        // Test database connection first
+        try {
+            await prisma.$connect();
+            console.log('✅ Database connection successful');
+        } catch (dbError) {
+            console.error('🔥 DATABASE CONNECTION FAILED:', dbError);
+            console.error('🔥 Database error type:', typeof dbError);
+            console.error('🔥 Database error message:', dbError instanceof Error ? dbError.message : 'No message');
+            console.error('🔥 Database error stack:', dbError instanceof Error ? dbError.stack : 'No stack');
+            throw new Error(`Database connection failed: ${dbError instanceof Error ? dbError.message : 'Unknown database error'}`);
+        }
+        
+        console.log('🔍 Executing Prisma query...');
         const posts = await prisma.post.findMany({
             where: {
                 status: 'published'
@@ -159,6 +180,11 @@ async function getAllPosts(res: VercelResponse) {
         });
 
         console.log(`✅ Successfully fetched ${posts.length} posts from database`);
+        console.log('🔍 Sample post data:', posts.length > 0 ? {
+            id: posts[0].id,
+            slug: posts[0].slug,
+            title: posts[0].title?.substring(0, 50) + '...'
+        } : 'No posts found');
 
         const postsWithReadingTime = posts.map(post => ({
             ...post,
@@ -173,13 +199,17 @@ async function getAllPosts(res: VercelResponse) {
         res.setHeader('Vary', 'Accept-Encoding');
 
         console.log('✅ Setting response headers');
+        console.log('✅ Returning successful response');
         return res.status(200).json({ posts: postsWithReadingTime });
     } catch (error) {
-        console.error('🔥 ERROR FETCHING BLOG POSTS:', error);
+        console.error('🔥 ERROR FETCHING BLOG POSTS:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack',
+            name: error instanceof Error ? error.name : 'No name',
+            timestamp: new Date().toISOString()
+        });
         console.error('🔥 Error type:', typeof error);
         console.error('🔥 Error constructor:', error?.constructor?.name);
-        console.error('🔥 Error message:', error instanceof Error ? error.message : 'No message');
-        console.error('🔥 Error stack:', error instanceof Error ? error.stack : 'No stack');
         console.error('🔥 Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
         
         return res.status(500).json({
@@ -187,11 +217,21 @@ async function getAllPosts(res: VercelResponse) {
             message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: new Date().toISOString()
         });
+    } finally {
+        try {
+            await prisma.$disconnect();
+            console.log('✅ Database connection closed');
+        } catch (disconnectError) {
+            console.error('⚠️ Error disconnecting from database:', disconnectError);
+        }
     }
 }
 
 async function getPostBySlug(slug: string, res: VercelResponse) {
     try {
+        console.log(`🔍 Fetching post with slug: ${slug}`);
+        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+        
         const post = await prisma.post.findFirst({
             where: {
                 slug: slug,
@@ -212,8 +252,11 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
         });
 
         if (!post) {
+            console.log(`❌ Post not found with slug: ${slug}`);
             return res.status(404).json({ error: 'Post not found' });
         }
+
+        console.log(`✅ Post found: ${post.title}`);
 
         const fullPost = {
             ...post,
@@ -223,7 +266,12 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
 
         return res.status(200).json({ post: fullPost });
     } catch (error) {
-        console.error(`Error fetching post with slug ${slug}:`, error);
+        console.error(`🔥 Error fetching post with slug ${slug}:`, {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack',
+            name: error instanceof Error ? error.name : 'No name',
+            timestamp: new Date().toISOString()
+        });
         return res.status(500).json({
             error: 'Internal server error',
             message: error instanceof Error ? error.message : 'Unknown error'
@@ -234,6 +282,7 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
 async function getStats(res: VercelResponse) {
     try {
         console.log('📊 Fetching blog statistics...');
+        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
         
         const totalPosts = await prisma.post.count({
             where: {
@@ -270,7 +319,12 @@ async function getStats(res: VercelResponse) {
             }
         });
     } catch (error) {
-        console.error('🔥 Stats API Error:', error);
+        console.error('🔥 Stats API Error:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : 'No stack',
+            name: error instanceof Error ? error.name : 'No name',
+            timestamp: new Date().toISOString()
+        });
         return res.status(500).json({ 
             success: false, 
             error: 'Internal server error',
