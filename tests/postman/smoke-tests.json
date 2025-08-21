@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "AI-GFT Smoke Tests",
+    "description": "Smoke tests for critical application functionality",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Blog API - List Posts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/blog/list",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "blog", "list"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Blog API - Stats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/blog/stats",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "blog", "stats"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gift API - Generate Gifts",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"recipient\": \"mom\",\n  \"occasion\": \"birthday\",\n  \"budget\": 100\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/generate-gifts",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "generate-gifts"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5173",
+      "type": "string"
+    }
+  ]
+}

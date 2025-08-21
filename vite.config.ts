@@ -2,66 +2,66 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Custom Contentlayer integration for Vite
-function contentlayerPlugin() {
-  return {
-    name: 'contentlayer',
-    buildStart() {
-      // This will run contentlayer build process
-      // For now, we'll handle this manually or via package.json scripts
-      console.log('Contentlayer: Building content...');
-    },
-    handleHotUpdate({ file, server }) {
-      // Hot reload when markdown files change
-      if (file.includes('src/content/posts') && file.endsWith('.md')) {
-        console.log('Contentlayer: Content file changed, rebuilding...');
-        server.ws.send({
-          type: 'full-reload'
-        });
-      }
-    }
-  }
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Smart Gift Finder',
         short_name: 'GiftFinder',
         description: 'An AI-powered tool to find the perfect gift for any occasion.',
-        theme_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
         background_color: '#f8fafc',
+        theme_color: '#ffffff',
+        orientation: 'portrait-primary',
+        scope: '/',
+        lang: 'en',
+        categories: ['lifestyle', 'productivity', 'utilities'],
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'maskable any'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          },
+            type: 'image/png',
+            purpose: 'maskable any'
+          }
+        ],
+        shortcuts: [
           {
-            src: 'pwa-192x192.webp',
-            sizes: '192x192',
-            type: 'image/webp'
-          },
-          {
-            src: 'pwa-512x512.webp',
-            sizes: '512x512',
-            type: 'image/webp'
+            name: 'Find Gifts',
+            short_name: 'Gifts',
+            description: 'Start finding personalized gift recommendations',
+            url: '/',
+            icons: [
+              {
+                src: '/pwa-192x192.png',
+                sizes: '192x192'
+              }
+            ]
           }
         ]
       }
-    }),
-    contentlayerPlugin()
+    })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      }
+    }
+  },
   build: {
     rollupOptions: {
       output: {

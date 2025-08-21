@@ -36,8 +36,8 @@ export class GiftService {
         );
       }
 
-      const data: ApiResponse = await response.json();
-      return data.suggestions;
+      const suggestions = await response.json();
+      return suggestions;
     } catch (error) {
       // Provide user-friendly error messages
       if (error instanceof Error) {
@@ -77,30 +77,35 @@ export class GiftService {
         name: "📸 Polaroid Go Camera",
         description: `Perfect for a ${formData.age}-year-old ${formData.relationship} who loves capturing memories. Great for ${formData.occasion}!`,
         link: "https://amazon.com",
+        reason: "Perfect for capturing memories and moments",
       },
       {
         id: 2,
         name: "🎮 Retro Game Console",
         description: `A nostalgic gaming experience that combines classic fun with modern convenience. Ideal for a ${formData.relationship} on ${formData.occasion}.`,
         link: "https://amazon.com",
+        reason: "Great for gaming enthusiasts and nostalgia lovers",
       },
       {
         id: 3,
         name: "📚 Personalized Book Collection",
         description: `Curated books based on their interests and reading level. A thoughtful ${formData.occasion} gift for your ${formData.relationship}.`,
         link: "https://amazon.com",
+        reason: "Thoughtful and educational gift choice",
       },
       {
         id: 4,
         name: "🎨 Creative Art Kit",
         description: `High-quality art supplies for unleashing creativity. Perfect for a ${formData.relationship} who loves artistic expression.`,
         link: "https://amazon.com",
+        reason: "Encourages creativity and artistic expression",
       },
       {
         id: 5,
         name: "🏠 Smart Home Device",
         description: `Modern tech gadget to make their home smarter and more convenient. Great for a ${formData.relationship} on ${formData.occasion}!`,
         link: "https://amazon.com",
+        reason: "Modern and practical tech solution",
       },
     ];
 

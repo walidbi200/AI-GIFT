@@ -14,11 +14,9 @@ interface FormInputProps {
   icon?: React.ReactNode;
   className?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  id?: string;
-  index?: number;
 }
 
-const FormInput: React.FC<FormInputProps> = ({
+const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
   label,
   type,
   value,
@@ -33,7 +31,6 @@ const FormInput: React.FC<FormInputProps> = ({
   className = "",
   onKeyDown,
   id,
-  index,
 }) => {
   // Generate a unique ID: use provided id, or label + random string
   const inputId =

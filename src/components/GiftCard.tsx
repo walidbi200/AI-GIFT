@@ -8,107 +8,86 @@ interface GiftCardProps {
   index: number;
 }
 
-// The GiftCard component with enhanced modern styling and dark mode support
+// The GiftCard component with enhanced modern styling and no image dependencies
 const GiftCard = ({ suggestion, index }: GiftCardProps) => {
   // Animation delay for a staggered effect
   const animationDelay = `${index * 100}ms`;
-  const imageUrl =
-    suggestion.imageUrl ||
-    "https://via.placeholder.com/300x200?text=Gift+Image";
 
   return (
     <article
-      className="card-container group border border-border rounded-lg shadow-md flex flex-col transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 animate-fade-in-up"
+      className="group border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:-translate-y-1 animate-fade-in-up bg-gradient-to-br from-blue-50 to-purple-50"
       style={{ animationDelay }}
     >
-      {/* Hero Image Container */}
-      <div className="image-wrapper relative h-48">
-        {/* Dynamic Badge */}
-        {suggestion.tag && (
-          <div className="absolute top-3 left-3 bg-secondary text-white px-2.5 py-1 rounded-full text-xs font-bold z-10 shadow">
-            {suggestion.tag}
-          </div>
-        )}
-        <img
-          src={imageUrl}
-          alt={suggestion.name}
-          className="w-full h-full object-cover rounded-t-lg"
-          loading="lazy"
-        />
-        {/* Quick Actions Overlay (optional, placeholder) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity duration-300 z-20">
-          {/* Example: Wishlist button */}
-          <button
-            className="bg-white/80 hover:bg-white text-primary rounded-full p-2 shadow-lg transition-colors duration-200 mr-2"
-            title="Add to Wishlist"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
       {/* Content Container */}
-      <div className="flex-1 flex flex-col px-4 pb-4 pt-4">
-        <header>
-          <h2 className="text-lg font-bold text-text-primary mb-1 truncate">
-            {suggestion.name}
-          </h2>
-          {suggestion.price && (
-            <div className="text-base font-semibold text-text-secondary mb-2">
-              {suggestion.price}
+      <div className="p-6">
+        {/* Header with badge and title */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">Gift Idea</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
+              {suggestion.name}
+            </h2>
+          </div>
+          {suggestion.tag && (
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+              {suggestion.tag}
             </div>
           )}
-        </header>
-        <section className="flex-grow">
-          <p className="text-text-secondary text-sm mb-3 line-clamp-3">
-            {suggestion.description}
-          </p>
-        </section>
-        <footer className="mt-auto flex items-center gap-2">
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          {suggestion.description}
+        </p>
+
+        {/* Price and reason if available */}
+        {suggestion.price && (
+          <div className="mb-4">
+            <span className="text-2xl font-bold text-green-600">
+              {suggestion.price}
+            </span>
+          </div>
+        )}
+        
+        {suggestion.reason && (
+          <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+            <p className="text-sm text-blue-800 italic">
+              💡 {suggestion.reason}
+            </p>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex items-center justify-between gap-3">
           <a
             href={suggestion.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-primary text-white px-3 py-2 rounded-md hover:bg-primary/90 transition-colors text-xs font-semibold"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-semibold text-center shadow-sm hover:shadow-md"
           >
-            <span>View Product</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Find on Amazon
+            </span>
           </a>
+          
           <button
             onClick={() =>
               navigator.clipboard.writeText(
                 `${suggestion.name} - ${suggestion.description}`,
               )
             }
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-primary transition-colors duration-200 p-2 rounded-md hover:bg-background"
+            className="p-3 text-gray-500 hover:text-blue-600 transition-colors duration-200 rounded-lg hover:bg-blue-50 border border-gray-200 hover:border-blue-200"
             title="Copy to clipboard"
             aria-label={`Copy ${suggestion.name} details to clipboard`}
           >
             <svg
-              className="w-4 h-4"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -121,7 +100,7 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
               />
             </svg>
           </button>
-        </footer>
+        </div>
       </div>
     </article>
   );

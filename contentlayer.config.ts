@@ -1,16 +1,38 @@
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files';
+import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 
 export const Post = defineDocumentType(() => ({
   name: 'Post',
-  filePathPattern: `**/*.md`,
+  filePathPattern: 'src/content/posts/**/*.md',
   fields: {
-    title: { type: 'string', required: true },
-    description: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' } },
-    image: { type: 'string', required: true },
-    author: { type: 'string', required: true },
-    readTime: { type: 'number', required: true },
+    title: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'string',
+      required: true,
+    },
+    date: {
+      type: 'date',
+      required: true,
+    },
+    tags: {
+      type: 'list',
+      of: { type: 'string' },
+      required: true,
+    },
+    image: {
+      type: 'string',
+      required: true,
+    },
+    author: {
+      type: 'string',
+      required: true,
+    },
+    readTime: {
+      type: 'number',
+      required: true,
+    },
   },
   computedFields: {
     url: {
@@ -25,7 +47,6 @@ export const Post = defineDocumentType(() => ({
 }));
 
 export default makeSource({
-  contentDirPath: 'src/content/posts',
+  contentDirPath: 'src/content',
   documentTypes: [Post],
-  // You can add markdown/mdx options here if needed
-}); 
+});

@@ -1,9 +1,33 @@
 /* FILE: src/index.css */
 /* This version removes the conflicting default styles. */
 
+/* Import Medium-style blog typography */
+@import './styles/blog.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom utilities for blog components */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+}
 
 @layer base {
   body {

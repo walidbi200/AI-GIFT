@@ -9,10 +9,12 @@ The PWA functionality has been successfully configured with the Vite PWA plugin 
 To complete the PWA setup, you need to add the following icon files to the `public/` folder:
 
 ### 1. PWA Icons (Required)
+
 - `public/pwa-192x192.png` - 192x192 pixel PNG icon
 - `public/pwa-512x512.png` - 512x512 pixel PNG icon
 
 ### 2. Apple Touch Icon (Optional but Recommended)
+
 - `public/apple-touch-icon.png` - 180x180 pixel PNG icon for iOS devices
 
 ## Icon Design Guidelines
@@ -27,11 +29,13 @@ For the best PWA experience, your icons should:
 ## How to Create Icons
 
 ### Option 1: Use Online Tools
+
 - [Favicon.io](https://favicon.io/) - Generate icons from text or images
 - [RealFaviconGenerator](https://realfavicongenerator.net/) - Comprehensive icon generator
 - [PWA Builder](https://www.pwabuilder.com/imageGenerator) - PWA-specific icon generator
 
 ### Option 2: Design Software
+
 - Figma, Adobe Illustrator, or any image editing software
 - Export as PNG with the exact dimensions
 
@@ -56,6 +60,7 @@ Your Smart Gift Finder now has:
 ## Manifest Configuration
 
 The PWA manifest is configured with:
+
 - **Name**: Smart Gift Finder
 - **Short Name**: GiftFinder
 - **Description**: An AI-powered tool to find the perfect gift for any occasion
@@ -72,7 +77,8 @@ The PWA manifest is configured with:
 ## Troubleshooting
 
 If PWA features don't work:
+
 1. Ensure all icon files are in the correct location
 2. Check that the manifest is being generated correctly
 3. Verify HTTPS is enabled (required for PWA)
-4. Clear browser cache and test again 
+4. Clear browser cache and test again

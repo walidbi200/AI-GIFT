@@ -2,35 +2,36 @@
 // This is the final, complete, and unabridged version of your application's
 // main component, with all features and correct routing.
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
+import React, { Suspense, useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
-// --- Your Actual Component Imports ---
-import GiftCard from "./components/GiftCard";
-import GiftCardSkeleton from "./components/GiftCardSkeleton";
-import LoadingSpinner from "./components/LoadingSpinner";
-import Toast from "./components/Toast";
-import FeedbackModal from "./components/FeedbackModal";
-import RecentSearches from "./components/RecentSearches";
-import Button from "./components/Button";
-import GiftBoxLoader from "./components/GiftBoxLoader";
-import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import ThemeToggle from "./components/ThemeToggle";
-import GiftLoadingScreen from "./components/GiftLoadingScreen";
-import NotFound from "./pages/NotFound";
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import { PrivacyPolicy } from './pages/privacy';
+import NotFound from './pages/NotFound';
+import RecentSearches from './components/RecentSearches';
+import Button from './components/Button';
+import GiftCard from './components/GiftCard';
+import { CookieConsent } from './components/CookieConsent';
+import { ErrorBoundary, setupGlobalErrorHandling } from './components/ErrorBoundary';
+import { logger } from './lib/logger';
+import GiftLoadingScreen from './components/GiftLoadingScreen';
+import GiftBoxLoader from './components/GiftBoxLoader';
 
 // --- Lazy-loaded Components ---
+const HomePage = React.lazy(() => import("./pages/HomePage"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
-const BlogPage = React.lazy(() => import("./pages/Blog"));
-const BlogPost = React.lazy(() => import("./pages/BlogPost"));
+const BlogIndex = React.lazy(() => import("./pages/BlogIndex"));
+const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
+const Login = React.lazy(() => import("./pages/Login"));
+const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
+const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
+const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
 
 // --- Your Actual Hook and Service Imports ---
-import type { GiftSuggestion, FormErrors, ToastType } from "./types";
+import type { GiftSuggestion, FormErrors } from "./types";
 import { GiftService } from "./services/giftService";
 import { useRecentSearches } from "./hooks/useLocalStorage";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
@@ -43,46 +44,11 @@ const REFINE_OPTIONS = [
   { label: "More Unique", value: "unique" },
   { label: "More Luxurious", value: "luxury" },
 ];
-const SURPRISE_PERSONAS = [
-  {
-    age: 45,
-    relationship: "Parent",
-    occasion: "Birthday",
-    interests: ["astronomy", "baking"],
-    budget: "100",
-    negativeKeywords: "socks, mugs",
-  },
-  {
-    age: 22,
-    relationship: "Friend",
-    occasion: "Graduation",
-    interests: ["gaming", "travel"],
-    budget: "50",
-    negativeKeywords: "books",
-  },
-];
-const POPULAR_TAGS = [
-  "tech",
-  "gaming",
-  "reading",
-  "cooking",
-  "travel",
-  "movies",
-  "music",
-  "sports",
-  "fitness",
-  "fashion",
-  "art",
-  "photography",
-  "gardening",
-  "diy crafts",
-  "hiking",
-  "makeup",
-];
+
+
 
 // This is the component for your main gift finder page
-function HomePage() {
-  const { trackGiftGeneration } = useGoogleAnalytics();
+function GiftFinder() {
   const TOTAL_STEPS = 6;
   const [step, setStep] = useState(1);
   const [age, setAge] = useState(25);
@@ -93,19 +59,11 @@ function HomePage() {
   const [relationship, setRelationship] = useState("");
   const [negativeKeywords, setNegativeKeywords] = useState("");
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<ToastType>("success");
-  const [isUsingMockData, setIsUsingMockData] = useState(false);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [hasGeneratedSuggestions, setHasGeneratedSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<
-    GiftSuggestion[]
-  >([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<GiftSuggestion[]>([]);
+
 
   // Update filtered suggestions when suggestions or activeFilters change
   useEffect(() => {
@@ -114,14 +72,11 @@ function HomePage() {
     } else {
       setFilteredSuggestions(
         suggestions.filter((s) =>
-          activeFilters.every(
-            (filter) =>
-              (s.reason &&
-                s.reason.toLowerCase().includes(filter.toLowerCase())) ||
-              (s.description &&
-                s.description.toLowerCase().includes(filter.toLowerCase())),
-          ),
-        ),
+          activeFilters.every((filter) =>
+            (s.reason && s.reason.toLowerCase().includes(filter.toLowerCase())) ||
+            (s.description && s.description.toLowerCase().includes(filter.toLowerCase()))
+          )
+        )
       );
     }
   }, [suggestions, activeFilters]);
@@ -131,7 +86,7 @@ function HomePage() {
     setActiveFilters((prev) =>
       prev.includes(filter)
         ? prev.filter((f) => f !== filter)
-        : [...prev, filter],
+        : [...prev, filter]
     );
   };
 
@@ -171,16 +126,12 @@ function HomePage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const showToastMessage = (message: string, type: ToastType) => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-  };
+
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validateForm()) {
-      showToastMessage("Please fix the errors in the form", "error");
+
       return;
     }
     setLoading(true);
@@ -200,24 +151,17 @@ function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const generatedSuggestions = await response.json();
       if (Array.isArray(generatedSuggestions)) {
         setSuggestions(generatedSuggestions);
-        showToastMessage(
-          `🎉 Found ${generatedSuggestions.length} gift suggestions!`,
-          "success",
-        );
-        trackGiftGeneration(occasion, relationship, interests.length);
+
+
       } else {
         throw new Error("Invalid data format received from API.");
       }
     } catch (error) {
-      showToastMessage(
-        "Failed to generate suggestions. Please try again.",
-        "error",
-      );
+
       const mockSuggestions = await GiftService.generateMockSuggestions({
         age,
         relationship,
@@ -226,31 +170,14 @@ function HomePage() {
         budget,
       });
       setSuggestions(mockSuggestions);
-      setIsUsingMockData(true);
+
     } finally {
       setLoading(false);
-      setHasGeneratedSuggestions(true);
+
     }
   };
 
-  const handleRefine = (refineValue: string) => {
-    if (!interests.includes(refineValue.toLowerCase())) {
-      setInterests([...interests, refineValue.toLowerCase()]);
-    }
-    setTimeout(() => handleSubmit(), 0);
-  };
 
-  const handleSurpriseMe = () => {
-    const persona =
-      SURPRISE_PERSONAS[Math.floor(Math.random() * SURPRISE_PERSONAS.length)];
-    setAge(persona.age);
-    setRelationship(persona.relationship);
-    setOccasion(persona.occasion);
-    setInterests(persona.interests);
-    setBudget(persona.budget);
-    setNegativeKeywords(persona.negativeKeywords);
-    setTimeout(() => handleSubmit(), 0);
-  };
 
   const copyToClipboard = async () => {
     try {
@@ -258,24 +185,12 @@ function HomePage() {
         .map((s: GiftSuggestion) => `${s.name} – ${s.description}`)
         .join("\n");
       await navigator.clipboard.writeText(text);
-      showToastMessage("Gift list copied to clipboard!", "success");
+
     } catch (error) {
-      showToastMessage("Failed to copy to clipboard", "error");
+
     }
   };
-  const clearForm = () => {
-    setAge(25);
-    setOccasion("");
-    setInterests([]);
-    setCurrentInterest("");
-    setBudget("");
-    setRelationship("");
-    setNegativeKeywords("");
-    setSuggestions([]);
-    setErrors({});
-    setIsUsingMockData(false);
-    setHasGeneratedSuggestions(false);
-  };
+
   const handleSelectRecentSearch = (search: any) => {
     setAge(search.age);
     setRelationship(search.relationship || "");
@@ -285,39 +200,19 @@ function HomePage() {
     setNegativeKeywords(search.negativeKeywords || "");
     setErrors({});
   };
-  const handleFeedbackSubmit = async (rating: number, feedback: string) => {
-    try {
-      showToastMessage("Thank you for your feedback!", "success");
-    } catch (error) {
-      showToastMessage("Failed to submit feedback", "error");
-    }
-  };
+
 
   // Progress bar width calculation
   const progressPercent = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
   // Fade-in animation class
-  const fadeInClass =
-    "transition-all duration-500 opacity-0 translate-y-4 animate-fade-in-up";
+
 
   // Popular interests for step 4
   const popularInterests = [
-    "Tech",
-    "Gaming",
-    "Reading",
-    "Cooking",
-    "Travel",
-    "Movies",
-    "Music",
-    "Sports",
-    "Fitness",
-    "Fashion",
-    "Art",
-    "Photography",
-    "Gardening",
-    "DIY Crafts",
-    "Hiking",
-    "Makeup",
+    'Tech', 'Gaming', 'Reading', 'Cooking', 'Travel', 'Movies',
+    'Music', 'Sports', 'Fitness', 'Fashion', 'Art', 'Photography',
+    'Gardening', 'DIY Crafts', 'Hiking', 'Makeup'
   ];
 
   // Render loading screen if loading
@@ -332,10 +227,7 @@ function HomePage() {
         <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
           <div
             className="h-3 bg-primary rounded-full transition-all"
-            style={{
-              width: `${progressPercent}%`,
-              transition: "width 0.4s ease-in-out",
-            }}
+            style={{ width: `${progressPercent}%`, transition: 'width 0.4s ease-in-out' }}
           />
         </div>
         <div className="text-center mt-2 text-sm font-medium text-text-secondary">
@@ -344,19 +236,14 @@ function HomePage() {
       </div>
       <header className="text-center mb-10">
         <h1 className="text-4xl sm:text-5xl font-display font-bold text-light-text-primary dark:text-dark-text-primary">
-          <span role="img" aria-label="Gift box icon">
-            🎁
-          </span>{" "}
-          Smart Gift Finder
+          <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
         </h1>
         <p className="text-light-text-muted dark:text-dark-text-muted mt-2">
           Find the perfect gift with AI-powered suggestions
         </p>
       </header>
       <section className="mb-6 text-center animate-fade-in-up">
-        <h2 className="font-display text-3xl font-bold text-text-primary">
-          Let's find the perfect gift!
-        </h2>
+        <h2 className="font-display text-3xl font-bold text-text-primary">Let's find the perfect gift!</h2>
       </section>
       <section>
         <RecentSearches
@@ -366,12 +253,7 @@ function HomePage() {
         />
       </section>
       <section className="bg-surface rounded-lg shadow-lg p-8 mb-8 border border-border mx-4 sm:mx-0">
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
-          role="search"
-          aria-label="Gift recommendation form"
-        >
+        <form onSubmit={handleSubmit} className="space-y-6" role="search" aria-label="Gift recommendation form">
           {Object.keys(errors).length > 0 && (
             <div className="mb-4 p-3 rounded-lg text-white text-center font-bold animate-fade-in-up bg-error dark:bg-dark-error">
               Please fill in all required fields.
@@ -380,176 +262,69 @@ function HomePage() {
           {/* Step 1: Recipient Age */}
           {step === 1 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="age"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
-                Recipient Age:{" "}
-                <span className="text-primary font-bold">{age}</span>
+              <label htmlFor="age" className="block text-base font-medium text-text-secondary mb-2">
+                Recipient Age: <span className="text-primary font-bold">{age}</span>
               </label>
-              <input
-                type="range"
-                id="age"
-                min="1"
-                max="100"
-                value={age}
-                onChange={(e) => setAge(parseInt(e.target.value))}
-                className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer"
-              />
+              <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer" />
             </div>
           )}
           {/* Step 2: Who is this for? */}
           {step === 2 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="relationship"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
+              <label htmlFor="relationship" className="block text-base font-medium text-text-secondary mb-2">
                 Who is this for? <span className="text-error">*</span>
               </label>
-              <select
-                id="relationship"
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? "border-error" : ""}`}
-                aria-describedby={
-                  errors.relationship ? "relationship-error" : undefined
-                }
-              >
+              <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? 'border-error' : ''}`} aria-describedby={errors.relationship ? 'relationship-error' : undefined}>
                 <option value="">Select relationship</option>
                 {relationships.map((rel) => (
-                  <option key={rel.value} value={rel.value}>
-                    {rel.label}
-                  </option>
+                  <option key={rel.value} value={rel.value}>{rel.label}</option>
                 ))}
               </select>
               {errors.relationship && (
-                <p
-                  id="relationship-error"
-                  className="text-error text-sm mt-1"
-                  role="alert"
-                >
-                  {errors.relationship}
-                </p>
+                <p id="relationship-error" className="text-error text-sm mt-1" role="alert">{errors.relationship}</p>
               )}
             </div>
           )}
           {/* Step 3: Occasion */}
           {step === 3 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="occasion"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
+              <label htmlFor="occasion" className="block text-base font-medium text-text-secondary mb-2">
                 Occasion <span className="text-error">*</span>
               </label>
-              <select
-                id="occasion"
-                value={occasion}
-                onChange={(e) => setOccasion(e.target.value)}
-                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? "border-error" : ""}`}
-                aria-describedby={
-                  errors.occasion ? "occasion-error" : undefined
-                }
-              >
+              <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? 'border-error' : ''}`} aria-describedby={errors.occasion ? 'occasion-error' : undefined}>
                 <option value="">Select an occasion</option>
                 {occasions.map((occ) => (
-                  <option key={occ.value} value={occ.value}>
-                    {occ.label}
-                  </option>
+                  <option key={occ.value} value={occ.value}>{occ.label}</option>
                 ))}
               </select>
               {errors.occasion && (
-                <p
-                  id="occasion-error"
-                  className="text-error text-sm mt-1"
-                  role="alert"
-                >
-                  {errors.occasion}
-                </p>
+                <p id="occasion-error" className="text-error text-sm mt-1" role="alert">{errors.occasion}</p>
               )}
             </div>
           )}
           {/* Step 4: Interests */}
           {step === 4 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="interests"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
+              <label htmlFor="interests" className="block text-base font-medium text-text-secondary mb-2">
                 Interests <span className="text-error">*</span>
               </label>
-              <input
-                type="text"
-                id="interests"
-                value={currentInterest}
-                onChange={(e) => setCurrentInterest(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && currentInterest.trim()) {
-                    e.preventDefault();
-                    const newInterest = currentInterest.trim().toLowerCase();
-                    if (!interests.includes(newInterest)) {
-                      setInterests([...interests, newInterest]);
-                    }
-                    setCurrentInterest("");
-                  }
-                }}
-                placeholder="Type an interest and press Enter"
-                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? "border-error" : ""}`}
-                aria-describedby={
-                  errors.interests ? "interests-error" : undefined
-                }
-              />
+              <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); const newInterest = currentInterest.trim().toLowerCase(); if (!interests.includes(newInterest)) { setInterests([...interests, newInterest]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? 'border-error' : ''}`} aria-describedby={errors.interests ? 'interests-error' : undefined} />
               {interests.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {interests.map((interest, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
-                      style={{ margin: "4px" }}
-                    >
+                    <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" style={{ margin: '4px' }}>
                       {interest}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          if (window.navigator.vibrate)
-                            window.navigator.vibrate([50]);
-                          setInterests(interests.filter((_, i) => i !== index));
-                        }}
-                        className="ml-1 text-primary hover:opacity-70 focus:outline-none"
-                        aria-label={`Remove ${interest} interest`}
-                      >
-                        &times;
-                      </button>
+                      <button type="button" onClick={() => { if (window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }} className="ml-1 text-primary hover:opacity-70 focus:outline-none" aria-label={`Remove ${interest} interest`}>&times;</button>
                     </span>
                   ))}
                 </div>
               )}
-              <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">
-                Add 1-3 interests
-              </div>
+              <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">Add 1-3 interests</div>
               <div className="mt-4">
-                <p className="text-xs text-text-secondary mb-2">
-                  Or select from popular interests:
-                </p>
+                <p className="text-xs text-text-secondary mb-2">Or select from popular interests:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {popularInterests.map((quickInterest) => (
-                    <button
-                      key={quickInterest}
-                      type="button"
-                      onClick={(e) => {
-                        if (window.navigator.vibrate)
-                          window.navigator.vibrate([50]);
-                        const lowerCaseInterest = quickInterest.toLowerCase();
-                        if (!interests.includes(lowerCaseInterest)) {
-                          setInterests([...interests, lowerCaseInterest]);
-                        }
-                      }}
-                      className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
-                      aria-label={`Interest: ${quickInterest}`}
-                    >
-                      {quickInterest}
-                    </button>
+                    <button key={quickInterest} type="button" onClick={() => { if (window.navigator.vibrate) window.navigator.vibrate([50]); const lowerCaseInterest = quickInterest.toLowerCase(); if (!interests.includes(lowerCaseInterest)) { setInterests([...interests, lowerCaseInterest]); } }} className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`Interest: ${quickInterest}`}>{quickInterest}</button>
                   ))}
                 </div>
               </div>
@@ -558,88 +333,39 @@ function HomePage() {
           {/* Step 5: Things to avoid */}
           {step === 5 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="negativeKeywords"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
-                Things to avoid{" "}
-                <span className="text-text-secondary">(optional)</span>
-              </label>
-              <input
-                type="text"
-                id="negativeKeywords"
-                value={negativeKeywords}
-                onChange={(e) => setNegativeKeywords(e.target.value)}
-                placeholder="e.g. socks, mugs, books"
-                className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base"
-              />
+              <label htmlFor="negativeKeywords" className="block text-base font-medium text-text-secondary mb-2">Things to avoid <span className="text-text-secondary">(optional)</span></label>
+              <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base" />
             </div>
           )}
           {/* Step 6: Budget */}
           {step === 6 && (
             <div className="fade-in animate-fade-in-up">
-              <label
-                htmlFor="budget"
-                className="block text-base font-medium text-text-secondary mb-2"
-              >
-                Budget (optional)
-              </label>
-              <input
-                type="number"
-                id="budget"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                placeholder="Enter maximum budget"
-                className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? "border-error" : "border-border"}`}
-                aria-describedby={errors.budget ? "budget-error" : undefined}
-              />
+              <label htmlFor="budget" className="block text-base font-medium text-text-secondary mb-2">Budget (optional)</label>
+              <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? 'border-error' : 'border-border'}`} aria-describedby={errors.budget ? 'budget-error' : undefined} />
               {errors.budget && (
-                <p
-                  id="budget-error"
-                  className="text-error text-sm mt-1"
-                  role="alert"
-                >
-                  {errors.budget}
-                </p>
+                <p id="budget-error" className="text-error text-sm mt-1" role="alert">{errors.budget}</p>
               )}
             </div>
           )}
           {/* Navigation Controls */}
           <div className="flex justify-between items-center mt-8">
             {step > 1 && (
-              <button
-                type="button"
-                onClick={() => setStep(step - 1)}
-                className="px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                Back
-              </button>
+              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Back</button>
             )}
             <div className="flex-1" />
             {step < TOTAL_STEPS && (
-              <button
-                type="button"
-                onClick={() => setStep(step + 1)}
-                className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                Next
-              </button>
+              <button type="button" onClick={() => setStep(step + 1)} className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Next</button>
             )}
             {step === TOTAL_STEPS && (
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                Find My Gift
-              </button>
+              <button type="submit" className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Find My Gift</button>
             )}
           </div>
         </form>
       </section>
 
-      {isLoading && <GiftBoxLoader />}
+      {loading && <GiftBoxLoader />}
       {/* Results Section */}
-      {!isLoading && suggestions.length > 0 && (
+              {!loading && suggestions.length > 0 && (
         <section className="animate-fade-in-up w-full">
           <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4 text-center">
             🎉 Here are a few ideas!
@@ -651,15 +377,9 @@ function HomePage() {
             {REFINE_OPTIONS.map((option) => (
               <Button
                 key={option.value}
-                variant={
-                  activeFilters.includes(option.label) ? "primary" : "outline"
-                }
+                variant={activeFilters.includes(option.label) ? 'primary' : 'outline'}
                 size="sm"
-                className={
-                  activeFilters.includes(option.label)
-                    ? "bg-primary text-white"
-                    : ""
-                }
+                className={activeFilters.includes(option.label) ? 'bg-primary text-white' : ''}
                 onClick={() => toggleFilter(option.label)}
               >
                 {option.label}
@@ -669,24 +389,14 @@ function HomePage() {
           {filteredSuggestions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 animate-fade-in-up">
               <span className="text-5xl mb-4">🤔</span>
-              <div className="text-xl font-bold mb-2 text-text-primary">
-                Our AI is stumped!
-              </div>
-              <div className="text-text-secondary mb-4">
-                We couldn't find any gifts that match your filters.
-              </div>
+              <div className="text-xl font-bold mb-2 text-text-primary">Our AI is stumped!</div>
+              <div className="text-text-secondary mb-4">We couldn't find any gifts that match your filters.</div>
               <ul className="text-sm text-text-secondary mb-4 list-disc list-inside">
                 <li>Try using broader interests or fewer filters.</li>
                 <li>Go back and adjust your search criteria.</li>
                 <li>Regenerate to get a new set of ideas.</li>
               </ul>
-              <Button
-                onClick={() => setActiveFilters([])}
-                variant="outline"
-                className="font-bold"
-              >
-                Clear Filters
-              </Button>
+              <Button onClick={() => setActiveFilters([])} variant="outline" className="font-bold">Clear Filters</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -700,7 +410,7 @@ function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-light-border dark:border-dark-border">
             <Button
               onClick={() => handleSubmit()}
-              disabled={isLoading}
+              disabled={loading}
               variant="secondary"
               fullWidth
               className="font-bold"
@@ -716,7 +426,7 @@ function HomePage() {
               📄 Copy List
             </Button>
             <Button
-              onClick={() => setShowFeedbackModal(true)}
+
               variant="outline"
               fullWidth
               className="font-bold"
@@ -734,39 +444,78 @@ function HomePage() {
 function App() {
   useGoogleAnalytics();
 
+  // Initialize global error handling and logging
+  React.useEffect(() => {
+    setupGlobalErrorHandling();
+    logger.info('Application started', {
+      context: {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+      },
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-grow flex flex-col items-center">
-        <div className="w-full flex-1 flex flex-col">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
-                  <p className="text-light-text-muted dark:text-dark-text-muted">
-                    Loading page...
-                  </p>
+    <ErrorBoundary showErrorDetails={process.env.NODE_ENV === 'development'}>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-grow flex flex-col items-center">
+          <div className="w-full flex-1 flex flex-col">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary mx-auto mb-4"></div>
+                    <p className="text-light-text-muted dark:text-dark-text-muted">
+                      Loading page...
+                    </p>
+                  </div>
                 </div>
-              </div>
-            }
-          >
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </div>
-        <Footer />
-      </main>
-      <Analytics />
-      <SpeedInsights />
-    </div>
+              }
+            >
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/gift-finder" element={<GiftFinder />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<BlogIndex />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <AdminDashboard />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/*" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <AdminDashboard />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/blog-generator" 
+                  element={
+                    <SimpleProtectedRoute>
+                      <BlogGenerator />
+                    </SimpleProtectedRoute>
+                  } 
+                />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </div>
+          <Footer />
+        </main>
+        <CookieConsent />
+        <Analytics />
+      </div>
+    </ErrorBoundary>
   );
 }
 

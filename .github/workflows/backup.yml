@@ -1,0 +1,159 @@
+name: Database Backup
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+  S3_BUCKET: ${{ secrets.S3_BACKUP_BUCKET }}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create backup directory
+        run: mkdir -p backups
+
+      - name: Create database backup
+        run: |
+          # Extract database connection details from URL
+          DB_URL="$POSTGRES_URL"
+          
+          # Create timestamp for backup file
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          BACKUP_FILE="smartgiftfinder_backup_${TIMESTAMP}.sql"
+          
+          # Create backup using pg_dump
+          pg_dump "$DB_URL" > "backups/$BACKUP_FILE"
+          
+          # Compress the backup
+          gzip "backups/$BACKUP_FILE"
+          
+          echo "Backup created: backups/${BACKUP_FILE}.gz"
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+      - name: Upload backup to S3
+        if: env.S3_BUCKET != ''
+        run: |
+          # Upload to S3
+          aws s3 cp backups/*.gz s3://$S3_BUCKET/database-backups/
+          
+          # Clean up old backups (keep last 30 days)
+          aws s3 ls s3://$S3_BUCKET/database-backups/ | \
+          awk '{print $4}' | \
+          sort | \
+          head -n -30 | \
+          xargs -I {} aws s3 rm s3://$S3_BUCKET/database-backups/{}
+
+      - name: Upload backup as artifact
+        if: env.S3_BUCKET == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ github.run_number }}
+          path: backups/*.gz
+          retention-days: 7
+
+      - name: Clean up local backups
+        run: rm -rf backups
+
+      - name: Notify backup completion
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Database backup completed successfully"
+          else
+            echo "❌ Database backup failed"
+            exit 1
+          fi
+
+  health-check:
+    runs-on: ubuntu-latest
+    needs: backup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database health check
+        run: |
+          # Simple health check to ensure database is accessible
+          node -e "
+            const { checkDatabaseHealth } = require('./lib/db/connections');
+            checkDatabaseHealth().then(result => {
+              console.log('Database health:', result);
+              if (result.status !== 'healthy') {
+                process.exit(1);
+              }
+            }).catch(error => {
+              console.error('Health check failed:', error);
+              process.exit(1);
+            });
+          "
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+
+  restore-test:
+    runs-on: ubuntu-latest
+    needs: backup
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download latest backup
+        if: env.S3_BUCKET != ''
+        run: |
+          # Download the most recent backup
+          LATEST_BACKUP=$(aws s3 ls s3://$S3_BUCKET/database-backups/ | \
+            awk '{print $4}' | \
+            sort | \
+            tail -n 1)
+          
+          aws s3 cp s3://$S3_BUCKET/database-backups/$LATEST_BACKUP ./test_backup.sql.gz
+          gunzip test_backup.sql.gz
+
+      - name: Test backup integrity
+        run: |
+          # Test that the backup file is valid SQL
+          if [ -f test_backup.sql ]; then
+            echo "Testing backup file integrity..."
+            head -n 10 test_backup.sql | grep -q "PostgreSQL database dump" || exit 1
+            echo "✅ Backup file appears to be valid"
+          else
+            echo "❌ No backup file found for testing"
+            exit 1
+          fi

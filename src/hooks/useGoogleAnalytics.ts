@@ -1,76 +1,78 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState, useCallback } from 'react';
 
-declare global {
-  interface Window {
-    gtag?: (...args: any[]) => void;
-  }
+interface AnalyticsData {
+  pageViews: number;
+  uniqueVisitors: number;
+  sessionDuration: number; // in seconds
+  bounceRate: number; // as a percentage
+  sessions: number;
+  topPages: Array<{
+    path: string;
+    title: string;
+    views: number;
+  }>;
+  recentActivity: Array<{
+    timestamp: string;
+    action: string;
+    page?: string;
+    occasion?: string;
+    post?: string;
+  }>;
 }
 
-export const useGoogleAnalytics = () => {
-  const location = useLocation();
+interface UseAnalyticsReturn extends AnalyticsData {
+  isLoading: boolean;
+  error: string | null;
+  refreshData: () => void;
+}
+
+export function useGoogleAnalytics(): UseAnalyticsReturn {
+  const [data, setData] = useState<AnalyticsData>({
+    pageViews: 0,
+    uniqueVisitors: 0,
+    sessionDuration: 0,
+    bounceRate: 0,
+    sessions: 0,
+    topPages: [],
+    recentActivity: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAnalyticsData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/ga');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
+      }
+      const result = await response.json();
+      if (result.success && result.data) {
+        setData(result.data);
+      } else {
+        throw new Error('Invalid analytics data format');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      // Fallback to zeroed data on error
+      setData({ 
+        pageViews: 0, 
+        uniqueVisitors: 0, 
+        sessionDuration: 0, 
+        bounceRate: 0,
+        sessions: 0,
+        topPages: [],
+        recentActivity: [],
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Track page view when location changes
-    if (window.gtag) {
-      window.gtag("config", "G-5VXMXKEYEV", {
-        page_path: location.pathname + location.search,
-        page_title: getPageTitle(location.pathname),
-      });
-    }
-  }, [location]);
+    fetchAnalyticsData();
+  }, [fetchAnalyticsData]);
 
-  const getPageTitle = (pathname: string): string => {
-    switch (pathname) {
-      case "/":
-        return "Home - Smart Gift Finder";
-      case "/about":
-        return "About - Smart Gift Finder";
-      case "/contact":
-        return "Contact - Smart Gift Finder";
-      default:
-        return "Smart Gift Finder";
-    }
-  };
-
-  // Function to track custom events
-  const trackEvent = (
-    action: string,
-    category: string,
-    label?: string,
-    value?: number,
-  ) => {
-    if (window.gtag) {
-      window.gtag("event", action, {
-        event_category: category,
-        event_label: label,
-        value: value,
-      });
-    }
-  };
-
-  // Function to track gift generation
-  const trackGiftGeneration = (
-    occasion: string,
-    relationship: string,
-    interestsCount: number,
-  ) => {
-    trackEvent(
-      "gift_generation",
-      "engagement",
-      `${occasion}_${relationship}`,
-      interestsCount,
-    );
-  };
-
-  // Function to track form submission
-  const trackFormSubmission = (formType: "contact" | "feedback") => {
-    trackEvent("form_submission", "engagement", formType);
-  };
-
-  return {
-    trackEvent,
-    trackGiftGeneration,
-    trackFormSubmission,
-  };
-};
+  return { ...data, isLoading, error, refreshData: fetchAnalyticsData };
+}
