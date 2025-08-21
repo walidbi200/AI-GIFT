@@ -1,4 +1,15 @@
 {
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["prisma/**"],
+        "installCommand": "npm install --no-cache",
+        "buildCommand": "npx prisma generate && npm run build"
+      }
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/|.*\\..*).*)",
@@ -62,6 +73,9 @@
     }
   ],
   "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    },
     "api/blog.ts": {
       "maxDuration": 60
     },
