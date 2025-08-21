@@ -18,7 +18,7 @@ const openai = new OpenAI({
 // Log environment variables (without sensitive data)
 console.log('🔧 Environment check:');
 console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
-console.log('🔧 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('🔧 POSTGRES_URL exists:', !!process.env.POSTGRES_URL);
 console.log('🔧 OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
 console.log('🔧 Prisma client initialized:', !!prisma);
 
@@ -143,7 +143,7 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
 async function getAllPosts(res: VercelResponse) {
     try {
         console.log('🔍 Starting getAllPosts function...');
-        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+        console.log('🔍 POSTGRES_URL exists:', !!process.env.POSTGRES_URL);
         console.log('🔍 Prisma client status:', !!prisma);
         console.log('🔍 Attempting to connect to database...');
         
@@ -230,7 +230,7 @@ async function getAllPosts(res: VercelResponse) {
 async function getPostBySlug(slug: string, res: VercelResponse) {
     try {
         console.log(`🔍 Fetching post with slug: ${slug}`);
-        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+        console.log('🔍 POSTGRES_URL exists:', !!process.env.POSTGRES_URL);
         
         const post = await prisma.post.findFirst({
             where: {
@@ -282,7 +282,7 @@ async function getPostBySlug(slug: string, res: VercelResponse) {
 async function getStats(res: VercelResponse) {
     try {
         console.log('📊 Fetching blog statistics...');
-        console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL);
+        console.log('🔍 POSTGRES_URL exists:', !!process.env.POSTGRES_URL);
         
         const totalPosts = await prisma.post.count({
             where: {
