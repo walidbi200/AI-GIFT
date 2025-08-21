@@ -162,16 +162,26 @@ async function handleValidate(req: VercelRequest, res: VercelResponse) {
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
 
-    if (decoded && decoded.role === 'admin') {
-      res.status(200).json({
-        success: true,
-        message: 'Token is valid',
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          role: decoded.role
-        }
-      });
+    // Type guard to ensure decoded is an object with the expected properties
+    if (typeof decoded === 'object' && decoded !== null && 'role' in decoded) {
+      const { role, id, email } = decoded as { role: string; id: string; email: string };
+      
+      if (role === 'admin') {
+        res.status(200).json({
+          success: true,
+          message: 'Token is valid',
+          user: {
+            id,
+            email,
+            role
+          }
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          message: 'Invalid token'
+        });
+      }
     } else {
       res.status(401).json({
         success: false,
