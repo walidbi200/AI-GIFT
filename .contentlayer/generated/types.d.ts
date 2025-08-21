@@ -19,7 +19,7 @@ export type Post = {
   tags?: string[] | undefined
   image: string
   author: string
-  readTime: string
+  readTime: number
   /** Markdown file body */
   body: Markdown
   url: string
