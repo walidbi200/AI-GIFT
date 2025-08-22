@@ -1,23 +1,9 @@
-# Ignore cached node_modules (but ensure build generates fresh ones)
+# Ignore cached node_modules and unnecessary files
 node_modules
-
-# Ignore unnecessary files
 *.log
 *.tmp
 dist/
-.vercel
 
-# Ignore development files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Ignore cache directories
-.cache
-.parcel-cache
-
-# Ensure prisma/ and build outputs are NOT ignored
+# Ensure prisma and build outputs are included
 !prisma/
-!package.json
-!package-lock.json
+!build/
