@@ -5,9 +5,7 @@
       "use": "@vercel/node",
       "config": {
         "includeFiles": ["prisma/**"],
-        "zeroConfig": false,
-        "installCommand": "npm install --no-cache --force",
-        "buildCommand": "npx prisma generate && npm run build"
+        "zeroConfig": false
       }
     }
   ],
