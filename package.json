@@ -8,7 +8,7 @@
         "dev:api": "vercel dev",
         "dev:local": "node simple-dev-server.js",
         "dev:full": "concurrently \"npm run dev:local\" \"npm run dev\"",
-        "build": "tsc && vite build",
+        "build": "npx prisma generate && tsc && vite build",
         "preview": "vite preview",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:fix": "eslint . --ext ts,tsx --fix",
