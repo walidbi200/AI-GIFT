@@ -1,0 +1,7 @@
+[33mcommit ba56e8d4164fd4df6d9c96b11f96c1670be8c05f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: walidbi200 <bichriwalid1@gmail.com>
+Date:   Thu Aug 21 21:54:55 2025 +0100
+
+    Disable Vercel dependency caching to fix Prisma Client and prevent future issues
+
+vercel.json
