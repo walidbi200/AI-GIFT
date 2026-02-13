@@ -5,7 +5,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import PrivacyPolicy from './pages/PrivacyPolicy';
