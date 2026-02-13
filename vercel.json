@@ -1,10 +1,21 @@
 {
-  "rewrites": [
-    {
-      "source": "/((?!api/|.*\\..*).*)",
-      "destination": "/"
+  "functions": {
+    "api/blog.ts": {
+      "maxDuration": 10
+    },
+    "api/generate-gifts.ts": {
+      "maxDuration": 30
+    },
+    "api/auth/login.ts": {
+      "maxDuration": 10
+    },
+    "api/auth/validate.ts": {
+      "maxDuration": 10
+    },
+    "api/subscribe.ts": {
+      "maxDuration": 10
     }
-  ],
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -27,27 +38,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/blog.ts": {
-      "memory": 1024,
-      "maxDuration": 10
-    },
-    "api/generate-gifts.ts": {
-      "memory": 1024,
-      "maxDuration": 30
-    },
-    "api/auth/login.ts": {
-      "memory": 512,
-      "maxDuration": 10
-    },
-    "api/auth/validate.ts": {
-      "memory": 512,
-      "maxDuration": 10
-    },
-    "api/subscribe.ts": {
-      "memory": 512,
-      "maxDuration": 10
-    }
-  }
+  ]
 }

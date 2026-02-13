@@ -27,15 +27,18 @@ export function useGoogleAnalytics(): UseAnalyticsReturn {
     setIsLoading(true);
     setError(null);
     try {
+      /* API removed to stay under Hobby plan limit
       const response = await fetch('/api/analytics/ga');
       if (!response.ok) {
         throw new Error(`Failed to fetch analytics data: ${response.statusText}`);
       }
       const analytics: AnalyticsData = await response.json();
       setData(analytics);
+      */
+      // Return mock/empty data instead
+      setData({ pageViews: 0, uniqueVisitors: 0, sessionDuration: 0, bounceRate: 0 });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      // Fallback to zeroed data on error
       setData({ pageViews: 0, uniqueVisitors: 0, sessionDuration: 0, bounceRate: 0 });
     } finally {
       setIsLoading(false);

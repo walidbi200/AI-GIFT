@@ -87,7 +87,7 @@ const POPULAR_TAGS = [
 
 // This is the component for your main gift finder page
 function HomePage() {
-  const { trackGiftGeneration } = useGoogleAnalytics();
+  // const { trackGiftGeneration } = useGoogleAnalytics(); // Disabled - API removed
   const TOTAL_STEPS = 6;
   const [step, setStep] = useState(1);
   const [age, setAge] = useState(25);
@@ -225,7 +225,7 @@ function HomePage() {
             : `🎉 Found ${giftsArray.length} gift suggestions!`,
           "success",
         );
-        trackGiftGeneration(occasion, relationship, interests.length);
+        // trackGiftGeneration(occasion, relationship, interests.length); // Disabled - API removed
 
         // Track success event
         analytics.giftSearchCompleted({
@@ -630,7 +630,7 @@ function HomePage() {
 
 // This is the main App component that handles routing and layout
 function App() {
-  useGoogleAnalytics();
+  // useGoogleAnalytics(); // Disabled - API removed
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
