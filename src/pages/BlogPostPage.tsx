@@ -23,10 +23,10 @@ const BlogPostPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         // Fetch the main post
-        const response = await fetch(`/api/blog/post?slug=${slug}`);
-        
+        const response = await fetch(`/api/blog?slug=${slug}`);
+
         if (!response.ok) {
           if (response.status === 404) {
             navigate('/404');
@@ -40,7 +40,7 @@ const BlogPostPage: React.FC = () => {
 
         // Fetch related posts
         try {
-          const relatedResponse = await fetch('/api/blog/list?limit=6');
+          const relatedResponse = await fetch('/api/blog?limit=6');
           if (relatedResponse.ok) {
             const relatedData = await relatedResponse.json();
             const filteredRelated = relatedData.posts
@@ -54,18 +54,18 @@ const BlogPostPage: React.FC = () => {
 
         // Fetch navigation posts (previous/next)
         try {
-          const allPostsResponse = await fetch('/api/blog/list?limit=100');
+          const allPostsResponse = await fetch('/api/blog?limit=100');
           if (allPostsResponse.ok) {
             const allPostsData = await allPostsResponse.json();
             const currentIndex = allPostsData.posts.findIndex((p: BlogPostType) => p.slug === slug);
-            
+
             if (currentIndex > 0) {
               setPreviousPost({
                 slug: allPostsData.posts[currentIndex - 1].slug,
                 title: allPostsData.posts[currentIndex - 1].title
               });
             }
-            
+
             if (currentIndex < allPostsData.posts.length - 1) {
               setNextPost({
                 slug: allPostsData.posts[currentIndex + 1].slug,
@@ -104,8 +104,8 @@ const BlogPostPage: React.FC = () => {
         <div className="text-center max-w-md mx-auto px-4">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error || "Could not load the blog post."}</p>
-          <Link 
-            to="/blog" 
+          <Link
+            to="/blog"
             className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
           >
             <span className="mr-2">←</span>
@@ -117,7 +117,7 @@ const BlogPostPage: React.FC = () => {
   }
 
   return (
-    <BlogPost 
+    <BlogPost
       blog={post}
       relatedPosts={relatedPosts}
       previousPost={previousPost || undefined}

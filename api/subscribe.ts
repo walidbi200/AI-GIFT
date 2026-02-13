@@ -11,10 +11,6 @@ export default async function handler(
     req: VercelRequest,
     res: VercelResponse
 ) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
     // CORS
     const origin = req.headers.origin || '';
     if (allowedOrigins.includes(origin)) {
@@ -23,8 +19,14 @@ export default async function handler(
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+    // Handle OPTIONS first
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
+    }
+
+    // Then check POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     // Rate limiting (stricter for email signups to prevent spam)

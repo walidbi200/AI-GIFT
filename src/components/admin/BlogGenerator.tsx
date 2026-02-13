@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '../Button';
 import Toast from '../Toast';
 import type { ToastType } from '../../types';
@@ -23,14 +23,14 @@ interface BlogGeneratorForm {
 
 // Helper function to calculate SEO score dynamically
 const calculateSeoScore = (blog: GeneratedBlog | null): number => {
-    if (!blog) return 0;
-    let score = 0;
-    if (blog.title.length > 30 && blog.title.length < 60) score += 25;
-    if (blog.description.length > 120 && blog.description.length < 160) score += 25;
-    if (blog.wordCount > 500) score += 20;
-    if (blog.tags.length >= 3) score += 15;
-    if (blog.content.includes(blog.primaryKeyword)) score += 15;
-    return Math.min(100, score);
+  if (!blog) return 0;
+  let score = 0;
+  if (blog.title.length > 30 && blog.title.length < 60) score += 25;
+  if (blog.description.length > 120 && blog.description.length < 160) score += 25;
+  if (blog.wordCount > 500) score += 20;
+  if (blog.tags.length >= 3) score += 15;
+  if (blog.content.includes(blog.primaryKeyword)) score += 15;
+  return Math.min(100, score);
 };
 
 const BlogGenerator: React.FC = () => {
@@ -49,7 +49,7 @@ const BlogGenerator: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<ToastType>('success');
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // SEO score is now derived state, calculated whenever the blog content changes
   const seoScore = calculateSeoScore(generatedBlog);
 
@@ -119,24 +119,24 @@ const BlogGenerator: React.FC = () => {
       showToastMessage('Please generate a blog first', 'error');
       return;
     }
-    
+
     setIsSaving(true);
     try {
-        const response = await fetch('/api/blog/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(generatedBlog)
-        });
-        const result = await response.json();
-        if (!result.success) throw new Error(result.error);
-        showToastMessage(`Blog saved successfully! View at: /blog/${result.blog.slug}`, 'success');
+      const response = await fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(generatedBlog)
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error);
+      showToastMessage(`Blog saved successfully! View at: /blog/${result.blog.slug}`, 'success');
     } catch (error) {
-        showToastMessage(`Error saving blog: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+      showToastMessage(`Error saving blog: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
-  
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
@@ -148,19 +148,19 @@ const BlogGenerator: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">AI Blog Generator</h1>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-gray-900">Content Parameters</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Blog Topic *</label>
                 <input
-                    type="text"
-                    value={formData.topic}
-                    onChange={(e) => handleInputChange('topic', e.target.value)}
-                    placeholder="e.g., Tech gifts for professionals"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="text"
+                  value={formData.topic}
+                  onChange={(e) => handleInputChange('topic', e.target.value)}
+                  placeholder="e.g., Tech gifts for professionals"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -219,27 +219,27 @@ const BlogGenerator: React.FC = () => {
 
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-gray-900">Preview & Analysis</h2>
-              
+
               {isGenerating && <p>Generating content, please wait...</p>}
 
               {generatedBlog && (
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="font-semibold text-gray-900 mb-2">SEO Analysis</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-600">SEO Score:</span>
-                          <span className={`ml-2 font-semibold ${getScoreColor(seoScore)}`}>
-                            {seoScore}/100
-                          </span>
-                        </div>
-                        <div>
-                            <span className="text-gray-600">Word Count:</span>
-                            <span className="ml-2 font-semibold">{generatedBlog.wordCount}</span>
-                        </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">SEO Analysis</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">SEO Score:</span>
+                        <span className={`ml-2 font-semibold ${getScoreColor(seoScore)}`}>
+                          {seoScore}/100
+                        </span>
                       </div>
+                      <div>
+                        <span className="text-gray-600">Word Count:</span>
+                        <span className="ml-2 font-semibold">{generatedBlog.wordCount}</span>
+                      </div>
+                    </div>
                   </div>
-                  
+
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-semibold text-gray-900 mb-2">Generated Content</h3>
                     <div className="space-y-2">

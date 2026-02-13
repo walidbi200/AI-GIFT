@@ -11,10 +11,10 @@ const AdminSimple: React.FC = () => {
     const fetchBlogStats = async () => {
       setIsLoadingStats(true);
       try {
-        const response = await fetch('/api/blog/stats');
+        const response = await fetch('/api/blog');
         if (response.ok) {
           const data = await response.json();
-          setBlogPostCount(data.count);
+          setBlogPostCount(Array.isArray(data) ? data.length : 0);
         } else {
           setBlogPostCount(0);
         }
@@ -33,17 +33,17 @@ const AdminSimple: React.FC = () => {
   const handleRefresh = () => {
     // Re-fetch both data sources
     const fetchBlogStats = async () => {
-        setIsLoadingStats(true);
-        try {
-          const response = await fetch('/api/blog/stats');
-          if (response.ok) {
-            const data = await response.json();
-            setBlogPostCount(data.count);
-          }
-        } finally {
-          setIsLoadingStats(false);
+      setIsLoadingStats(true);
+      try {
+        const response = await fetch('/api/blog');
+        if (response.ok) {
+          const data = await response.json();
+          setBlogPostCount(Array.isArray(data) ? data.length : 0);
         }
-      };
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
     fetchBlogStats();
     refreshData();
   };
@@ -205,28 +205,28 @@ const AdminSimple: React.FC = () => {
           {/* Stats Overview */}
           <div className="bg-white shadow rounded-lg p-6 mb-8">
             <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-lg font-medium text-gray-900">Quick Stats</h3>
-                 <button onClick={handleRefresh} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                    <svg className={`w-4 h-4 ${ (isAnalyticsLoading || isLoadingStats) ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001a7.5 7.5 0 0 1-1.08 3.916m-1.08 3.916a7.5 7.5 0 0 1-3.916 1.08m-3.916-1.08a7.5 7.5 0 0 1-3.916-1.08m0 0a7.5 7.5 0 0 1-1.08-3.916m1.08-3.916a7.5 7.5 0 0 1 1.08-3.916m3.916-1.08a7.5 7.5 0 0 1 3.916 1.08m-3.916 1.08a7.5 7.5 0 0 1 3.916 1.08" />
-                    </svg>
-                    Refresh
-                 </button>
+              <h3 className="text-lg font-medium text-gray-900">Quick Stats</h3>
+              <button onClick={handleRefresh} className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                <svg className={`w-4 h-4 ${(isAnalyticsLoading || isLoadingStats) ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001a7.5 7.5 0 0 1-1.08 3.916m-1.08 3.916a7.5 7.5 0 0 1-3.916 1.08m-3.916-1.08a7.5 7.5 0 0 1-3.916-1.08m0 0a7.5 7.5 0 0 1-1.08-3.916m1.08-3.916a7.5 7.5 0 0 1 1.08-3.916m3.916-1.08a7.5 7.5 0 0 1 3.916 1.08m-3.916 1.08a7.5 7.5 0 0 1 3.916 1.08" />
+                </svg>
+                Refresh
+              </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-blue-600">
-                    {blogPostCountDisplay}
+                  {blogPostCountDisplay}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">Blog Posts</div>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-green-600">
-                    {monthlyVisitorsDisplay}
+                  {monthlyVisitorsDisplay}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">Monthly Visitors</div>
               </div>
-               <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold text-purple-600">{thisMonthVisitors}</div>
                 <div className="text-sm text-gray-500 mt-1">This Month</div>
               </div>

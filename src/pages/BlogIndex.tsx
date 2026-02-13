@@ -23,7 +23,7 @@ const BlogIndex: React.FC = () => {
     const fetchPosts = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/blog/list');
+        const response = await fetch('/api/blog');
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }

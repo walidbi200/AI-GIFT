@@ -8,25 +8,14 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // CORS headers
-  const allowedOrigins = [
-    'https://www.smartgiftfinder.xyz',
-    'https://smartgiftfinder.xyz',
-  ];
-  const origin = req.headers.origin || '';
-
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+  // Handle OPTIONS first (before POST check)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Now check for POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // Check rate limit

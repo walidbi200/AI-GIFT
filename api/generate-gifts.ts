@@ -20,11 +20,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// CORS configuration - specific domains only
-const allowedOrigins = [
-  'https://www.smartgiftfinder.xyz',
-  'https://smartgiftfinder.xyz',
-];
+
 
 interface GiftSuggestion {
   id?: string;
