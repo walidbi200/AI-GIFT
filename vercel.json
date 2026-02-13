@@ -10,31 +10,44 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000; includeSubDomains; preload"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://region1.google-analytics.com https://www.google-analytics.com https://analytics.google.com;"
-        },
-        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         },
         {
           "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
+          "value": "DENY"
         },
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
         }
       ]
     }
   ],
   "functions": {
-    "api/blog/generate-blog.ts": {
-      "maxDuration": 60
+    "api/blog.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/generate-gifts.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    },
+    "api/auth/login.ts": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/auth/validate.ts": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/subscribe.ts": {
+      "memory": 512,
+      "maxDuration": 10
     }
   }
 }
