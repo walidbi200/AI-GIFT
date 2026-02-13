@@ -1,102 +1,91 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { SignJWT } from 'jose';
+import bcrypt from 'bcryptjs';
 
-interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  token?: string;
-}
+import { checkRateLimit, authRateLimit } from '../middleware/rateLimit';
 
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // CORS headers
+  const allowedOrigins = [
+    'https://www.smartgiftfinder.xyz',
+    'https://smartgiftfinder.xyz',
+  ];
+  const origin = req.headers.origin || '';
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    res.status(405).json({ success: false, message: 'Method not allowed' });
+  // Check rate limit
+  const rateLimitPassed = await checkRateLimit(req, res, authRateLimit);
+  if (!rateLimitPassed) {
     return;
   }
 
   try {
-    const { username, password }: LoginRequest = req.body;
-
-    // Debug logging (remove in production)
-    console.log('Login attempt:', { 
-      username, 
-      hasPassword: !!password,
-      adminUserConfigured: !!process.env.ADMIN_USER,
-      adminPassConfigured: !!process.env.ADMIN_PASS
-    });
+    const { username, password } = req.body;
 
     // Validate input
     if (!username || !password) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Username and password are required' 
-      });
-      return;
+      return res.status(400).json({ error: 'Missing credentials' });
     }
 
-    // Check credentials against environment variables
-    const adminUser = process.env.ADMIN_USER;
-    const adminPass = process.env.ADMIN_PASS;
-
-    if (!adminUser || !adminPass) {
-      console.error('Admin credentials not configured in environment variables');
-      res.status(500).json({ 
-        success: false, 
-        message: 'Server configuration error - please check environment variables' 
-      });
-      return;
+    // Check environment variables are configured
+    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD_HASH || !process.env.JWT_SECRET) {
+      console.error('Missing required environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
     }
 
-    // Compare credentials (case-sensitive)
-    const usernameMatch = username === adminUser;
-    const passwordMatch = password === adminPass;
+    // Check username
+    if (username !== process.env.ADMIN_USERNAME) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    console.log('Credential check:', { 
-      usernameMatch, 
-      passwordMatch,
-      providedUsername: username,
-      expectedUsername: adminUser
+    // Check password using bcrypt - secure hash comparison
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      process.env.ADMIN_PASSWORD_HASH
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Create JWT token with 24h expiration
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new SignJWT({
+      username,
+      role: 'admin',
+      iat: Math.floor(Date.now() / 1000)
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime('24h')
+      .setIssuedAt()
+      .sign(secret);
+
+    console.log('Login successful for user:', username);
+
+    return res.status(200).json({
+      success: true,
+      token,
+      expiresIn: 86400 // 24 hours in seconds
     });
 
-    if (usernameMatch && passwordMatch) {
-      // Generate a simple session token (in production, use JWT)
-      const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
-      
-      console.log('Login successful for user:', username);
-      
-      res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        token
-      });
-    } else {
-      console.log('Login failed - invalid credentials');
-      res.status(401).json({
-        success: false,
-        message: 'Invalid username or password'
-      });
-    }
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

@@ -13,9 +13,14 @@ dist
 .DS_Store
 npm-debug.log
 
-# Env
+# Env - NEVER commit these files (contain secrets)
 .env
 .env.local
+.env*.local
+*.env
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Vercel
+.vercel

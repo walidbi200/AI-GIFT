@@ -71,6 +71,42 @@ npm run dev:api
 npm run dev:full
 ```
 
+## Caching Strategy
+
+This application uses **Redis caching** (via Upstash) to reduce OpenAI API costs by ~70%.
+
+### Setup
+
+1. Create a free Upstash account at https://upstash.com
+2. Create a Redis database (Regional - free tier)
+3. Add credentials to Vercel environment variables:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+
+### How It Works
+
+- Gift recommendations are cached for **7 days**
+- Cache keys are generated from normalized user inputs
+- Cache hits return results instantly (< 200ms)
+- Cache misses call OpenAI API and store the result
+- **Expected cost savings**: 50-70% reduction
+
+### Monitoring
+
+- **Cache statistics**: Visit `/api/cache-stats`
+- **Clear cache** (admin only): POST to `/api/admin/clear-cache` with JWT token
+- Check Vercel logs for cache hit/miss ratio
+
+### Cost Impact
+
+| Scenario | Monthly Cost | Savings |
+|----------|-------------|---------|
+| Without caching | ~$60 | - |
+| With 50% cache hit rate | ~$30 | 50% |
+| With 70% cache hit rate | ~$18 | 70% |
+
+See [docs/COST_OPTIMIZATION.md](docs/COST_OPTIMIZATION.md) for detailed information.
+
 ## Technologies Used
 
 - React 18
@@ -80,6 +116,10 @@ npm run dev:full
 - React Router DOM
 - EmailJS
 - Vercel Analytics
+- OpenAI API (GPT-3.5-turbo)
+- Upstash Redis (caching)
+- Jose (JWT authentication)
+- Bcrypt (password hashing)
 
 ## Creator
 

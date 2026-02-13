@@ -1,73 +1,65 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-interface ValidateRequest {
-  token: string;
-}
-
-interface ValidateResponse {
-  valid: boolean;
-  message: string;
-}
+import { jwtVerify } from 'jose';
 
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // CORS - specific domains only (no wildcards)
+  const allowedOrigins = [
+    'https://www.smartgiftfinder.xyz',
+    'https://smartgiftfinder.xyz',
+  ];
+  const origin = req.headers.origin || '';
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    res.status(405).json({ valid: false, message: 'Method not allowed' });
-    return;
+    return res.status(200).end();
   }
 
   try {
-    const { token }: ValidateRequest = req.body;
+    const { token } = req.body;
 
     if (!token) {
-      res.status(400).json({ valid: false, message: 'Token is required' });
-      return;
+      return res.status(400).json({ error: 'Missing token' });
     }
 
-    // Decode the token to check if it's valid
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const [username, timestamp] = decoded.split(':');
-      
-      if (!username || !timestamp) {
-        res.status(401).json({ valid: false, message: 'Invalid token format' });
-        return;
-      }
-
-      // Check if token is not too old (24 hours)
-      const tokenAge = Date.now() - parseInt(timestamp);
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-      if (tokenAge > maxAge) {
-        res.status(401).json({ valid: false, message: 'Token expired' });
-        return;
-      }
-
-      // Verify username matches admin user
-      const adminUser = process.env.ADMIN_USER;
-      if (username !== adminUser) {
-        res.status(401).json({ valid: false, message: 'Invalid token' });
-        return;
-      }
-
-      res.status(200).json({ valid: true, message: 'Token is valid' });
-    } catch (decodeError) {
-      res.status(401).json({ valid: false, message: 'Invalid token' });
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET not configured');
+      return res.status(500).json({ error: 'Server configuration error' });
     }
-  } catch (error) {
+
+    // Verify JWT token with signature validation
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+
+    // Verify admin role
+    if (payload.role !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    return res.status(200).json({
+      valid: true,
+      username: payload.username
+    });
+
+  } catch (error: any) {
     console.error('Token validation error:', error);
-    res.status(500).json({ valid: false, message: 'Internal server error' });
+
+    // Distinguish between expired and invalid tokens
+    if (error.code === 'ERR_JWT_EXPIRED' || error.message?.includes('exp')) {
+      return res.status(401).json({ error: 'Token expired' });
+    }
+
+    return res.status(401).json({ error: 'Invalid token' });
   }
 }

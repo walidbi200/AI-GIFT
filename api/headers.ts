@@ -26,8 +26,16 @@ export default function handler(_req: VercelRequest, res: VercelResponse) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS headers - specific domains only (no wildcards)
+  const allowedOrigins = [
+    'https://www.smartgiftfinder.xyz',
+    'https://smartgiftfinder.xyz',
+  ];
+  const origin = _req.headers.origin || '';
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 

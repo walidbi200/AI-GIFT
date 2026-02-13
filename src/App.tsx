@@ -3,24 +3,19 @@
 // main component, with all features and correct routing.
 
 import React, { Suspense, useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import HomePage from './pages/HomePage';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import BlogIndex from './pages/BlogIndex';
-import BlogPostPage from './pages/BlogPostPage';
-import Login from './pages/Login';
-import AdminSimple from './pages/AdminSimple';
-import BlogGenerator from './components/admin/BlogGenerator';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
-import SimpleProtectedRoute from './components/auth/SimpleProtectedRoute';
 import RecentSearches from './components/RecentSearches';
-import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
+
+import Button from './components/Button';
+import GiftCard from './components/GiftCard';
+import GiftBoxLoader from './components/GiftBoxLoader';
+import GiftLoadingScreen from './components/GiftLoadingScreen';
 
 // --- Lazy-loaded Components ---
 const About = React.lazy(() => import("./pages/About"));
@@ -33,12 +28,17 @@ const AdminSimple = React.lazy(() => import("./pages/AdminSimple"));
 const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
 const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
 const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
+const GiftsForMom = React.lazy(() => import("./pages/GiftsForMom"));
+const GiftsForDad = React.lazy(() => import("./pages/GiftsForDad"));
+const BirthdayGifts = React.lazy(() => import("./pages/BirthdayGifts"));
+const AnniversaryGifts = React.lazy(() => import("./pages/AnniversaryGifts"));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from "./types";
 import { GiftService } from "./services/giftService";
 import { useRecentSearches } from "./hooks/useLocalStorage";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
+import { analytics } from "./services/analytics";
 
 // --- Constants ---
 const REFINE_OPTIONS = [
@@ -109,6 +109,7 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<GiftSuggestion[]>([]);
+  const [isCachedResult, setIsCachedResult] = useState(false);
 
   // Update filtered suggestions when suggestions or activeFilters change
   useEffect(() => {
@@ -194,6 +195,14 @@ function HomePage() {
         budget,
         negativeKeywords,
       };
+
+      const startTime = Date.now();
+      analytics.giftSearchStarted({
+        recipient: relationship,
+        occasion: occasion,
+        budget: budget,
+      });
+
       addSearch(formData);
       const response = await fetch("/api/generate-gifts", {
         method: "POST",
@@ -201,18 +210,38 @@ function HomePage() {
         body: JSON.stringify(formData),
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const generatedSuggestions = await response.json();
-      if (Array.isArray(generatedSuggestions)) {
-        setSuggestions(generatedSuggestions);
+      const data = await response.json();
+
+      // Handle new response format with cache status
+      const giftsArray = data.gifts || data;
+      const isCached = data.cached || false;
+
+      if (Array.isArray(giftsArray)) {
+        setSuggestions(giftsArray);
+        setIsCachedResult(isCached);
         showToastMessage(
-          `🎉 Found ${generatedSuggestions.length} gift suggestions!`,
+          isCached
+            ? `⚡ Found ${giftsArray.length} gift suggestions instantly (cached)!`
+            : `🎉 Found ${giftsArray.length} gift suggestions!`,
           "success",
         );
         trackGiftGeneration(occasion, relationship, interests.length);
+
+        // Track success event
+        analytics.giftSearchCompleted({
+          recipient: relationship,
+          occasion: occasion,
+          cached: isCached,
+          responseTime: Date.now() - startTime,
+        });
+
       } else {
         throw new Error("Invalid data format received from API.");
       }
     } catch (error) {
+      // Track failure event
+      analytics.giftSearchFailed(error instanceof Error ? error.message : "Unknown error");
+
       showToastMessage(
         "Failed to generate suggestions. Please try again.",
         "error",
@@ -460,6 +489,14 @@ function HomePage() {
           <h2 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4 text-center">
             🎉 Here are a few ideas!
           </h2>
+          {isCachedResult && (
+            <div className="flex items-center justify-center gap-2 text-sm text-green-600 dark:text-green-400 mb-4 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">⚡ Instant results (from cache) - Saved API cost!</span>
+            </div>
+          )}
           <nav
             className="flex flex-wrap gap-2 justify-center mb-6"
             aria-label="Refine suggestions"
@@ -526,6 +563,67 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      <section className="mt-16 w-full max-w-4xl px-4 animate-fade-in-up">
+        <h2 className="text-3xl font-bold mb-8 text-center text-text-primary">Popular Gift Categories</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link
+            to="/gifts-for-mom"
+            className="group p-6 bg-surface border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:shadow-lg transition"
+          >
+            <div className="text-4xl mb-3">👩</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-600 transition-colors">Gifts for Mom</h3>
+            <p className="text-text-secondary mb-4">
+              25+ thoughtful ideas for Mother's Day, birthdays, and more
+            </p>
+            <span className="text-blue-600 font-medium group-hover:underline">
+              View Gift Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/gifts-for-dad"
+            className="group p-6 bg-surface border-2 border-green-200 rounded-lg hover:border-green-500 hover:shadow-lg transition"
+          >
+            <div className="text-4xl mb-3">👨</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-green-600 transition-colors">Gifts for Dad</h3>
+            <p className="text-text-secondary mb-4">
+              25+ practical ideas for Father's Day and birthdays
+            </p>
+            <span className="text-green-600 font-medium group-hover:underline">
+              View Gift Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/birthday-gifts"
+            className="group p-6 bg-surface border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition"
+          >
+            <div className="text-4xl mb-3">🎂</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-purple-600 transition-colors">Birthday Gifts</h3>
+            <p className="text-text-secondary mb-4">
+              Perfect presents for every age and relationship
+            </p>
+            <span className="text-purple-600 font-medium group-hover:underline">
+              View Gift Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/anniversary-gifts"
+            className="group p-6 bg-surface border-2 border-red-200 rounded-lg hover:border-red-500 hover:shadow-lg transition"
+          >
+            <div className="text-4xl mb-3">💑</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-red-600 transition-colors">Anniversary Gifts</h3>
+            <p className="text-text-secondary mb-4">
+              Romantic gifts for every anniversary milestone
+            </p>
+            <span className="text-red-600 font-medium group-hover:underline">
+              View Gift Guide →
+            </span>
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }
@@ -551,32 +649,36 @@ function App() {
               </div>
             }
           >
-                              <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/blog" element={<BlogIndex />} />
-                    <Route path="/blog/:slug" element={<BlogPostPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route 
-                      path="/admin" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <AdminSimple />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/blog-generator" 
-                      element={
-                        <SimpleProtectedRoute>
-                          <BlogGenerator />
-                        </SimpleProtectedRoute>
-                      } 
-                    />
-                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<BlogIndex />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/admin"
+                element={
+                  <SimpleProtectedRoute>
+                    <AdminSimple />
+                  </SimpleProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/blog-generator"
+                element={
+                  <SimpleProtectedRoute>
+                    <BlogGenerator />
+                  </SimpleProtectedRoute>
+                }
+              />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/gifts-for-mom" element={<GiftsForMom />} />
+              <Route path="/gifts-for-dad" element={<GiftsForDad />} />
+              <Route path="/birthday-gifts" element={<BirthdayGifts />} />
+              <Route path="/anniversary-gifts" element={<AnniversaryGifts />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </Suspense>
         </div>
         <Footer />
