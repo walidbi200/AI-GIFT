@@ -32,6 +32,21 @@ export default function RelatedGiftGuides({ currentPage }: RelatedGiftGuidesProp
             title: 'Anniversary Gifts',
             description: 'Romantic anniversary ideas',
             url: '/anniversary-gifts'
+        },
+        'gifts-for-boyfriend': {
+            title: 'Gifts for Boyfriend',
+            description: 'Ideas he\'ll actually love',
+            url: '/gifts-for-boyfriend'
+        },
+        'gifts-for-girlfriend': {
+            title: 'Gifts for Girlfriend',
+            description: 'Romantic and thoughtful ideas',
+            url: '/gifts-for-girlfriend'
+        },
+        'unique-gifts': {
+            title: 'Unique Gifts',
+            description: 'Creative and memorable gift ideas',
+            url: '/unique-gifts'
         }
     };
 

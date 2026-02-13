@@ -32,6 +32,9 @@ const GiftsForMom = React.lazy(() => import("./pages/GiftsForMom"));
 const GiftsForDad = React.lazy(() => import("./pages/GiftsForDad"));
 const BirthdayGifts = React.lazy(() => import("./pages/BirthdayGifts"));
 const AnniversaryGifts = React.lazy(() => import("./pages/AnniversaryGifts"));
+const GiftsForBoyfriend = React.lazy(() => import("./pages/GiftsForBoyfriend"));
+const GiftsForGirlfriend = React.lazy(() => import("./pages/GiftsForGirlfriend"));
+const UniqueGifts = React.lazy(() => import("./pages/UniqueGifts"));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from "./types";
@@ -564,62 +567,118 @@ function HomePage() {
         </section>
       )}
 
-      <section className="mt-16 w-full max-w-4xl px-4 animate-fade-in-up">
-        <h2 className="text-3xl font-bold mb-8 text-center text-text-primary">Popular Gift Categories</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="mt-16 w-full max-w-6xl px-4 animate-fade-in-up">
+        <h2 className="text-3xl font-bold mb-8 text-center text-text-primary font-display">Browse Gift Ideas by Category</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
             to="/gifts-for-mom"
-            className="group p-6 bg-surface border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:shadow-lg transition"
+            className="group p-6 bg-surface border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👩</div>
             <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-600 transition-colors">Gifts for Mom</h3>
-            <p className="text-text-secondary mb-4">
-              25+ thoughtful ideas for Mother's Day, birthdays, and more
+            <p className="text-text-secondary text-sm mb-4">
+              Thoughtful ideas she'll love.
             </p>
-            <span className="text-blue-600 font-medium group-hover:underline">
-              View Gift Guide →
+            <span className="text-blue-600 font-medium group-hover:underline mt-auto">
+              View Guide →
             </span>
           </Link>
 
           <Link
             to="/gifts-for-dad"
-            className="group p-6 bg-surface border-2 border-green-200 rounded-lg hover:border-green-500 hover:shadow-lg transition"
+            className="group p-6 bg-surface border-2 border-green-200 rounded-lg hover:border-green-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👨</div>
             <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-green-600 transition-colors">Gifts for Dad</h3>
-            <p className="text-text-secondary mb-4">
-              25+ practical ideas for Father's Day and birthdays
+            <p className="text-text-secondary text-sm mb-4">
+              Practical gifts he'll use.
             </p>
-            <span className="text-green-600 font-medium group-hover:underline">
-              View Gift Guide →
+            <span className="text-green-600 font-medium group-hover:underline mt-auto">
+              View Guide →
             </span>
           </Link>
 
           <Link
             to="/birthday-gifts"
-            className="group p-6 bg-surface border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition"
+            className="group p-6 bg-surface border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">🎂</div>
             <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-purple-600 transition-colors">Birthday Gifts</h3>
-            <p className="text-text-secondary mb-4">
-              Perfect presents for every age and relationship
+            <p className="text-text-secondary text-sm mb-4">
+              Perfect for any age.
             </p>
-            <span className="text-purple-600 font-medium group-hover:underline">
-              View Gift Guide →
+            <span className="text-purple-600 font-medium group-hover:underline mt-auto">
+              View Guide →
             </span>
           </Link>
 
           <Link
             to="/anniversary-gifts"
-            className="group p-6 bg-surface border-2 border-red-200 rounded-lg hover:border-red-500 hover:shadow-lg transition"
+            className="group p-6 bg-surface border-2 border-red-200 rounded-lg hover:border-red-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">💑</div>
             <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-red-600 transition-colors">Anniversary Gifts</h3>
-            <p className="text-text-secondary mb-4">
-              Romantic gifts for every anniversary milestone
+            <p className="text-text-secondary text-sm mb-4">
+              Romantic gift ideas.
             </p>
-            <span className="text-red-600 font-medium group-hover:underline">
-              View Gift Guide →
+            <span className="text-red-600 font-medium group-hover:underline mt-auto">
+              View Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/gifts-for-boyfriend"
+            className="group p-6 bg-surface border-2 border-blue-800 rounded-lg hover:border-blue-900 hover:shadow-lg transition flex flex-col items-center text-center"
+          >
+            <div className="text-4xl mb-3">👦</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-800 transition-colors">Gifts for Boyfriend</h3>
+            <p className="text-text-secondary text-sm mb-4">
+              Ideas he'll actually love.
+            </p>
+            <span className="text-blue-800 font-medium group-hover:underline mt-auto">
+              View Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/gifts-for-girlfriend"
+            className="group p-6 bg-surface border-2 border-pink-200 rounded-lg hover:border-pink-500 hover:shadow-lg transition flex flex-col items-center text-center"
+          >
+            <div className="text-4xl mb-3">👧</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-pink-600 transition-colors">Gifts for Girlfriend</h3>
+            <p className="text-text-secondary text-sm mb-4">
+              Romantic & thoughtful.
+            </p>
+            <span className="text-pink-600 font-medium group-hover:underline mt-auto">
+              View Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/unique-gifts"
+            className="group p-6 bg-surface border-2 border-teal-200 rounded-lg hover:border-teal-500 hover:shadow-lg transition flex flex-col items-center text-center"
+          >
+            <div className="text-4xl mb-3">✨</div>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-teal-600 transition-colors">Unique Gifts</h3>
+            <p className="text-text-secondary text-sm mb-4">
+              Creative & memorable.
+            </p>
+            <span className="text-teal-600 font-medium group-hover:underline mt-auto">
+              View Guide →
+            </span>
+          </Link>
+
+          <Link
+            to="/"
+            className="group p-6 bg-gradient-to-br from-primary to-secondary text-white rounded-lg hover:shadow-xl transition flex flex-col items-center text-center border-2 border-transparent"
+          >
+            <div className="text-4xl mb-3">🤖</div>
+            <h3 className="text-xl font-semibold mb-2">AI Gift Finder</h3>
+            <p className="text-white/90 text-sm mb-4">
+              Get personalized gift ideas.
+            </p>
+            <span className="bg-white text-primary px-4 py-1.5 rounded-full font-bold text-sm group-hover:bg-opacity-90 transition-colors mt-auto">
+              Try Now →
             </span>
           </Link>
         </div>
@@ -677,6 +736,9 @@ function App() {
               <Route path="/gifts-for-dad" element={<GiftsForDad />} />
               <Route path="/birthday-gifts" element={<BirthdayGifts />} />
               <Route path="/anniversary-gifts" element={<AnniversaryGifts />} />
+              <Route path="/gifts-for-boyfriend" element={<GiftsForBoyfriend />} />
+              <Route path="/gifts-for-girlfriend" element={<GiftsForGirlfriend />} />
+              <Route path="/unique-gifts" element={<UniqueGifts />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
