@@ -35,6 +35,8 @@ const AnniversaryGifts = React.lazy(() => import("./pages/AnniversaryGifts"));
 const GiftsForBoyfriend = React.lazy(() => import("./pages/GiftsForBoyfriend"));
 const GiftsForGirlfriend = React.lazy(() => import("./pages/GiftsForGirlfriend"));
 const UniqueGifts = React.lazy(() => import("./pages/UniqueGifts"));
+const UltimateGiftGivingGuide = React.lazy(() => import("./pages/blog/UltimateGiftGivingGuide"));
+const GiftGivingPsychology = React.lazy(() => import("./pages/blog/GiftGivingPsychology"));
 
 // --- Your Actual Hook and Service Imports ---
 import type { GiftSuggestion, FormErrors, ToastType } from "./types";
@@ -713,6 +715,8 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/blog" element={<BlogIndex />} />
+              <Route path="/blog/ultimate-gift-giving-guide" element={<UltimateGiftGivingGuide />} />
+              <Route path="/blog/gift-giving-psychology" element={<GiftGivingPsychology />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/login" element={<Login />} />
               <Route

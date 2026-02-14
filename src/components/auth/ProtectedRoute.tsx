@@ -29,3 +29,5 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Render children if authenticated
   return <>{children}</>;
 }
+
+export default ProtectedRoute;
