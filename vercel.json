@@ -1,25 +1,18 @@
 {
-  "functions": {
-    "api/blog.ts": {
-      "maxDuration": 10
-    },
-    "api/generate-gifts.ts": {
-      "maxDuration": 30
-    },
-    "api/auth/login.ts": {
-      "maxDuration": 10
-    },
-    "api/auth/validate.ts": {
-      "maxDuration": 10
-    },
-    "api/subscribe.ts": {
-      "maxDuration": 10
+  "rewrites": [
+    {
+      "source": "/((?!api/|admin/|assets/|favicon.ico|_next/|static/|.*\\..*).*)",
+      "destination": "/index.html"
     }
-  },
+  ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api|admin|thank-you).*)",
       "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        },
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
@@ -37,6 +30,32 @@
           "value": "strict-origin-when-cross-origin"
         }
       ]
+    },
+    {
+      "source": "/(api|admin|thank-you).*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
-  ]
+  ],
+  "functions": {
+    "api/blog.ts": {
+      "maxDuration": 10
+    },
+    "api/generate-gifts.ts": {
+      "maxDuration": 30
+    },
+    "api/auth/login.ts": {
+      "maxDuration": 10
+    },
+    "api/auth/validate.ts": {
+      "maxDuration": 10
+    },
+    "api/subscribe.ts": {
+      "maxDuration": 10
+    }
+  }
 }
