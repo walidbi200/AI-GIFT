@@ -3,6 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
 import RelatedGiftGuides from '../components/RelatedGiftGuides';
+import InlineEmailCapture from '../components/InlineEmailCapture';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { useTimeOnPage } from '../hooks/useTimeOnPage';
+import { analytics } from '../services/analytics';
 
 interface GiftItemProps {
     name: string;
@@ -37,13 +41,13 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
                         rel="nofollow noopener noreferrer"
                         onClick={() => {
                             // Track affiliate click
-                            if (typeof window !== 'undefined' && (window as any).gtag) {
-                                (window as any).gtag('event', 'affiliate_click', {
-                                    gift_name: name,
-                                    platform: link.platform,
-                                    position: index + 1,
-                                });
-                            }
+                            analytics.affiliateLinkClicked({
+                                giftName: name,
+                                platform: link.platform,
+                                position: index + 1,
+                                page: window.location.pathname,
+                                commission: link.commission,
+                            });
                         }}
                         className={`px-4 py-2 rounded-lg font-medium transition ${link.featured
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -111,6 +115,9 @@ export default function GiftsForMom() {
             }
         ]
     };
+
+    useScrollDepth('gifts-for-mom');
+    useTimeOnPage('gifts-for-mom');
 
     const breadcrumbSchema = {
         "@context": "https://schema.org",
@@ -197,6 +204,7 @@ export default function GiftsForMom() {
                 </header>
 
                 <AffiliateDisclosure />
+                <InlineEmailCapture placement="top" pageType="landing" />
 
                 {/* Table of Contents */}
                 <div className="bg-blue-50 p-6 rounded-lg mb-12">
@@ -496,6 +504,7 @@ export default function GiftsForMom() {
                             ]}
                         />
                     </section>
+                    <InlineEmailCapture placement="middle" pageType="landing" />
 
                     {/* Section 4: Luxury Treats */}
                     <section id="luxury" className="mt-16">

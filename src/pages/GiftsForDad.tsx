@@ -3,6 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
 import RelatedGiftGuides from '../components/RelatedGiftGuides';
+import InlineEmailCapture from '../components/InlineEmailCapture';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { useTimeOnPage } from '../hooks/useTimeOnPage';
+import { analytics } from '../services/analytics';
 
 interface GiftItemProps {
     name: string;
@@ -36,17 +40,18 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
                         target="_blank"
                         rel="nofollow noopener noreferrer"
                         onClick={() => {
-                            if (typeof window !== 'undefined' && (window as any).gtag) {
-                                (window as any).gtag('event', 'affiliate_click', {
-                                    gift_name: name,
-                                    platform: link.platform,
-                                    position: index + 1,
-                                });
-                            }
+                            // Track affiliate click
+                            analytics.affiliateLinkClicked({
+                                giftName: name,
+                                platform: link.platform,
+                                position: index + 1,
+                                page: window.location.pathname,
+                                commission: link.commission,
+                            });
                         }}
                         className={`px-4 py-2 rounded-lg font-medium transition ${link.featured
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                     >
                         {link.featured && '🏆 '}
@@ -72,7 +77,7 @@ export default function GiftsForDad() {
                 "name": "What are the best gifts for dad?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The best gifts for dad include tech gadgets, tools for hobbies, experience gifts like sports tickets or brewery tours, personalized items, and quality accessories. Consider his interests, lifestyle, and what he actually needs or wants."
+                    "text": "The best gifts for dad are often practical, gadget-oriented, or tied to his hobbies. Think grilling accessories, smart home devices, high-quality tools, whiskey sets, or personalized leather goods."
                 }
             },
             {
@@ -80,35 +85,38 @@ export default function GiftsForDad() {
                 "name": "What should I get my dad for his birthday?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "For dad's birthday, consider a nice watch, wireless headphones, grilling accessories, a personalized whiskey glass set, sports memorabilia, or an experience like golf lessons or a fishing trip. Practical gifts that match his hobbies tend to be most appreciated."
+                    "text": "For dad's birthday, consider upgrading something he uses daily, like a wallet or coffee maker. Alternatively, gift him an experience like a brewery tour, golf lesson, or tickets to a sports game."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What are good Father's Day gifts under $50?",
+                "name": "What are unique gifts for the dad who has everything?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Great Father's Day gifts under $50 include multi-tools, BBQ sauce gift sets, personalized keychains, portable phone chargers, craft beer samplers, funny t-shirts, quality coffee or tea, and books on topics he enjoys."
+                    "text": "For the dad who has everything, go for unique consumable gifts like a hot sauce subscription or craft beer box. Personalized items like an engraved hammer or custom family portrait are also great choices."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What do you get a dad who has everything?",
+                "name": "What are good gifts for dad under $50?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "For dads who have everything, focus on experiences (concert tickets, cooking classes, adventure activities), consumables (premium coffee, craft beer, gourmet snacks), subscriptions (streaming services, magazines), or donations to his favorite charity in his name."
+                    "text": "Great gifts for dad under $50 include digital tire pressure gauges, BBQ spice rub sets, personalized keychains, funny socks, or a high-qualityinsulated tumbler."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What should I avoid when buying gifts for dad?",
+                "name": "What is a good Father's Day gift?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Avoid novelty ties, generic gift cards without thought, anything he already has, cheap tools that won't last, or gifts that feel like obligations (like work-related items). Focus on quality over quantity and match his actual interests."
+                    "text": "A good Father's Day gift shows appreciation for his role. Classic options include grooming kits, watches, or tech gadgets. Adding a personal note or card makes it even more special."
                 }
             }
         ]
     };
+
+    useScrollDepth('gifts-for-dad');
+    useTimeOnPage('gifts-for-dad');
 
     const breadcrumbSchema = {
         "@context": "https://schema.org",
@@ -189,6 +197,7 @@ export default function GiftsForDad() {
                 </header>
 
                 <AffiliateDisclosure />
+                <InlineEmailCapture placement="top" pageType="landing" />
 
                 <div className="bg-green-50 p-6 rounded-lg mb-12">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Navigation</h2>
@@ -483,6 +492,7 @@ export default function GiftsForDad() {
                             ]}
                         />
                     </section>
+                    <InlineEmailCapture placement="middle" pageType="landing" />
 
                     <section id="practical" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">

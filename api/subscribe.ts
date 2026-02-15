@@ -80,6 +80,7 @@ export default async function handler(
         return res.status(200).json({
             success: true,
             message: 'Successfully subscribed to newsletter',
+            redirectUrl: '/thank-you'
         });
 
     } catch (error) {

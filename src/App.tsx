@@ -44,6 +44,9 @@ import { GiftService } from "./services/giftService";
 import { useRecentSearches } from "./hooks/useLocalStorage";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 import { analytics } from "./services/analytics";
+import ExitIntentPopup from './components/ExitIntentPopup';
+import StickyEmailBar from './components/StickyEmailBar';
+const ThankYou = React.lazy(() => import("./pages/ThankYou"));
 
 // --- Constants ---
 const REFINE_OPTIONS = [
@@ -202,7 +205,7 @@ function HomePage() {
       };
 
       const startTime = Date.now();
-      analytics.giftSearchStarted({
+      analytics.giftFinderStarted({
         recipient: relationship,
         occasion: occasion,
         budget: budget,
@@ -233,7 +236,7 @@ function HomePage() {
         // trackGiftGeneration(occasion, relationship, interests.length); // Disabled - API removed
 
         // Track success event
-        analytics.giftSearchCompleted({
+        analytics.giftFinderCompleted({
           recipient: relationship,
           occasion: occasion,
           cached: isCached,
@@ -245,7 +248,7 @@ function HomePage() {
       }
     } catch (error) {
       // Track failure event
-      analytics.giftSearchFailed(error instanceof Error ? error.message : "Unknown error");
+      analytics.giftFinderFailed(error instanceof Error ? error.message : "Unknown error");
 
       showToastMessage(
         "Failed to generate suggestions. Please try again.",
@@ -693,6 +696,12 @@ function HomePage() {
 function App() {
   // useGoogleAnalytics(); // Disabled - API removed
 
+  useEffect(() => {
+    import('./services/analytics').then(({ trackUTMParams }) => {
+      trackUTMParams();
+    });
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -743,11 +752,15 @@ function App() {
               <Route path="/gifts-for-boyfriend" element={<GiftsForBoyfriend />} />
               <Route path="/gifts-for-girlfriend" element={<GiftsForGirlfriend />} />
               <Route path="/unique-gifts" element={<UniqueGifts />} />
+              <Route path="/unique-gifts" element={<UniqueGifts />} />
+              <Route path="/thank-you" element={<ThankYou />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </div>
         <Footer />
+        <ExitIntentPopup />
+        <StickyEmailBar />
       </main>
       <Analytics />
       <SpeedInsights />

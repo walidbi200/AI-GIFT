@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import InlineEmailCapture from '../InlineEmailCapture';
 
 interface BlogPostProps {
     title: string;
@@ -11,7 +12,7 @@ interface BlogPostProps {
     slug: string;
 }
 
-export default function BlogPost({
+export default function StaticBlogPost({
     title,
     description,
     publishDate,
@@ -48,7 +49,9 @@ export default function BlogPost({
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none">
+                <InlineEmailCapture placement="top" pageType="blog" />
                 {children}
+                <InlineEmailCapture placement="bottom" pageType="blog" />
             </div>
 
             {/* CTA Section */}

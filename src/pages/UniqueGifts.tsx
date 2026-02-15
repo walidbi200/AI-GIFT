@@ -3,6 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
 import RelatedGiftGuides from '../components/RelatedGiftGuides';
+import InlineEmailCapture from '../components/InlineEmailCapture';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { useTimeOnPage } from '../hooks/useTimeOnPage';
+import { analytics } from '../services/analytics';
 
 interface GiftItemProps {
     name: string;
@@ -36,13 +40,13 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
                         target="_blank"
                         rel="nofollow noopener noreferrer"
                         onClick={() => {
-                            if (typeof window !== 'undefined' && (window as any).gtag) {
-                                (window as any).gtag('event', 'affiliate_click', {
-                                    gift_name: name,
-                                    platform: link.platform,
-                                    position: index + 1,
-                                });
-                            }
+                            analytics.affiliateLinkClicked({
+                                giftName: name,
+                                platform: link.platform,
+                                position: index + 1,
+                                page: window.location.pathname,
+                                commission: link.commission,
+                            });
                         }}
                         className={`px-4 py-2 rounded-lg font-medium transition ${link.featured
                             ? 'bg-teal-600 text-white hover:bg-teal-700'
@@ -109,6 +113,9 @@ export default function UniqueGifts() {
             }
         ]
     };
+
+    useScrollDepth('unique-gifts');
+    useTimeOnPage('unique-gifts');
 
     const breadcrumbSchema = {
         "@context": "https://schema.org",
@@ -189,6 +196,7 @@ export default function UniqueGifts() {
                 </header>
 
                 <AffiliateDisclosure />
+                <InlineEmailCapture placement="top" pageType="landing" />
 
                 <div className="bg-teal-50 p-6 rounded-lg mb-12 border-teal-200 border shadow-sm">
                     <h2 className="text-xl font-semibold text-teal-900 mb-4">Explore Unique Categories</h2>
@@ -282,6 +290,7 @@ export default function UniqueGifts() {
                             ]}
                         />
                     </section>
+                    <InlineEmailCapture placement="middle" pageType="landing" />
 
                     <section id="personalized" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">Personalized & Custom Art</h2>

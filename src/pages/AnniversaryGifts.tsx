@@ -3,6 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
 import RelatedGiftGuides from '../components/RelatedGiftGuides';
+import InlineEmailCapture from '../components/InlineEmailCapture';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { useTimeOnPage } from '../hooks/useTimeOnPage';
+import { analytics } from '../services/analytics';
 
 interface GiftItemProps {
     name: string;
@@ -36,17 +40,17 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
                         target="_blank"
                         rel="nofollow noopener noreferrer"
                         onClick={() => {
-                            if (typeof window !== 'undefined' && (window as any).gtag) {
-                                (window as any).gtag('event', 'affiliate_click', {
-                                    gift_name: name,
-                                    platform: link.platform,
-                                    position: index + 1,
-                                });
-                            }
+                            analytics.affiliateLinkClicked({
+                                giftName: name,
+                                platform: link.platform,
+                                position: index + 1,
+                                page: window.location.pathname,
+                                commission: link.commission,
+                            });
                         }}
                         className={`px-4 py-2 rounded-lg font-medium transition ${link.featured
-                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-red-600 text-white hover:bg-red-700'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                     >
                         {link.featured && '🏆 '}
@@ -69,38 +73,41 @@ export default function AnniversaryGifts() {
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "What are traditional anniversary gifts by year?",
+                "name": "What are traditional anniversary gifts?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The traditional anniversary gifts are: 1st - Paper, 5th - Wood, 10th - Tin/Aluminum, 25th - Silver, 50th - Gold. These materials symbolize the strength and durability of the marriage as it grows over time."
+                    "text": "Traditional anniversary gifts follow a meaningful theme for each year: Paper (1st), Cotton (2nd), Leather (3rd), Fruit/Flowers (4th), Wood (5th), Tin/Aluminum (10th), Crystal (15th), China (20th), Silver (25th), Pearl (30th), Ruby (40th), and Gold (50th)."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What is a good 1st anniversary gift?",
+                "name": "What are good anniversary gifts for him?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The traditional 1st anniversary gift is paper. Great ideas include personalized stationery, a custom map of where you met, a book of love poems, tickets to a show (paper!), or a framed wedding photo. The modern alternative is clocks."
+                    "text": "Good anniversary gifts for him include personalized watches, high-quality leather goods, experience days (driving, flying, tasting), tech gadgets, or sentimental items like a framed map of where you met or a custom photo book of your time together."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What should I get my husband for our anniversary?",
+                "name": "What are romantic anniversary gift ideas for her?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "For your husband, consider a personalized watch, a weekend getaway, a stylish leather bag, tech gadgets he's been eyeing, or an experience you can share together like a tasting menu dinner. Focus on things that celebrate your time together."
+                    "text": "Romantic gifts for her include jewelry (especially with significant stones), a surprise weekend getaway, a spa day, a handwritten love letter with a preserved rose, or recreating your first date. Personalized gifts showing you remember small details are always romantic."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What are romantic anniversary gift ideas?",
+                "name": "How much should I spend on an anniversary gift?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Romantic anniversary gifts include a couple's spa day, a surprise trip, jewelry with a meaningful engraving, a custom star map of your wedding night, a handwritten love letter, or recreating your first date. Often, the effort and thought count more than the price."
+                    "text": "There's no set rule for anniversary spending. It depends on your budget and how long you've been together. For newer relationships, $50-$100 is common. For milestone anniversaries (10, 20, 25 years), couples often splurge on larger gifts or trips. The thought matters more than the price tag."
                 }
             }
         ]
     };
+
+    useScrollDepth('anniversary-gifts');
+    useTimeOnPage('anniversary-gifts');
 
     const breadcrumbSchema = {
         "@context": "https://schema.org",
@@ -181,6 +188,7 @@ export default function AnniversaryGifts() {
                 </header>
 
                 <AffiliateDisclosure />
+                <InlineEmailCapture placement="top" pageType="landing" />
 
                 <div className="bg-red-50 p-6 rounded-lg mb-12">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Navigation</h2>
@@ -404,6 +412,7 @@ export default function AnniversaryGifts() {
                             ]}
                         />
                     </section>
+                    <InlineEmailCapture placement="middle" pageType="landing" />
 
                     <section id="personalized" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-6">

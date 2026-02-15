@@ -1,11 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import BlogPost from '../../components/BlogPost';
+import StaticBlogPost from '../../components/blog/StaticBlogPost';
 
 export default function UltimateGiftGivingGuide() {
     return (
-        <BlogPost
+        <StaticBlogPost
             title="The Ultimate Gift Giving Guide: 50+ Ideas for Every Occasion"
             description="Struggling to find the perfect present? Our comprehensive guide covers 50+ gift ideas organized by recipient, occasion, and budget to help you become a master gift giver."
             publishDate="February 13, 2026"
@@ -214,6 +214,6 @@ export default function UltimateGiftGivingGuide() {
                     <p>Always include a gift receipt! It takes the pressure off both the giver and the receiver.</p>
                 </div>
             </div>
-        </BlogPost>
+        </StaticBlogPost>
     );
 }
