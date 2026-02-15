@@ -2,7 +2,6 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
@@ -67,92 +66,28 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
     );
 };
 
-export default function GiftsForMom() {
-    // Schema markup data
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are the best gifts for mom?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The best gifts for mom are personalized jewelry, spa experiences, photo albums, subscription boxes, and thoughtful items that match her interests. Consider her hobbies, lifestyle, and preferences when choosing."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What should I get my mom for her birthday?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "For mom's birthday, consider personalized gifts like custom jewelry with birthstones, a spa day package, a subscription box tailored to her interests, or a heartfelt photo album. Experience gifts like cooking classes or concert tickets also make memorable presents."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are good gifts for mom under $50?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Great gifts for mom under $50 include personalized photo frames, scented candle sets, cozy throw blankets, gourmet food baskets, gardening tool sets, and coffee or tea subscription samplers. These thoughtful gifts show you care without breaking the budget."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What is a thoughtful gift for Mother's Day?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Thoughtful Mother's Day gifts include personalized jewelry with her children's names or birthstones, a handwritten letter combined with a meaningful gift, a curated gift basket with her favorite items, or an experience you can share together like a spa day or brunch."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What should I avoid when buying gifts for mom?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Avoid generic gifts that lack personal touch, household appliances (unless specifically requested), anti-aging products that might be offensive, or gifts that create more work for her. Focus on gifts that show you know her interests and appreciate her."
-                }
-            }
-        ]
-    };
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
+export default function GiftsForMom() {
     useScrollDepth('gifts-for-mom');
     useTimeOnPage('gifts-for-mom');
-
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.smartgiftfinder.xyz/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Gifts for Mom",
-                "item": "https://www.smartgiftfinder.xyz/gifts-for-mom"
-            }
-        ]
-    };
 
     return (
         <>
             <Helmet>
                 {/* Primary Meta Tags */}
-                <title>Best Gifts for Mom [2025] - 25+ Thoughtful Ideas She'll Love</title>
-                <meta name="title" content="Best Gifts for Mom [2025] - 25+ Thoughtful Ideas She'll Love" />
-                <meta name="description" content="Discover 25+ unique gift ideas for mom, from personalized jewelry to experience gifts. Find the perfect present for birthdays, Mother's Day, or just because. Free AI recommendations!" />
+                <title>Best Gifts for Mom [2025] - 25+ Ideas She'll Love | Smart Gift Finder</title>
+                <meta name="title" content="Best Gifts for Mom [2025] - 25+ Ideas She'll Love | Smart Gift Finder" />
+                <meta name="description" content="🎁 Best gifts for mom 2025! 25+ ideas from $10-$500. Personalized jewelry, spa experiences, unique presents. Free AI gift finder ⚡" />
                 <meta name="keywords" content="gifts for mom, mother's day gifts, birthday gifts for mom, gift ideas for mom, best gifts for mother" />
                 <link rel="canonical" href="https://www.smartgiftfinder.xyz/gifts-for-mom" />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content="https://www.smartgiftfinder.xyz/gifts-for-mom" />
-                <meta property="og:title" content="Best Gifts for Mom [2025] - 25+ Thoughtful Ideas" />
-                <meta property="og:description" content="Discover unique gift ideas for mom, from personalized jewelry to experience gifts. Find the perfect present!" />
+                <meta property="og:title" content="Best Gifts for Mom [2025] - 25+ Ideas She'll Love" />
+                <meta property="og:description" content="🎁 Find perfect gifts for mom! Personalized jewelry, spa days & more. Free AI recommendations." />
                 <meta property="og:image" content="https://www.smartgiftfinder.xyz/images/gifts-for-mom-og.jpg" />
 
                 {/* Twitter */}
@@ -164,10 +99,41 @@ export default function GiftsForMom() {
 
                 {/* Schema Markup */}
                 <script type="application/ld+json">
-                    {JSON.stringify(faqSchema)}
+                    {injectSchema(schemaMarkup.collectionPage({
+                        name: "Best Gifts for Mom",
+                        description: "Discover 25+ thoughtful gift ideas for mom",
+                        url: "https://www.smartgiftfinder.xyz/gifts-for-mom"
+                    }))}
                 </script>
                 <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
+                    {injectSchema(schemaMarkup.breadcrumbs([
+                        { name: "Home", url: "https://www.smartgiftfinder.xyz/" },
+                        { name: "Gifts for Mom", url: "https://www.smartgiftfinder.xyz/gifts-for-mom" }
+                    ]))}
+                </script>
+                <script type="application/ld+json">
+                    {injectSchema(schemaMarkup.faqPage([
+                        {
+                            question: "What are the best gifts for mom?",
+                            answer: "The best gifts for mom include personalized jewelry, spa experiences, photo albums, subscription boxes, and thoughtful items that match her interests."
+                        },
+                        {
+                            question: "What should I get my mom for her birthday?",
+                            answer: "For mom's birthday, consider personalized gifts like custom jewelry with birthstones, a spa day package, a subscription box tailored to her interests, or a heartfelt photo album."
+                        },
+                        {
+                            question: "What are good gifts for mom under $50?",
+                            answer: "Great gifts for mom under $50 include personalized photo frames, scented candle sets, cozy throw blankets, gourmet food baskets, gardening tool sets, and coffee or tea subscription samplers."
+                        },
+                        {
+                            question: "What is a thoughtful gift for Mother's Day?",
+                            answer: "Thoughtful Mother's Day gifts include personalized jewelry with her children's names or birthstones, a handwritten letter combined with a meaningful gift, a curated gift basket, or an experience shared together."
+                        },
+                        {
+                            question: "What should I avoid when buying gifts for mom?",
+                            answer: "Avoid generic gifts, household appliances (unless requested), offensive anti-aging products, or gifts that create work. Focus on her interests."
+                        }
+                    ]))}
                 </script>
             </Helmet>
 
@@ -236,6 +202,7 @@ export default function GiftsForMom() {
                             Personalized gifts show extra thought and effort. These custom items become cherished
                             keepsakes that mom will treasure forever.
                         </p>
+
 
                         <GiftItem
                             name="Personalized Family Tree Necklace"
@@ -642,9 +609,11 @@ export default function GiftsForMom() {
                             to="/"
                             className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
                         >
-                            Find the Perfect Gift with AI →
+                            Get AI Gift Suggestions →
                         </Link>
                     </div>
+
+                    <InternalLinks currentPage="/gifts-for-mom" className="my-12" />
 
                     {/* FAQ Section */}
                     <section id="faq" className="mt-16">
@@ -713,27 +682,6 @@ export default function GiftsForMom() {
                             </div>
                         </div>
                     </section>
-
-                    {/* Final CTA */}
-                    <div className="mt-16 border-t pt-8">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                            More Gift Guides
-                        </h3>
-                        <div className="grid md:grid-cols-3 gap-4">
-                            <Link to="/gifts-for-dad" className="p-4 border rounded-lg hover:border-blue-500 transition">
-                                <h4 className="font-semibold text-gray-900 mb-2">Gifts for Dad</h4>
-                                <p className="text-sm text-gray-600">Find perfect gifts for your father</p>
-                            </Link>
-                            <Link to="/birthday-gifts" className="p-4 border rounded-lg hover:border-blue-500 transition">
-                                <h4 className="font-semibold text-gray-900 mb-2">Birthday Gifts</h4>
-                                <p className="text-sm text-gray-600">Ideas for any birthday celebration</p>
-                            </Link>
-                            <Link to="/anniversary-gifts" className="p-4 border rounded-lg hover:border-blue-500 transition">
-                                <h4 className="font-semibold text-gray-900 mb-2">Anniversary Gifts</h4>
-                                <p className="text-sm text-gray-600">Romantic gifts for your partner</p>
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </article>
         </>

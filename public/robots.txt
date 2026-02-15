@@ -1,4 +1,18 @@
+# Allow all crawlers
 User-agent: *
 Allow: /
-Disallow: /node_modules/
+
+# Crawl-delay
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 0
+
+# Disallow private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /thank-you
+
+# Sitemap
 Sitemap: https://www.smartgiftfinder.xyz/sitemap.xml

@@ -1,7 +1,6 @@
-// Extend Window interface for gtag
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (command: string, action: string, params?: any) => void;
   }
 }
 

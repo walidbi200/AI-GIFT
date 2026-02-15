@@ -2,11 +2,12 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
 import { analytics } from '../services/analytics';
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
 interface GiftItemProps {
     name: string;
@@ -431,21 +432,33 @@ export default function GiftsForGirlfriend() {
                         </Link>
                     </div>
 
+                    <InternalLinks currentPage="/gifts-for-girlfriend" className="my-12" />
+
                     <section id="faq" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">Girlfriend Gift FAQ</h2>
                         <div className="space-y-6">
-                            <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What's the best anniversary gift for a girlfriend?</h3>
-                                <p className="text-gray-700 underline-offset-4 decoration-pink-300 decoration-2 underline">Personalized jewelry or a romantic experience like a weekend trip are top choices for anniversaries.</p>
+                            <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What are romantic gifts for girlfriend?</h3>
+                                <p className="text-gray-700">Romantic gifts often focus on thoughtfulness and personalization. A custom star map of your first date, a weekend getaway surprise, or a piece of jewelry engraved with a special message are all deeply romantic choices that show you've put heart into the selection.</p>
                             </div>
-                            <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">How much should I spend on a birthday gift for her?</h3>
-                                <p className="text-gray-700">The amount matters less than the thought. A well-chosen $50 gift she LOVES is better than a generic $200 gift that doesn't fit her style.</p>
+                            <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What should I get my girlfriend for her birthday?</h3>
+                                <p className="text-gray-700">Birthday gifts should match her unique personality. If she loves self-care, a luxury spa gift set is perfect. If she's a fashionista, a designer accessory like a watch or handbag is a great choice. For a sentimental touch, consider a custom photo album of your time together.</p>
+                            </div>
+                            <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What are thoughtful gifts to show I care?</h3>
+                                <p className="text-gray-700">Thoughtful gifts are about noticing the little things. It could be a subscription to her favorite magazine, a cozy cashmere sweater for cold nights, or even a 'planned' night out that takes all the decision-making off her plate.</p>
+                            </div>
+                            <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What are the best gifts for a new girlfriend?</h3>
+                                <p className="text-gray-700">In a new relationship, opt for gifts that are sweet but not overwhelming. Luxury candles, a high-end chocolate box, or tickets to a concert or movie you both want to see are ideal ways to celebrate without making things 'too serious' too fast.</p>
+                            </div>
+                            <div className="bg-pink-50 p-6 rounded-lg border border-pink-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">What gifts do girlfriends actually want?</h3>
+                                <p className="text-gray-700">Most girlfriends appreciate gifts that show you know them. This means paying attention to their 'wish list'—whether it's a specific brand of skincare, a hobby they want to start, or a place they've mentioned they want to visit.</p>
                             </div>
                         </div>
                     </section>
-
-                    <RelatedGiftGuides currentPage="gifts-for-girlfriend" />
                 </div>
             </article>
         </>

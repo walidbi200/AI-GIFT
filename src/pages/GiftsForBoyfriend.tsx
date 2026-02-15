@@ -2,11 +2,13 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
+// RelatedGiftGuides removed in favor of InternalLinks
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
 import { analytics } from '../services/analytics';
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
 interface GiftItemProps {
     name: string;
@@ -67,101 +69,66 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
 };
 
 export default function GiftsForBoyfriend() {
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are the best gifts for a new boyfriend?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "For a new boyfriend, look for gifts that are thoughtful but not overly intense. High-quality phone accessories, a craft beer tasting set, or tickets to a casual event like a minor league baseball game or an arcade bar are great 'safe' choices that show interest without being too serious."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What do guys actually want as gifts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Most guys prioritize utility, quality, and their personal hobbies. High-end tech gadgets they can use daily, durable outdoor gear, or high-quality staples for their favorite hobby (like a premium gaming headset or a professional-grade grilling set) are usually the biggest hits."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What should I get my boyfriend for his birthday?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Birthday gifts should celebrate his specific interests. If he's a techie, look at smart home devices or noise-canceling headphones. For the sports fan, an authentic jersey or tickets to a game. If he loves experiences, a brewery tour or axe-throwing session is a memorable alternative to a physical item."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are romantic gifts for boyfriend?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Romantic gifts for men often involve shared experiences or high-quality items he can wear daily. A weekend getaway, a stylish silver watch he'll see every time he checks the time, or a framed photo from your favorite trip together are all deeply romantic without feeling 'cliché'."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What should I avoid buying my boyfriend?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Avoid generic 'filler' gifts like generic mugs or socks unless they are high-quality items specifically related to his passion. Also, avoid anything that feels like a 'project' or an obligation—stick to items that enhance his existing lifestyle and hobbies."
-                }
-            }
-        ]
-    };
-
     useScrollDepth('gifts-for-boyfriend');
     useTimeOnPage('gifts-for-boyfriend');
-
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.smartgiftfinder.xyz/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Gifts for Boyfriend",
-                "item": "https://www.smartgiftfinder.xyz/gifts-for-boyfriend"
-            }
-        ]
-    };
 
     return (
         <>
             <Helmet>
-                <title>Best Gifts for Boyfriend [2025] - 25+ Ideas He'll Actually Love</title>
-                <meta name="title" content="Best Gifts for Boyfriend [2025] - 25+ Ideas He'll Actually Love" />
-                <meta name="description" content="Discover 25+ gift ideas your boyfriend will actually use and love. From tech gadgets to experiences, find the perfect present for any occasion." />
-                <meta name="keywords" content="gifts for boyfriend, birthday gifts for boyfriend, best gifts for boyfriend 2025, anniversary gifts for boyfriend, boyfriend gift ideas" />
+                <title>Best Gifts for Boyfriend [2025] - 25+ Ideas He'll Actually Love | Smart Gift Finder</title>
+                <meta name="title" content="Best Gifts for Boyfriend [2025] - 25+ Ideas He'll Actually Love | Smart Gift Finder" />
+                <meta name="description" content="🎁 Discover 25+ gift ideas your boyfriend will actually use! Tech gadgets, gaming gear, outdoor essentials & unique experiences. Free AI recommendations ⚡" />
+                <meta name="keywords" content="gifts for boyfriend, birthday gifts for boyfriend, best gifts for boyfriend 2025, anniversary gifts for boyfriend, tech gifts for men, gaming gifts" />
                 <link rel="canonical" href="https://www.smartgiftfinder.xyz/gifts-for-boyfriend" />
 
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content="https://www.smartgiftfinder.xyz/gifts-for-boyfriend" />
                 <meta property="og:title" content="Best Gifts for Boyfriend [2025] - Ideas He'll Love" />
-                <meta property="og:description" content="Find the perfect tech, sports, or experience gift for your boyfriend." />
+                <meta property="og:description" content="🎁 Find the perfect tech, sports, or experience gift for your boyfriend. Curated ideas he'll actually use." />
                 <meta property="og:image" content="https://www.smartgiftfinder.xyz/images/gifts-for-boyfriend-og.jpg" />
 
                 <meta property="twitter:card" content="summary_large_image" />
                 <meta property="twitter:url" content="https://www.smartgiftfinder.xyz/gifts-for-boyfriend" />
                 <meta property="twitter:title" content="Best Gifts for Boyfriend [2025]" />
-                <meta property="twitter:description" content="25+ gift ideas he'll actually use." />
+                <meta property="twitter:description" content="25+ gift ideas he'll actually use. Tech, gaming, and more." />
                 <meta property="twitter:image" content="https://www.smartgiftfinder.xyz/images/gifts-for-boyfriend-twitter.jpg" />
 
                 <script type="application/ld+json">
-                    {JSON.stringify(faqSchema)}
+                    {injectSchema(schemaMarkup.collectionPage({
+                        name: "Best Gifts for Boyfriend",
+                        description: "Curated collection of the best gift ideas for boyfriends in 2025",
+                        url: "https://www.smartgiftfinder.xyz/gifts-for-boyfriend"
+                    }))}
                 </script>
                 <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
+                    {injectSchema(schemaMarkup.breadcrumbs([
+                        { name: "Home", url: "https://www.smartgiftfinder.xyz/" },
+                        { name: "Gifts for Boyfriend", url: "https://www.smartgiftfinder.xyz/gifts-for-boyfriend" }
+                    ]))}
+                </script>
+                <script type="application/ld+json">
+                    {injectSchema(schemaMarkup.faqPage([
+                        {
+                            question: "What are the best gifts for a new boyfriend?",
+                            answer: "For a new boyfriend, look for gifts that are thoughtful but not overly intense. High-quality phone accessories, a craft beer tasting set, or tickets to a casual event like a minor league baseball game or an arcade bar are great 'safe' choices that show interest without being too serious."
+                        },
+                        {
+                            question: "What do guys actually want as gifts?",
+                            answer: "Most guys prioritize utility, quality, and their personal hobbies. High-end tech gadgets they can use daily, durable outdoor gear, or high-quality staples for their favorite hobby (like a premium gaming headset or a professional-grade grilling set) are usually the biggest hits."
+                        },
+                        {
+                            question: "What should I get my boyfriend for his birthday?",
+                            answer: "Birthday gifts should celebrate his specific interests. If he's a techie, look at smart home devices or noise-canceling headphones. For the sports fan, an authentic jersey or tickets to a game. If he loves experiences, a brewery tour or axe-throwing session is a memorable alternative to a physical item."
+                        },
+                        {
+                            question: "What are romantic gifts for boyfriend?",
+                            answer: "Romantic gifts for men often involve shared experiences or high-quality items he can wear daily. A weekend getaway, a stylish silver watch he'll see every time he checks the time, or a framed photo from your favorite trip together are all deeply romantic without feeling 'cliché'."
+                        },
+                        {
+                            question: "What should I avoid buying my boyfriend?",
+                            answer: "Avoid generic 'filler' gifts like generic mugs or socks unless they are high-quality items specifically related to his passion. Also, avoid anything that feels like a 'project' or an obligation—stick to items that enhance his existing lifestyle and hobbies."
+                        }
+                    ]))}
                 </script>
             </Helmet>
 
@@ -459,25 +426,33 @@ export default function GiftsForBoyfriend() {
                         </Link>
                     </div>
 
+                    <InternalLinks currentPage="/gifts-for-boyfriend" className="my-12" />
+
                     <section id="faq" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">Boyfriend Gift FAQ</h2>
                         <div className="space-y-6">
                             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-3">What are the best gifts for a new boyfriend?</h3>
-                                <p className="text-gray-700">Go for 'low pressure' gifts like unique food items, high-quality accessories (like a nice power bank), or an experience you can share together without it feeling too sentimental.</p>
+                                <p className="text-gray-700">For a new boyfriend, look for gifts that are thoughtful but not overly intense. High-quality phone accessories, a craft beer tasting set, or tickets to a casual event like a minor league baseball game or an arcade bar are great 'safe' choices that show interest without being too serious.</p>
                             </div>
                             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-3">How do I choose a gift he'll actually like?</h3>
-                                <p className="text-gray-700">Pay attention to the things he complains about or the upgrades he mentions needing for his hobbies. Practicality and quality usually win over novelty.</p>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What do guys actually want as gifts?</h3>
+                                <p className="text-gray-700">Most guys prioritize utility, quality, and their personal hobbies. High-end tech gadgets they can use daily, durable outdoor gear, or high-quality staples for their favorite hobby (like a premium gaming headset or a professional-grade grilling set) are usually the biggest hits.</p>
                             </div>
                             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What are some romantic but not 'cheesy' gifts?</h3>
-                                <p className="text-gray-700">A weekend trip, a piece of timeless jewelry (like a classic watch), or a high-quality leather item that will age well are all great choices.</p>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What should I get my boyfriend for his birthday?</h3>
+                                <p className="text-gray-700">Birthday gifts should celebrate his specific interests. If he's a techie, look at smart home devices or noise-canceling headphones. For the sports fan, an authentic jersey or tickets to a game. If he loves experiences, a brewery tour or axe-throwing session is a memorable alternative to a physical item.</p>
+                            </div>
+                            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What are romantic gifts for boyfriend?</h3>
+                                <p className="text-gray-700">Romantic gifts for men often involve shared experiences or high-quality items he can wear daily. A weekend getaway, a stylish silver watch he'll see every time he checks the time, or a framed photo from your favorite trip together are all deeply romantic without feeling 'cliché'.</p>
+                            </div>
+                            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What should I avoid buying my boyfriend?</h3>
+                                <p className="text-gray-700">Avoid generic 'filler' gifts like generic mugs or socks unless they are high-quality items specifically related to his passion. Also, avoid anything that feels like a 'project' or an obligation—stick to items that enhance his existing lifestyle and hobbies.</p>
                             </div>
                         </div>
                     </section>
-
-                    <RelatedGiftGuides currentPage="gifts-for-boyfriend" />
                 </div>
             </article>
         </>

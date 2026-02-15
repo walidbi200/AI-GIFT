@@ -2,11 +2,13 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
+// RelatedGiftGuides removed in favor of InternalLinks
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
 import { analytics } from '../services/analytics';
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
 interface GiftItemProps {
     name: string;
@@ -67,101 +69,66 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
 };
 
 export default function UniqueGifts() {
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are the most unique gifts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The most unique gifts are often those that fuse innovation with personalization. Examples include smart indoor garden systems, custom DNA-based ancestry portraits, or rare experiences like hot air balloon rides or artisanal pottery masterclasses."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What do you get someone who has everything?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "For the person who 'has everything,' focus on consumable experiences or highly personalized mementos. Subscription boxes for niche interests (like rare coffees or international snacks) or a custom star map of a special date always stand out."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are creative gift ideas?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Creative gifts often involve active participation or unusual home decor. Consider a DIY cocktail crafting kit, a levitating plant pot, or 'conversation starter' games that facilitate deep and memorable discussions."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are good conversation starter gifts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Gifts that double as interesting home art are the best conversation starters. Items like unique geometric bookends, handcrafted pottery with a story, or a high-quality portable projector for impromptu movie nights are great options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Where can I find unusual gifts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Specialty marketplaces like Uncommon Goods and Etsy are goldmines for unusual gifts. You can also look for innovative tech on sites like Best Buy or search for global artisan goods on Amazon's Handmade section."
-                }
-            }
-        ]
-    };
-
     useScrollDepth('unique-gifts');
     useTimeOnPage('unique-gifts');
-
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.smartgiftfinder.xyz/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Unique Gift Ideas",
-                "item": "https://www.smartgiftfinder.xyz/unique-gifts"
-            }
-        ]
-    };
 
     return (
         <>
             <Helmet>
-                <title>Unique Gift Ideas [2025] - 30+ Creative Gifts They'll Never Forget</title>
-                <meta name="title" content="Unique Gift Ideas [2025] - 30+ Creative Gifts They'll Never Forget" />
-                <meta name="description" content="Discover 30+ unique and creative gift ideas for people who have everything. From experiences to personalized items, find truly memorable gifts." />
-                <meta name="keywords" content="unique gifts, creative gift ideas, unusual gifts, gifts for people who have everything, memorable gifts" />
+                <title>Unique Gift Ideas [2025] - 30+ Creative Gifts They'll Never Forget | Smart Gift Finder</title>
+                <meta name="title" content="Unique Gift Ideas [2025] - 30+ Creative Gifts They'll Never Forget | Smart Gift Finder" />
+                <meta name="description" content="🎁 Discover 30+ unique and creative gift ideas for people who have everything. from cutting-edge tech to once-in-a-lifetime experiences. Free AI recommendations ⚡" />
+                <meta name="keywords" content="unique gifts, creative gift ideas, unusual gifts, gifts for people who have everything, memorable gifts, personalized gifts" />
                 <link rel="canonical" href="https://www.smartgiftfinder.xyz/unique-gifts" />
 
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content="https://www.smartgiftfinder.xyz/unique-gifts" />
                 <meta property="og:title" content="30+ Unique Gift Ideas for 2025" />
-                <meta property="og:description" content="Creative and unusual gifts for every personality." />
+                <meta property="og:description" content="Creative and unusual gifts for every personality. Find something they've never seen before." />
                 <meta property="og:image" content="https://www.smartgiftfinder.xyz/images/unique-gifts-og.jpg" />
 
                 <meta property="twitter:card" content="summary_large_image" />
                 <meta property="twitter:url" content="https://www.smartgiftfinder.xyz/unique-gifts" />
                 <meta property="twitter:title" content="Unique Gift Ideas [2025]" />
-                <meta property="twitter:description" content="Gifts they'll never forget." />
+                <meta property="twitter:description" content="Gifts they'll never forget. From tech to experiences." />
                 <meta property="twitter:image" content="https://www.smartgiftfinder.xyz/images/unique-gifts-twitter.jpg" />
 
                 <script type="application/ld+json">
-                    {JSON.stringify(faqSchema)}
+                    {injectSchema(schemaMarkup.collectionPage({
+                        name: "Unique Gift Ideas",
+                        description: "Curated collection of unique and creative gift ideas for 2025",
+                        url: "https://www.smartgiftfinder.xyz/unique-gifts"
+                    }))}
                 </script>
                 <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
+                    {injectSchema(schemaMarkup.breadcrumbs([
+                        { name: "Home", url: "https://www.smartgiftfinder.xyz/" },
+                        { name: "Unique Gift Ideas", url: "https://www.smartgiftfinder.xyz/unique-gifts" }
+                    ]))}
+                </script>
+                <script type="application/ld+json">
+                    {injectSchema(schemaMarkup.faqPage([
+                        {
+                            question: "What are the most unique gifts?",
+                            answer: "The most unique gifts are often those that fuse innovation with personalization. Examples include smart indoor garden systems, custom DNA-based ancestry portraits, or rare experiences like hot air balloon rides or artisanal pottery masterclasses."
+                        },
+                        {
+                            question: "What do you get someone who has everything?",
+                            answer: "For the person who 'has everything,' focus on consumable experiences or highly personalized mementos. Subscription boxes for niche interests (like rare coffees or international snacks) or a custom star map of a special date always stand out."
+                        },
+                        {
+                            question: "What are creative gift ideas?",
+                            answer: "Creative gifts often involve active participation or unusual home decor. Consider a DIY cocktail crafting kit, a levitating plant pot, or 'conversation starter' games that facilitate deep and memorable discussions."
+                        },
+                        {
+                            question: "What are good conversation starter gifts?",
+                            answer: "Gifts that double as interesting home art are the best conversation starters. Items like unique geometric bookends, handcrafted pottery with a story, or a high-quality portable projector for impromptu movie nights are great options."
+                        },
+                        {
+                            question: "Where can I find unusual gifts?",
+                            answer: "Specialty marketplaces like Uncommon Goods and Etsy are goldmines for unusual gifts. You can also look for innovative tech on sites like Best Buy or search for global artisan goods on Amazon's Handmade section."
+                        }
+                    ]))}
                 </script>
             </Helmet>
 
@@ -380,21 +347,33 @@ export default function UniqueGifts() {
                         </Link>
                     </div>
 
+                    <InternalLinks currentPage="/unique-gifts" className="my-12" />
+
                     <section id="faq" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">Unique Gift FAQ</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-                                <h3 className="text-lg font-bold mb-2">What makes a gift truly unique?</h3>
-                                <p className="text-gray-600">A gift is unique when it caters to a specific, often overlooked interest, or when it offers an experience that the recipient wouldn't normally find on their own.</p>
+                        <div className="space-y-6">
+                            <div className="bg-teal-50 p-6 rounded-lg border border-teal-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What makes a gift truly unique?</h3>
+                                <p className="text-gray-700">A gift is unique when it caters to a specific, often overlooked interest, or when it offers an experience that the recipient wouldn't normally find on their own.</p>
                             </div>
-                            <div className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-                                <h3 className="text-lg font-bold mb-2">Are unique gifts always expensive?</h3>
-                                <p className="text-gray-600">Not at all! Many unique gifts, like artisanal snacks or handcrafted soaps, start at very accessible price points under $30.</p>
+                            <div className="bg-teal-50 p-6 rounded-lg border border-teal-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What do you get someone who has everything?</h3>
+                                <p className="text-gray-700">For the person who 'has everything,' focus on consumable experiences or highly personalized mementos. Subscription boxes for niche interests (like rare coffees or international snacks) or a custom star map of a special date always stand out.</p>
+                            </div>
+                            <div className="bg-teal-50 p-6 rounded-lg border border-teal-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What are creative gift ideas?</h3>
+                                <p className="text-gray-700">Creative gifts often involve active participation or unusual home decor. Consider a DIY cocktail crafting kit, a levitating plant pot, or 'conversation starter' games that facilitate deep and memorable discussions.</p>
+                            </div>
+                            <div className="bg-teal-50 p-6 rounded-lg border border-teal-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">What are good conversation starter gifts?</h3>
+                                <p className="text-gray-700">Gifts that double as interesting home art are the best conversation starters. Items like unique geometric bookends, handcrafted pottery with a story, or a high-quality portable projector for impromptu movie nights are great options.</p>
+                            </div>
+                            <div className="bg-teal-50 p-6 rounded-lg border border-teal-200">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">Where can I find unusual gifts?</h3>
+                                <p className="text-gray-700">Specialty marketplaces like Uncommon Goods and Etsy are goldmines for unusual gifts. You can also look for innovative tech on sites like Best Buy or search for global artisan goods on Amazon's Handmade section.</p>
                             </div>
                         </div>
                     </section>
-
-                    <RelatedGiftGuides currentPage="unique-gifts" />
                 </div>
             </article>
         </>

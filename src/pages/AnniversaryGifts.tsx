@@ -2,11 +2,13 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
+// RelatedGiftGuides removed in favor of InternalLinks
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
 import { analytics } from '../services/analytics';
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
 interface GiftItemProps {
     name: string;
@@ -67,93 +69,62 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
 };
 
 export default function AnniversaryGifts() {
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are traditional anniversary gifts?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Traditional anniversary gifts follow a meaningful theme for each year: Paper (1st), Cotton (2nd), Leather (3rd), Fruit/Flowers (4th), Wood (5th), Tin/Aluminum (10th), Crystal (15th), China (20th), Silver (25th), Pearl (30th), Ruby (40th), and Gold (50th)."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are good anniversary gifts for him?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Good anniversary gifts for him include personalized watches, high-quality leather goods, experience days (driving, flying, tasting), tech gadgets, or sentimental items like a framed map of where you met or a custom photo book of your time together."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are romantic anniversary gift ideas for her?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Romantic gifts for her include jewelry (especially with significant stones), a surprise weekend getaway, a spa day, a handwritten love letter with a preserved rose, or recreating your first date. Personalized gifts showing you remember small details are always romantic."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How much should I spend on an anniversary gift?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "There's no set rule for anniversary spending. It depends on your budget and how long you've been together. For newer relationships, $50-$100 is common. For milestone anniversaries (10, 20, 25 years), couples often splurge on larger gifts or trips. The thought matters more than the price tag."
-                }
-            }
-        ]
-    };
-
     useScrollDepth('anniversary-gifts');
     useTimeOnPage('anniversary-gifts');
-
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.smartgiftfinder.xyz/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Anniversary Gifts",
-                "item": "https://www.smartgiftfinder.xyz/anniversary-gifts"
-            }
-        ]
-    };
 
     return (
         <>
             <Helmet>
-                <title>Best Anniversary Gifts [2025] - Romantic Ideas by Year</title>
-                <meta name="title" content="Best Anniversary Gifts [2025] - Romantic Ideas by Year" />
-                <meta name="description" content="Find the perfect anniversary gift for your partner. Traditional gifts by year (paper, wood, silver) plus romantic experiences and modern ideas." />
-                <meta name="keywords" content="anniversary gifts, wedding anniversary gifts, best anniversary gifts, gifts by year, romantic gifts" />
+                <title>Best Anniversary Gifts [2025] - Romantic Ideas by Year | Smart Gift Finder</title>
+                <meta name="title" content="Best Anniversary Gifts [2025] - Romantic Ideas by Year | Smart Gift Finder" />
+                <meta name="description" content="💑 Find perfect anniversary gifts by year (1st, 5th, 10th...)! Romantic experiences, personalized keepsakes & luxury ideas. Free AI recommendations ⚡" />
+                <meta name="keywords" content="anniversary gifts, wedding anniversary gifts, gifts by year, paper anniversary gifts, wood anniversary gifts, romantic gifts for partner" />
                 <link rel="canonical" href="https://www.smartgiftfinder.xyz/anniversary-gifts" />
 
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content="https://www.smartgiftfinder.xyz/anniversary-gifts" />
-                <meta property="og:title" content="Best Anniversary Gifts [2025] - Romantic Ideas" />
-                <meta property="og:description" content="Romantic and traditional anniversary gift ideas for every milestone." />
+                <meta property="og:title" content="Best Anniversary Gifts [2025] - Romantic Ideas by Year" />
+                <meta property="og:description" content="💑 Find perfect anniversary gifts! Traditional themes & modern romantic ideas." />
                 <meta property="og:image" content="https://www.smartgiftfinder.xyz/images/anniversary-gifts-og.jpg" />
 
                 <meta property="twitter:card" content="summary_large_image" />
                 <meta property="twitter:url" content="https://www.smartgiftfinder.xyz/anniversary-gifts" />
                 <meta property="twitter:title" content="Best Anniversary Gifts [2025]" />
-                <meta property="twitter:description" content="Romantic anniversary gift ideas." />
+                <meta property="twitter:description" content="Romantic anniversary gift ideas for every milestone." />
                 <meta property="twitter:image" content="https://www.smartgiftfinder.xyz/images/anniversary-gifts-twitter.jpg" />
 
                 <script type="application/ld+json">
-                    {JSON.stringify(faqSchema)}
+                    {injectSchema(schemaMarkup.collectionPage({
+                        name: "Best Anniversary Gifts",
+                        description: "Curated collection of the best anniversary gift ideas for 2025",
+                        url: "https://www.smartgiftfinder.xyz/anniversary-gifts"
+                    }))}
                 </script>
                 <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
+                    {injectSchema(schemaMarkup.breadcrumbs([
+                        { name: "Home", url: "https://www.smartgiftfinder.xyz/" },
+                        { name: "Anniversary Gifts", url: "https://www.smartgiftfinder.xyz/anniversary-gifts" }
+                    ]))}
+                </script>
+                <script type="application/ld+json">
+                    {injectSchema(schemaMarkup.faqPage([
+                        {
+                            question: "What are traditional anniversary gifts?",
+                            answer: "Traditional anniversary gifts follow a meaningful theme for each year: Paper (1st), Cotton (2nd), Leather (3rd), Fruit/Flowers (4th), Wood (5th), Tin/Aluminum (10th), Crystal (15th), China (20th), Silver (25th), Pearl (30th), Ruby (40th), and Gold (50th)."
+                        },
+                        {
+                            question: "What are good anniversary gifts for him?",
+                            answer: "Good anniversary gifts for him include personalized watches, high-quality leather goods, experience days (driving, flying, tasting), tech gadgets, or sentimental items like a framed map of where you met or a custom photo book of your time together."
+                        },
+                        {
+                            question: "What are romantic anniversary gift ideas for her?",
+                            answer: "Romantic gifts for her include jewelry (especially with significant stones), a surprise weekend getaway, a spa day, a handwritten love letter with a preserved rose, or recreating your first date. Personalized gifts showing you remember small details are always romantic."
+                        },
+                        {
+                            question: "How much should I spend on an anniversary gift?",
+                            answer: "There's no set rule for anniversary spending. It depends on your budget and how long you've been together. For newer relationships, $50-$100 is common. For milestone anniversaries (10, 20, 25 years), couples often splurge on larger gifts or trips. The thought matters more than the price tag."
+                        }
+                    ]))}
                 </script>
             </Helmet>
 
@@ -474,6 +445,8 @@ export default function AnniversaryGifts() {
                         </Link>
                     </div>
 
+                    <InternalLinks currentPage="/anniversary-gifts" className="my-12" />
+
                     <section id="faq" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">
                             Frequently Asked Questions
@@ -526,8 +499,6 @@ export default function AnniversaryGifts() {
                             </div>
                         </div>
                     </section>
-
-                    <RelatedGiftGuides currentPage="anniversary-gifts" />
                 </div>
             </article>
         </>

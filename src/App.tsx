@@ -11,6 +11,8 @@ import Footer from './components/layout/Footer';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import RecentSearches from './components/RecentSearches';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { schemaMarkup, injectSchema } from './utils/schemaMarkup';
 
 import Button from './components/Button';
 import GiftCard from './components/GiftCard';
@@ -362,6 +364,19 @@ function HomePage() {
         </div>
       </div>
       <header className="text-center mb-10">
+        <Helmet>
+          <title>Smart Gift Finder - AI-Powered Gift Ideas for Everyone [2025]</title>
+          <meta name="description" content="🎁 Find perfect gifts in seconds! AI-powered recommendations for birthdays, weddings, & more. 25+ categories. Free to use ⚡" />
+          <link rel="canonical" href="https://www.smartgiftfinder.xyz/" />
+          {/* Organization Schema */}
+          <script type="application/ld+json">
+            {injectSchema(schemaMarkup.organization())}
+          </script>
+          {/* Website Schema with Search */}
+          <script type="application/ld+json">
+            {injectSchema(schemaMarkup.website())}
+          </script>
+        </Helmet>
         <h1 className="text-4xl sm:text-5xl font-display font-bold text-light-text-primary dark:text-dark-text-primary">
           <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
         </h1>
@@ -751,7 +766,6 @@ function App() {
               <Route path="/anniversary-gifts" element={<AnniversaryGifts />} />
               <Route path="/gifts-for-boyfriend" element={<GiftsForBoyfriend />} />
               <Route path="/gifts-for-girlfriend" element={<GiftsForGirlfriend />} />
-              <Route path="/unique-gifts" element={<UniqueGifts />} />
               <Route path="/unique-gifts" element={<UniqueGifts />} />
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="*" element={<NotFound />} />

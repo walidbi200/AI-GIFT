@@ -2,7 +2,6 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import AffiliateDisclosure from '../components/AffiliateDisclosure';
-import RelatedGiftGuides from '../components/RelatedGiftGuides';
 import InlineEmailCapture from '../components/InlineEmailCapture';
 import { useScrollDepth } from '../hooks/useScrollDepth';
 import { useTimeOnPage } from '../hooks/useTimeOnPage';
@@ -67,89 +66,28 @@ const GiftItem: React.FC<GiftItemProps> = ({ name, description, priceRange, cate
     );
 };
 
-export default function GiftsForDad() {
-    const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are the best gifts for dad?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The best gifts for dad are often practical, gadget-oriented, or tied to his hobbies. Think grilling accessories, smart home devices, high-quality tools, whiskey sets, or personalized leather goods."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What should I get my dad for his birthday?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "For dad's birthday, consider upgrading something he uses daily, like a wallet or coffee maker. Alternatively, gift him an experience like a brewery tour, golf lesson, or tickets to a sports game."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are unique gifts for the dad who has everything?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "For the dad who has everything, go for unique consumable gifts like a hot sauce subscription or craft beer box. Personalized items like an engraved hammer or custom family portrait are also great choices."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What are good gifts for dad under $50?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Great gifts for dad under $50 include digital tire pressure gauges, BBQ spice rub sets, personalized keychains, funny socks, or a high-qualityinsulated tumbler."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What is a good Father's Day gift?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "A good Father's Day gift shows appreciation for his role. Classic options include grooming kits, watches, or tech gadgets. Adding a personal note or card makes it even more special."
-                }
-            }
-        ]
-    };
+import { schemaMarkup, injectSchema } from '../utils/schemaMarkup';
+import InternalLinks from '../components/seo/InternalLinks';
 
+// ... (keep intermediate content)
+
+export default function GiftsForDad() {
     useScrollDepth('gifts-for-dad');
     useTimeOnPage('gifts-for-dad');
-
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://www.smartgiftfinder.xyz/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Gifts for Dad",
-                "item": "https://www.smartgiftfinder.xyz/gifts-for-dad"
-            }
-        ]
-    };
 
     return (
         <>
             <Helmet>
-                <title>Best Gifts for Dad [2025] - 25+ Ideas He'll Actually Use</title>
-                <meta name="title" content="Best Gifts for Dad [2025] - 25+ Ideas He'll Actually Use" />
-                <meta name="description" content="Discover 25+ practical gift ideas for dad, from tech gadgets to hobby tools. Perfect for Father's Day, birthdays, or any occasion. Free AI recommendations!" />
+                <title>Best Gifts for Dad [2025] - 25+ Ideas He'll Use | Smart Gift Finder</title>
+                <meta name="title" content="Best Gifts for Dad [2025] - 25+ Ideas He'll Use | Smart Gift Finder" />
+                <meta name="description" content="🎁 Perfect gifts for dad 2025! 25+ practical ideas from $10-$500. Tech gadgets, tools, experiences he'll love. Free recommendations ⚡" />
                 <meta name="keywords" content="gifts for dad, father's day gifts, birthday gifts for dad, gift ideas for dad, best gifts for father" />
                 <link rel="canonical" href="https://www.smartgiftfinder.xyz/gifts-for-dad" />
 
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content="https://www.smartgiftfinder.xyz/gifts-for-dad" />
                 <meta property="og:title" content="Best Gifts for Dad [2025] - 25+ Practical Ideas" />
-                <meta property="og:description" content="Practical gift ideas for dad from tech gadgets to hobby tools. Find the perfect present!" />
+                <meta property="og:description" content="🎁 Unique & practical gifts for dad! Tech, tools, experiences & more. AI-powered recommendations." />
                 <meta property="og:image" content="https://www.smartgiftfinder.xyz/images/gifts-for-dad-og.jpg" />
 
                 <meta property="twitter:card" content="summary_large_image" />
@@ -159,10 +97,41 @@ export default function GiftsForDad() {
                 <meta property="twitter:image" content="https://www.smartgiftfinder.xyz/images/gifts-for-dad-twitter.jpg" />
 
                 <script type="application/ld+json">
-                    {JSON.stringify(faqSchema)}
+                    {injectSchema(schemaMarkup.collectionPage({
+                        name: "Best Gifts for Dad",
+                        description: "Discover 25+ practical gift ideas for dad",
+                        url: "https://www.smartgiftfinder.xyz/gifts-for-dad"
+                    }))}
                 </script>
                 <script type="application/ld+json">
-                    {JSON.stringify(breadcrumbSchema)}
+                    {injectSchema(schemaMarkup.breadcrumbs([
+                        { name: "Home", url: "https://www.smartgiftfinder.xyz/" },
+                        { name: "Gifts for Dad", url: "https://www.smartgiftfinder.xyz/gifts-for-dad" }
+                    ]))}
+                </script>
+                <script type="application/ld+json">
+                    {injectSchema(schemaMarkup.faqPage([
+                        {
+                            question: "What are the best gifts for dad?",
+                            answer: "The best gifts for dad are often practical, gadget-oriented, or tied to his hobbies. Think grilling accessories, smart home devices, high-quality tools, whiskey sets, or personalized leather goods."
+                        },
+                        {
+                            question: "What should I get my dad for his birthday?",
+                            answer: "For dad's birthday, consider upgrading something he uses daily, like a wallet or coffee maker. Alternatively, gift him an experience like a brewery tour, golf lesson, or tickets to a sports game."
+                        },
+                        {
+                            question: "What are unique gifts for the dad who has everything?",
+                            answer: "For the dad who has everything, go for unique consumable gifts like a hot sauce subscription or craft beer box. Personalized items like an engraved hammer or custom family portrait are also great choices."
+                        },
+                        {
+                            question: "What are good gifts for dad under $50?",
+                            answer: "Great gifts for dad under $50 include digital tire pressure gauges, BBQ spice rub sets, personalized keychains, funny socks, or a high-quality insulated tumbler."
+                        },
+                        {
+                            question: "What is a good Father's Day gift?",
+                            answer: "A good Father's Day gift shows appreciation for his role. Classic options include grooming kits, watches, or tech gadgets. Adding a personal note or card makes it even more special."
+                        }
+                    ]))}
                 </script>
             </Helmet>
 
@@ -670,6 +639,8 @@ export default function GiftsForDad() {
                         </Link>
                     </div>
 
+                    <InternalLinks currentPage="/gifts-for-dad" className="my-12" />
+
                     <section id="faq" className="mt-16">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">
                             Frequently Asked Questions
@@ -739,7 +710,6 @@ export default function GiftsForDad() {
                         </div>
                     </section>
 
-                    <RelatedGiftGuides currentPage="gifts-for-dad" />
                 </div>
             </article>
         </>
