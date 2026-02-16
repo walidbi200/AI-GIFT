@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
@@ -40,22 +42,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/blog.ts": {
-      "maxDuration": 10
-    },
-    "api/generate-gifts.ts": {
-      "maxDuration": 30
-    },
-    "api/auth/login.ts": {
-      "maxDuration": 10
-    },
-    "api/auth/validate.ts": {
-      "maxDuration": 10
-    },
-    "api/subscribe.ts": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }
