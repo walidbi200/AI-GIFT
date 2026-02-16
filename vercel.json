@@ -18,7 +18,7 @@
   },
   "rewrites": [
     {
-      "source": "/((?!api|_next|_vercel|assets|favicon.ico|robots.txt|sitemap.xml|manifest.json|manifest.webmanifest|registerSW.js|sw.js|workbox-.*\\.js|.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt)).*)",
+      "source": "/((?!api|_next|assets|favicon.ico|robots.txt|sitemap.xml|manifest.json|images).*)",
       "destination": "/index.html"
     }
   ],
