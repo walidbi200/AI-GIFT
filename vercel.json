@@ -1,9 +1,24 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "functions": {
+    "api/blog.ts": {
+      "maxDuration": 10
+    },
+    "api/generate-gifts.ts": {
+      "maxDuration": 30
+    },
+    "api/auth/login.ts": {
+      "maxDuration": 10
+    },
+    "api/auth/validate.ts": {
+      "maxDuration": 10
+    },
+    "api/subscribe.ts": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api|_next|_vercel|assets|favicon.ico|robots.txt|sitemap.xml|manifest.json|manifest.webmanifest|registerSW.js|sw.js|workbox-.*\\.js|.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|json|xml|txt)).*)",
       "destination": "/index.html"
     }
   ],
