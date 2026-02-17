@@ -10,30 +10,30 @@ export const performance = {
   trackApiCall: (operation: string, startTime: number) => {
     const duration = Date.now() - startTime;
     // Send to analytics if available
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "api_call", {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'api_call', {
         operation,
         duration,
-        category: "performance",
+        category: 'performance',
       });
     }
   },
 
   // Track user interactions
   trackInteraction: (action: string, details?: Record<string, any>) => {
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "user_interaction", {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'user_interaction', {
         action,
         ...details,
-        category: "engagement",
+        category: 'engagement',
       });
     }
   },
 
   // Track page views
   trackPageView: (page: string) => {
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("config", "GA_MEASUREMENT_ID", {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', 'GA_MEASUREMENT_ID', {
         page_title: page,
         page_location: window.location.href,
       });
@@ -42,8 +42,8 @@ export const performance = {
 
   // Track errors
   trackError: (error: Error, context?: string) => {
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "exception", {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'exception', {
         description: error.message,
         fatal: false,
         context,
@@ -55,7 +55,7 @@ export const performance = {
 // Debounce utility for performance optimization
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number,
+  wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
 
@@ -68,7 +68,7 @@ export function debounce<T extends (...args: any[]) => any>(
 // Throttle utility for performance optimization
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  limit: number,
+  limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
 
@@ -95,15 +95,13 @@ export const storage = {
   set: (key: string, value: any) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-    }
+    } catch (error) {}
   },
 
   remove: (key: string) => {
     try {
       localStorage.removeItem(key);
-    } catch (error) {
-    }
+    } catch (error) {}
   },
 };
 
@@ -113,9 +111,9 @@ export const analytics = {
   trackGiftSuggestions: (
     count: number,
     occasion: string,
-    hasBudget: boolean,
+    hasBudget: boolean
   ) => {
-    performance.trackInteraction("gift_suggestions_generated", {
+    performance.trackInteraction('gift_suggestions_generated', {
       count,
       occasion,
       has_budget: hasBudget,
@@ -124,7 +122,7 @@ export const analytics = {
 
   // Track feedback submitted
   trackFeedback: (rating: number, hasComment: boolean) => {
-    performance.trackInteraction("feedback_submitted", {
+    performance.trackInteraction('feedback_submitted', {
       rating,
       has_comment: hasComment,
     });
@@ -132,7 +130,7 @@ export const analytics = {
 
   // Track copy to clipboard
   trackCopyToClipboard: (suggestionCount: number) => {
-    performance.trackInteraction("copy_to_clipboard", {
+    performance.trackInteraction('copy_to_clipboard', {
       suggestion_count: suggestionCount,
     });
   },

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/blog", label: "Blog" },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-  { to: "/privacy-policy", label: "Privacy Policy" },
+  { to: '/', label: 'Home' },
+  { to: '/blog', label: 'Blog' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+  { to: '/privacy-policy', label: 'Privacy Policy' },
 ];
 
 const Header: React.FC = () => {

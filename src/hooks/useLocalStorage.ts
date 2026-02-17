@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Get from local storage then parse stored json or return initialValue
@@ -19,7 +19,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return [storedValue, setValue] as const;
@@ -35,7 +37,7 @@ export function useRecentSearches() {
       budget: string;
       timestamp: number;
     }>
-  >("recent-searches", []);
+  >('recent-searches', []);
 
   const addSearch = (search: {
     age: number;
@@ -54,7 +56,7 @@ export function useRecentSearches() {
         (s) =>
           s.age !== search.age ||
           s.occasion !== search.occasion ||
-          s.interests !== search.interests,
+          s.interests !== search.interests
       );
       return [newSearch, ...filtered].slice(0, 5); // Keep only 5 most recent
     });

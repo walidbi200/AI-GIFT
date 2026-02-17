@@ -5,7 +5,9 @@ interface SimpleProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const SimpleProtectedRoute: React.FC<SimpleProtectedRouteProps> = ({ children }) => {
+const SimpleProtectedRoute: React.FC<SimpleProtectedRouteProps> = ({
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ const SimpleProtectedRoute: React.FC<SimpleProtectedRouteProps> = ({ children })
     const session = localStorage.getItem('nextauth.session-token');
     const adminToken = localStorage.getItem('adminToken');
     const adminUser = localStorage.getItem('adminUser');
-    
+
     // If any authentication method is present, consider user authenticated
     if (session || adminToken || adminUser) {
       setIsAuthenticated(true);

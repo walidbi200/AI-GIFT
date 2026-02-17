@@ -8,8 +8,14 @@ const BlogPostPage: React.FC = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
-  const [previousPost, setPreviousPost] = useState<{ slug: string; title: string } | null>(null);
-  const [nextPost, setNextPost] = useState<{ slug: string; title: string } | null>(null);
+  const [previousPost, setPreviousPost] = useState<{
+    slug: string;
+    title: string;
+  } | null>(null);
+  const [nextPost, setNextPost] = useState<{
+    slug: string;
+    title: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,28 +63,31 @@ const BlogPostPage: React.FC = () => {
           const allPostsResponse = await fetch('/api/blog?limit=100');
           if (allPostsResponse.ok) {
             const allPostsData = await allPostsResponse.json();
-            const currentIndex = allPostsData.posts.findIndex((p: BlogPostType) => p.slug === slug);
+            const currentIndex = allPostsData.posts.findIndex(
+              (p: BlogPostType) => p.slug === slug
+            );
 
             if (currentIndex > 0) {
               setPreviousPost({
                 slug: allPostsData.posts[currentIndex - 1].slug,
-                title: allPostsData.posts[currentIndex - 1].title
+                title: allPostsData.posts[currentIndex - 1].title,
               });
             }
 
             if (currentIndex < allPostsData.posts.length - 1) {
               setNextPost({
                 slug: allPostsData.posts[currentIndex + 1].slug,
-                title: allPostsData.posts[currentIndex + 1].title
+                title: allPostsData.posts[currentIndex + 1].title,
               });
             }
           }
         } catch (err) {
           console.warn('Failed to fetch navigation posts:', err);
         }
-
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(
+          err instanceof Error ? err.message : 'An unknown error occurred'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -103,7 +112,9 @@ const BlogPostPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-600 mb-6">{error || "Could not load the blog post."}</p>
+          <p className="text-gray-600 mb-6">
+            {error || 'Could not load the blog post.'}
+          </p>
           <Link
             to="/blog"
             className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"

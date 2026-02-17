@@ -1,19 +1,19 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import Button from "../components/Button";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Button from '../components/Button';
 
 const About: React.FC = () => {
   useEffect(() => {
     // Update document title for SEO
     document.title =
-      "About - Smart Gift Finder | AI-Powered Gift Recommendations";
+      'About - Smart Gift Finder | AI-Powered Gift Recommendations';
 
     // Update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
-        "content",
-        "Learn about Smart Gift Finder - an AI-powered platform that helps you find the perfect gifts for your loved ones. Discover how our technology works and the story behind our creation.",
+        'content',
+        'Learn about Smart Gift Finder - an AI-powered platform that helps you find the perfect gifts for your loved ones. Discover how our technology works and the story behind our creation.'
       );
     }
   }, []);

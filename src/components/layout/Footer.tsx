@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => (
   <footer className="bg-surface border-t border-border py-6 mt-8">

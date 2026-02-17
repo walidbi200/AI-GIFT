@@ -36,10 +36,22 @@ export function useGoogleAnalytics(): UseAnalyticsReturn {
       setData(analytics);
       */
       // Return mock/empty data instead
-      setData({ pageViews: 0, uniqueVisitors: 0, sessionDuration: 0, bounceRate: 0 });
+      setData({
+        pageViews: 0,
+        uniqueVisitors: 0,
+        sessionDuration: 0,
+        bounceRate: 0,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      setData({ pageViews: 0, uniqueVisitors: 0, sessionDuration: 0, bounceRate: 0 });
+      setError(
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      );
+      setData({
+        pageViews: 0,
+        uniqueVisitors: 0,
+        sessionDuration: 0,
+        bounceRate: 0,
+      });
     } finally {
       setIsLoading(false);
     }

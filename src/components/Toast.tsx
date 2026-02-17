@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import type { ToastType } from "../types";
+import React, { useEffect } from 'react';
+import type { ToastType } from '../types';
 
 interface ToastProps {
   message: string;
@@ -30,23 +30,23 @@ const Toast: React.FC<ToastProps> = ({
 
   const getIcon = () => {
     switch (type) {
-      case "success":
-        return "✅";
-      case "error":
-        return "❌";
+      case 'success':
+        return '✅';
+      case 'error':
+        return '❌';
       default:
-        return "ℹ️";
+        return 'ℹ️';
     }
   };
 
   const getStyles = () => {
     const baseStyles =
-      "fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-3 max-w-sm";
+      'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-3 max-w-sm';
 
     switch (type) {
-      case "success":
+      case 'success':
         return `${baseStyles} bg-green-500 text-white`;
-      case "error":
+      case 'error':
         return `${baseStyles} bg-red-500 text-white`;
       default:
         return `${baseStyles} bg-blue-500 text-white`;

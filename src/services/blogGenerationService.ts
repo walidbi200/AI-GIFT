@@ -33,7 +33,7 @@ interface BlogPost {
   content: string;
 }
 
-interface HumanizationChecklist {
+export interface HumanizationChecklist {
   removeRepetitivePhrases: boolean;
   replaceVagueWords: boolean;
   addPersonalTouches: boolean;
@@ -43,7 +43,7 @@ interface HumanizationChecklist {
   warmNaturalTone: boolean;
 }
 
-interface SEOChecklist {
+export interface SEOChecklist {
   titleLength: boolean;
   metaDescription: boolean;
   keywordInHeadings: boolean;
@@ -76,10 +76,10 @@ export class BlogGenerationService {
     return JSON.parse(content);
   }
 
-  private async readEditorialBrief(): Promise<EditorialBrief> {
+  public async readEditorialBrief(): Promise<EditorialBrief> {
     const filePath = path.join(this.templatesPath, 'editorial_brief.md');
     const content = fs.readFileSync(filePath, 'utf-8');
-    
+
     // Parse the markdown brief into structured data
     const lines = content.split('\n');
     const brief: EditorialBrief = {
@@ -91,7 +91,7 @@ export class BlogGenerationService {
       toneOfVoice: '',
       outline: [],
       references: [],
-      specialNotes: []
+      specialNotes: [],
     };
 
     let currentSection = '';
@@ -99,14 +99,16 @@ export class BlogGenerationService {
       if (line.includes('**Title:**')) {
         brief.title = line.split('**Title:**')[1]?.trim() || '';
       } else if (line.includes('**Target Audience:**')) {
-        brief.targetAudience = line.split('**Target Audience:**')[1]?.trim() || '';
+        brief.targetAudience =
+          line.split('**Target Audience:**')[1]?.trim() || '';
       } else if (line.includes('**Goal:**')) {
         brief.goal = line.split('**Goal:**')[1]?.trim() || '';
       } else if (line.includes('**Primary Keyword:**')) {
-        brief.primaryKeyword = line.split('**Primary Keyword:**')[1]?.trim() || '';
+        brief.primaryKeyword =
+          line.split('**Primary Keyword:**')[1]?.trim() || '';
       } else if (line.includes('**Secondary Keywords:**')) {
         const keywords = line.split('**Secondary Keywords:**')[1]?.trim() || '';
-        brief.secondaryKeywords = keywords.split(',').map(k => k.trim());
+        brief.secondaryKeywords = keywords.split(',').map((k) => k.trim());
       } else if (line.includes('**Tone of Voice:**')) {
         brief.toneOfVoice = line.split('**Tone of Voice:**')[1]?.trim() || '';
       } else if (line.includes('**References & Sources:**')) {
@@ -130,23 +132,26 @@ export class BlogGenerationService {
     return fs.readFileSync(filePath, 'utf-8');
   }
 
-  private async readHumanFirstSEORules(): Promise<string> {
+  public async readHumanFirstSEORules(): Promise<string> {
     const filePath = path.join(this.contentPath, 'human_first_seo_rules.md');
     return fs.readFileSync(filePath, 'utf-8');
   }
 
-  private async readHumanizationChecklist(): Promise<string> {
+  public async readHumanizationChecklist(): Promise<string> {
     const filePath = path.join(this.contentPath, 'humanization_checklist.md');
     return fs.readFileSync(filePath, 'utf-8');
   }
 
-  private async readSEOPublishChecklist(): Promise<string> {
+  public async readSEOPublishChecklist(): Promise<string> {
     const filePath = path.join(this.contentPath, 'seo_publish_checklist.md');
     return fs.readFileSync(filePath, 'utf-8');
   }
 
   // Generate initial blog draft using OpenAI
-  private async generateInitialDraft(brief: EditorialBrief, promptTemplate: string): Promise<string> {
+  private async generateInitialDraft(
+    brief: EditorialBrief,
+    promptTemplate: string
+  ): Promise<string> {
     const params = await this.readChatGPTParams();
     const seoRules = await this.readHumanFirstSEORules();
 
@@ -162,28 +167,33 @@ export class BlogGenerationService {
     const systemPrompt = `You are an expert ${brief.primaryKeyword} writer. Follow these Human-First SEO Rules:\n\n${seoRules}\n\nWrite engaging, informative content that sounds natural and human-written.`;
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: params.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
-          temperature: params.temperature,
-          top_p: params.top_p,
-          frequency_penalty: params.frequency_penalty,
-          presence_penalty: params.presence_penalty,
-          max_tokens: params.max_tokens,
-        }),
-      });
+      const response = await fetch(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: params.model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: prompt },
+            ],
+            temperature: params.temperature,
+            top_p: params.top_p,
+            frequency_penalty: params.frequency_penalty,
+            presence_penalty: params.presence_penalty,
+            max_tokens: params.max_tokens,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `OpenAI API error: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -196,34 +206,37 @@ export class BlogGenerationService {
 
   // Apply humanization to the draft
   private async humanizeContent(content: string): Promise<string> {
-    const checklist = await this.readHumanizationChecklist();
-    
     let humanizedContent = content;
 
     // Remove repetitive phrases
     humanizedContent = humanizedContent
-      .replace(/\b(In conclusion|Overall|Moreover|Furthermore|Additionally)\b/gi, '')
-      .replace(/\b(things|stuff)\b/gi, (match) => {
+      .replace(
+        /\b(In conclusion|Overall|Moreover|Furthermore|Additionally)\b/gi,
+        ''
+      )
+      .replace(/\b(things|stuff)\b/gi, (_) => {
         const alternatives = ['items', 'elements', 'aspects', 'components'];
         return alternatives[Math.floor(Math.random() * alternatives.length)];
       });
 
     // Add contractions
-    humanizedContent = humanizedContent
-      .replace(/\b(you are|do not|it is|they are|we are)\b/gi, (match) => {
+    humanizedContent = humanizedContent.replace(
+      /\b(you are|do not|it is|they are|we are)\b/gi,
+      (match) => {
         const contractions: { [key: string]: string } = {
           'you are': "you're",
           'do not': "don't",
           'it is': "it's",
           'they are': "they're",
-          'we are': "we're"
+          'we are': "we're",
         };
         return contractions[match.toLowerCase()] || match;
-      });
+      }
+    );
 
     // Vary sentence lengths by breaking some long sentences
     const sentences = humanizedContent.split(/[.!?]+/);
-    const variedSentences = sentences.map(sentence => {
+    const variedSentences = sentences.map((sentence) => {
       if (sentence.length > 80) {
         // Break long sentences at natural points
         const clauses = sentence.split(/[,;]/);
@@ -237,18 +250,22 @@ export class BlogGenerationService {
 
     // Add personal touches (mini-examples)
     const personalTouches = [
-      "For example, I recently discovered...",
+      'For example, I recently discovered...',
       "Here's a quick tip I learned...",
-      "One thing that really works is...",
+      'One thing that really works is...',
       "I've found that...",
-      "From my experience..."
+      'From my experience...',
     ];
 
     // Insert personal touches at strategic points
     const paragraphs = humanizedContent.split('\n\n');
     if (paragraphs.length > 2) {
       const insertIndex = Math.floor(paragraphs.length / 2);
-      paragraphs.splice(insertIndex, 0, personalTouches[Math.floor(Math.random() * personalTouches.length)]);
+      paragraphs.splice(
+        insertIndex,
+        0,
+        personalTouches[Math.floor(Math.random() * personalTouches.length)]
+      );
       humanizedContent = paragraphs.join('\n\n');
     }
 
@@ -256,25 +273,25 @@ export class BlogGenerationService {
   }
 
   // Check content against SEO and humanization checklists
-  private async checkContentQuality(content: string, brief: EditorialBrief): Promise<{
+  private async checkContentQuality(
+    content: string,
+    brief: EditorialBrief
+  ): Promise<{
     seoWarnings: string[];
     humanizationWarnings: string[];
     autoFixAttempted: boolean;
   }> {
-    const seoChecklist = await this.readSEOPublishChecklist();
-    const humanizationChecklist = await this.readHumanizationChecklist();
-    
     const warnings = {
       seoWarnings: [] as string[],
       humanizationWarnings: [] as string[],
-      autoFixAttempted: false
+      autoFixAttempted: false,
     };
 
     // SEO Checks
     if (brief.title.length > 60) {
       warnings.seoWarnings.push('Title exceeds 60 characters');
     }
-    
+
     if (!content.includes(brief.primaryKeyword)) {
       warnings.seoWarnings.push('Primary keyword not found in content');
     }
@@ -301,22 +318,32 @@ export class BlogGenerationService {
     }
 
     // Auto-fix attempt if warnings exist
-    if (warnings.seoWarnings.length > 0 || warnings.humanizationWarnings.length > 0) {
+    if (
+      warnings.seoWarnings.length > 0 ||
+      warnings.humanizationWarnings.length > 0
+    ) {
       warnings.autoFixAttempted = true;
-      console.log('⚠️ Content quality warnings detected. Attempting auto-fix...');
+      console.log(
+        '⚠️ Content quality warnings detected. Attempting auto-fix...'
+      );
     }
 
     return warnings;
   }
 
   // Generate meta description
-  private generateMetaDescription(content: string, primaryKeyword: string): string {
+  private generateMetaDescription(
+    content: string,
+    primaryKeyword: string
+  ): string {
     // Extract first paragraph and create meta description
-    const firstParagraph = content.split('\n\n')[0]?.replace(/[#*`]/g, '') || '';
+    const firstParagraph =
+      content.split('\n\n')[0]?.replace(/[#*`]/g, '') || '';
     let description = firstParagraph.substring(0, 150);
-    
+
     if (description.length === 150) {
-      description = description.substring(0, description.lastIndexOf(' ')) + '...';
+      description =
+        description.substring(0, description.lastIndexOf(' ')) + '...';
     }
 
     // Ensure primary keyword is included
@@ -351,7 +378,7 @@ title: "${post.title}"
 slug: "${post.slug}"
 date: "${post.date}"
 description: "${post.description}"
-tags: [${post.tags.map(tag => `"${tag}"`).join(', ')}]
+tags: [${post.tags.map((tag) => `"${tag}"`).join(', ')}]
 ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 ---
 
@@ -359,15 +386,17 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 
       const fullContent = frontmatter + post.content;
       const filePath = path.join(this.postsPath, `${post.slug}.md`);
-      
+
       // Use synchronous write for better error handling
       fs.writeFileSync(filePath, fullContent, 'utf-8');
       console.log(`✅ Blog post saved: ${filePath}`);
-      
+
       return filePath;
     } catch (error) {
       console.error('❌ Error saving blog post:', error);
-      throw new Error(`Failed to save blog post: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to save blog post: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -378,7 +407,9 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
     const wpPassword = process.env.WP_APP_PASSWORD;
 
     if (!wpUrl || !wpUsername || !wpPassword) {
-      console.log('⚠️ WordPress credentials not found in environment variables');
+      console.log(
+        '⚠️ WordPress credentials not found in environment variables'
+      );
       return false;
     }
 
@@ -386,7 +417,7 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
       const response = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(`${wpUsername}:${wpPassword}`).toString('base64')}`,
+          Authorization: `Basic ${Buffer.from(`${wpUsername}:${wpPassword}`).toString('base64')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -400,7 +431,9 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 
       if (response.ok) {
         const result = await response.json();
-        console.log(`✅ Blog post published to WordPress with ID: ${result.id}`);
+        console.log(
+          `✅ Blog post published to WordPress with ID: ${result.id}`
+        );
         return true;
       } else {
         console.error('❌ WordPress publish failed:', response.statusText);
@@ -428,7 +461,10 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 
       // Generate initial draft
       console.log('🤖 Generating initial draft with OpenAI...');
-      const initialDraft = await this.generateInitialDraft(brief, promptTemplate);
+      const initialDraft = await this.generateInitialDraft(
+        brief,
+        promptTemplate
+      );
       console.log('✅ Initial draft generated');
 
       // Apply humanization
@@ -438,13 +474,19 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
 
       // Check content quality
       console.log('🔍 Checking content quality...');
-      const qualityCheck = await this.checkContentQuality(humanizedContent, brief);
-      
+      const qualityCheck = await this.checkContentQuality(
+        humanizedContent,
+        brief
+      );
+
       if (qualityCheck.seoWarnings.length > 0) {
         console.log('⚠️ SEO Warnings:', qualityCheck.seoWarnings);
       }
       if (qualityCheck.humanizationWarnings.length > 0) {
-        console.log('⚠️ Humanization Warnings:', qualityCheck.humanizationWarnings);
+        console.log(
+          '⚠️ Humanization Warnings:',
+          qualityCheck.humanizationWarnings
+        );
       }
 
       // Prepare blog post data
@@ -452,9 +494,12 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
         title: brief.title,
         slug: this.generateSlug(brief.title),
         date: new Date().toISOString(),
-        description: this.generateMetaDescription(humanizedContent, brief.primaryKeyword),
+        description: this.generateMetaDescription(
+          humanizedContent,
+          brief.primaryKeyword
+        ),
         tags: [brief.primaryKeyword, ...brief.secondaryKeywords],
-        content: humanizedContent
+        content: humanizedContent,
       };
 
       // Save to file
@@ -465,21 +510,23 @@ ${post.featuredImage ? `featured_image: "${post.featuredImage}"` : ''}
       console.log('🌐 Attempting WordPress publish...');
       const wordpressPublished = await this.publishToWordPress(post);
 
-      const allWarnings = [...qualityCheck.seoWarnings, ...qualityCheck.humanizationWarnings];
+      const allWarnings = [
+        ...qualityCheck.seoWarnings,
+        ...qualityCheck.humanizationWarnings,
+      ];
 
       return {
         success: true,
         filePath,
         warnings: allWarnings,
-        wordpressPublished
+        wordpressPublished,
       };
-
     } catch (error) {
       console.error('❌ Blog generation failed:', error);
       return {
         success: false,
         warnings: [error instanceof Error ? error.message : 'Unknown error'],
-        wordpressPublished: false
+        wordpressPublished: false,
       };
     }
   }

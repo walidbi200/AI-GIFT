@@ -57,7 +57,7 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
-      setState(prev => ({ ...prev, slug }));
+      setState((prev) => ({ ...prev, slug }));
     }
   }, [state.title, state.slug]);
 
@@ -112,18 +112,24 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
       suggestions.push('Add a featured image for better engagement');
     }
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       seoScore: Math.min(100, score),
       seoSuggestions: suggestions,
     }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setState(prev => ({ ...prev, isImageUploading: true, imageUploadProgress: 0 }));
+    setState((prev) => ({
+      ...prev,
+      isImageUploading: true,
+      imageUploadProgress: 0,
+    }));
 
     // Simulate image upload with progress
     const simulateUpload = () => {
@@ -131,8 +137,8 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
         let progress = 0;
         const interval = setInterval(() => {
           progress += 10;
-          setState(prev => ({ ...prev, imageUploadProgress: progress }));
-          
+          setState((prev) => ({ ...prev, imageUploadProgress: progress }));
+
           if (progress >= 100) {
             clearInterval(interval);
             // Generate a placeholder URL (in real app, this would be the uploaded image URL)
@@ -145,14 +151,14 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
 
     try {
       const imageUrl = await simulateUpload();
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         image: imageUrl,
         isImageUploading: false,
         imageUploadProgress: 0,
       }));
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isImageUploading: false,
         imageUploadProgress: 0,
@@ -162,7 +168,7 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
 
   const addTag = () => {
     if (state.newTag.trim() && !state.tags.includes(state.newTag.trim())) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         tags: [...prev.tags, state.newTag.trim()],
         newTag: '',
@@ -171,15 +177,15 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove),
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleSave = async () => {
-    setState(prev => ({ ...prev, isSaving: true }));
-    
+    setState((prev) => ({ ...prev, isSaving: true }));
+
     try {
       const postData: Post = {
         slug: state.slug,
@@ -197,18 +203,18 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
       };
 
       // Simulate save delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       onSave?.(postData);
-      setState(prev => ({ ...prev, isSaving: false }));
+      setState((prev) => ({ ...prev, isSaving: false }));
     } catch (error) {
-      setState(prev => ({ ...prev, isSaving: false }));
+      setState((prev) => ({ ...prev, isSaving: false }));
     }
   };
 
   const handlePublish = async () => {
-    setState(prev => ({ ...prev, isPublishing: true }));
-    
+    setState((prev) => ({ ...prev, isPublishing: true }));
+
     try {
       const postData: Post = {
         slug: state.slug,
@@ -226,12 +232,12 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
       };
 
       // Simulate publish delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       onPublish?.(postData);
-      setState(prev => ({ ...prev, isPublishing: false }));
+      setState((prev) => ({ ...prev, isPublishing: false }));
     } catch (error) {
-      setState(prev => ({ ...prev, isPublishing: false }));
+      setState((prev) => ({ ...prev, isPublishing: false }));
     }
   };
 
@@ -239,14 +245,18 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
     if (editorRef.current) {
       const start = editorRef.current.selectionStart;
       const end = editorRef.current.selectionEnd;
-      const newContent = state.content.substring(0, start) + text + state.content.substring(end);
-      setState(prev => ({ ...prev, content: newContent }));
-      
+      const newContent =
+        state.content.substring(0, start) + text + state.content.substring(end);
+      setState((prev) => ({ ...prev, content: newContent }));
+
       // Set cursor position after inserted text
       setTimeout(() => {
         if (editorRef.current) {
           editorRef.current.focus();
-          editorRef.current.setSelectionRange(start + text.length, start + text.length);
+          editorRef.current.setSelectionRange(
+            start + text.length,
+            start + text.length
+          );
         }
       }, 0);
     }
@@ -280,8 +290,10 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Basic Information
+              </h2>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -290,7 +302,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   <input
                     type="text"
                     value={state.title}
-                    onChange={(e) => setState(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({ ...prev, title: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter blog post title..."
                   />
@@ -302,7 +316,12 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   </label>
                   <textarea
                     value={state.description}
-                    onChange={(e) => setState(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter meta description for SEO..."
@@ -316,7 +335,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   <input
                     type="text"
                     value={state.slug}
-                    onChange={(e) => setState(prev => ({ ...prev, slug: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({ ...prev, slug: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="blog-post-url-slug"
                   />
@@ -329,7 +350,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   <input
                     type="text"
                     value={state.author}
-                    onChange={(e) => setState(prev => ({ ...prev, author: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({ ...prev, author: e.target.value }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Author name"
                   />
@@ -340,10 +363,18 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                     type="checkbox"
                     id="featured"
                     checked={state.featured}
-                    onChange={(e) => setState(prev => ({ ...prev, featured: e.target.checked }))}
+                    onChange={(e) =>
+                      setState((prev) => ({
+                        ...prev,
+                        featured: e.target.checked,
+                      }))
+                    }
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">
+                  <label
+                    htmlFor="featured"
+                    className="ml-2 block text-sm text-gray-900"
+                  >
                     Featured Post
                   </label>
                 </div>
@@ -356,7 +387,12 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                 <h2 className="text-lg font-semibold text-gray-900">Content</h2>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => setState(prev => ({ ...prev, isPreviewMode: !prev.isPreviewMode }))}
+                    onClick={() =>
+                      setState((prev) => ({
+                        ...prev,
+                        isPreviewMode: !prev.isPreviewMode,
+                      }))
+                    }
                     className={`px-3 py-1 text-sm rounded ${
                       state.isPreviewMode
                         ? 'bg-blue-600 text-white'
@@ -385,7 +421,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                       Italic
                     </button>
                     <button
-                      onClick={() => insertText('[Link Text](https://example.com)')}
+                      onClick={() =>
+                        insertText('[Link Text](https://example.com)')
+                      }
                       className="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
                     >
                       Link
@@ -419,7 +457,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   <textarea
                     ref={editorRef}
                     value={state.content}
-                    onChange={(e) => setState(prev => ({ ...prev, content: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({ ...prev, content: e.target.value }))
+                    }
                     rows={20}
                     className="w-full px-3 py-2 border border-gray-300 rounded-b-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                     placeholder="Write your blog post content here... Use Markdown formatting."
@@ -440,13 +480,15 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
             {/* Tags */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Tags</h2>
-              
+
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={state.newTag}
-                    onChange={(e) => setState(prev => ({ ...prev, newTag: e.target.value }))}
+                    onChange={(e) =>
+                      setState((prev) => ({ ...prev, newTag: e.target.value }))
+                    }
                     onKeyPress={(e) => e.key === 'Enter' && addTag()}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Add a tag..."
@@ -480,8 +522,10 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
 
             {/* Featured Image */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Featured Image</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Featured Image
+              </h2>
+
               <div className="space-y-4">
                 <input
                   ref={fileInputRef}
@@ -490,7 +534,7 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                
+
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={state.isImageUploading}
@@ -514,7 +558,9 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                       className="w-full h-48 object-cover rounded-md"
                     />
                     <button
-                      onClick={() => setState(prev => ({ ...prev, image: '' }))}
+                      onClick={() =>
+                        setState((prev) => ({ ...prev, image: '' }))
+                      }
                       className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700"
                     >
                       ×
@@ -529,20 +575,29 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
           <div className="space-y-6">
             {/* SEO Analysis */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">SEO Analysis</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                SEO Analysis
+              </h2>
+
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">{state.seoScore}</div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {state.seoScore}
+                  </div>
                   <div className="text-sm text-gray-600">SEO Score</div>
                 </div>
 
                 {state.seoSuggestions.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Suggestions:</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                      Suggestions:
+                    </h3>
                     <ul className="space-y-1">
                       {state.seoSuggestions.map((suggestion, index) => (
-                        <li key={index} className="text-sm text-red-600 flex items-start">
+                        <li
+                          key={index}
+                          className="text-sm text-red-600 flex items-start"
+                        >
                           <span className="mr-1">•</span>
                           {suggestion}
                         </li>
@@ -555,8 +610,10 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
 
             {/* Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Actions
+              </h2>
+
               <div className="space-y-3">
                 <button
                   onClick={handleSave}
@@ -565,10 +622,12 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
                 >
                   {state.isSaving ? 'Saving...' : 'Save Draft'}
                 </button>
-                
+
                 <button
                   onClick={handlePublish}
-                  disabled={state.isPublishing || !state.title || !state.content}
+                  disabled={
+                    state.isPublishing || !state.title || !state.content
+                  }
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {state.isPublishing ? 'Publishing...' : 'Publish Post'}
@@ -578,12 +637,16 @@ export function BlogEditor({ post, onSave, onPublish }: BlogEditorProps) {
 
             {/* Word Count */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Statistics</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Statistics
+              </h2>
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Words:</span>
-                  <span className="font-medium">{state.content.split(/\s+/).length}</span>
+                  <span className="font-medium">
+                    {state.content.split(/\s+/).length}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Characters:</span>

@@ -20,7 +20,7 @@ const BlogList: React.FC<BlogListProps> = ({
   selectedTag,
   searchQuery,
   onTagSelect,
-  onSearchChange
+  onSearchChange,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
@@ -37,19 +37,19 @@ const BlogList: React.FC<BlogListProps> = ({
       setAllPosts([]);
     }
   }, [posts]);
-  
+
   // Get unique tags from all posts with defensive checks
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    
+
     if (!Array.isArray(allPosts)) {
       console.warn('⚠️ allPosts is not an array for tags');
       return [];
     }
-    
-    allPosts.forEach(post => {
+
+    allPosts.forEach((post) => {
       if (Array.isArray(post.tags)) {
-        post.tags.forEach(tag => tags.add(tag));
+        post.tags.forEach((tag) => tags.add(tag));
       }
     });
     return Array.from(tags).sort();
@@ -65,26 +65,37 @@ const BlogList: React.FC<BlogListProps> = ({
     let filtered = [...allPosts]; // Create a copy to avoid mutations
 
     if (searchQuery) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (Array.isArray(post.tags) &&
+            post.tags.some((tag) =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase())
+            ))
       );
     }
 
     if (selectedTag) {
-      filtered = filtered.filter(post =>
-        Array.isArray(post.tags) && post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
+      filtered = filtered.filter(
+        (post) =>
+          Array.isArray(post.tags) &&
+          post.tags.some(
+            (tag) => tag.toLowerCase() === selectedTag.toLowerCase()
+          )
       );
     }
 
-    return filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
   }, [allPosts, searchQuery, selectedTag]);
 
   // Pagination with defensive slice
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = Array.isArray(filteredPosts) 
+  const paginatedPosts = Array.isArray(filteredPosts)
     ? filteredPosts.slice(startIndex, startIndex + postsPerPage)
     : [];
 
@@ -159,7 +170,7 @@ const BlogList: React.FC<BlogListProps> = ({
             >
               All
             </button>
-            {allTags.map(tag => (
+            {allTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => onTagSelect(tag)}
@@ -191,7 +202,8 @@ const BlogList: React.FC<BlogListProps> = ({
       {/* Results Count */}
       <div className="mb-6 text-center">
         <p className="text-gray-600">
-          {filteredPosts.length} post{filteredPosts.length !== 1 ? 's' : ''} found
+          {filteredPosts.length} post{filteredPosts.length !== 1 ? 's' : ''}{' '}
+          found
         </p>
       </div>
 
@@ -199,11 +211,23 @@ const BlogList: React.FC<BlogListProps> = ({
       {paginatedPosts.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="mx-auto h-12 w-12"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No posts found
+          </h3>
           <p className="text-gray-600">
             Try adjusting your search terms or filters
           </p>
@@ -226,8 +250,8 @@ const BlogList: React.FC<BlogListProps> = ({
           >
             Previous
           </button>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
@@ -240,7 +264,7 @@ const BlogList: React.FC<BlogListProps> = ({
               {page}
             </button>
           ))}
-          
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -258,13 +282,13 @@ const BlogList: React.FC<BlogListProps> = ({
 const PostCard: React.FC<{ post: Post }> = ({ post }) => {
   // Defensive check for tags
   const safeTags = Array.isArray(post.tags) ? post.tags : [];
-  
+
   return (
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="p-6">
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {safeTags.slice(0, 3).map(tag => (
+          {safeTags.slice(0, 3).map((tag) => (
             <span
               key={tag}
               className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
@@ -290,9 +314,7 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
         </h2>
 
         {/* Description */}
-        <p className="text-gray-600 mb-4 line-clamp-3">
-          {post.description}
-        </p>
+        <p className="text-gray-600 mb-4 line-clamp-3">{post.description}</p>
 
         {/* Meta Information */}
         <div className="flex items-center justify-between text-sm text-gray-500">
@@ -307,8 +329,18 @@ const PostCard: React.FC<{ post: Post }> = ({ post }) => {
             className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             Read more
-            <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="ml-1 h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </Link>
         </div>

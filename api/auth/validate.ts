@@ -1,10 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { jwtVerify } from 'jose';
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle OPTIONS first (before POST check)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -38,9 +35,8 @@ export default async function handler(
 
     return res.status(200).json({
       valid: true,
-      username: payload.username
+      username: payload.username,
     });
-
   } catch (error: any) {
     console.error('Token validation error:', error);
 

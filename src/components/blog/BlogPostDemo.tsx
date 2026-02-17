@@ -8,7 +8,8 @@ const BlogPostDemo: React.FC = () => {
     id: 1,
     slug: 'top-gifts-for-gamers-under-30',
     title: 'Top Gifts for Gamers Under $30',
-    description: 'Discover the best gifts for gamers under $30 with our top picks. Perfect for any budget!',
+    description:
+      'Discover the best gifts for gamers under $30 with our top picks. Perfect for any budget!',
     content: `
       <h2>Introduction</h2>
       <p>Finding the perfect gift for a gamer doesn't have to break the bank. In this guide, we'll explore some of the best gaming accessories and gadgets that cost less than $30, perfect for birthdays, holidays, or just because.</p>
@@ -39,12 +40,13 @@ const BlogPostDemo: React.FC = () => {
     secondaryKeywords: ['budget gifts', 'gaming accessories'],
     targetAudience: 'Gamers and gift-givers',
     toneOfVoice: 'Friendly and informative',
-    featuredImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop',
+    featuredImage:
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop',
     galleryImages: [],
     wordCount: 450,
     status: 'published',
     createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
+    updatedAt: '2024-01-15T10:00:00Z',
   };
 
   const relatedPosts: BlogPostType[] = [
@@ -52,55 +54,58 @@ const BlogPostDemo: React.FC = () => {
       id: 2,
       slug: 'best-tech-gifts-2025',
       title: 'Best Tech Gifts in 2025',
-      description: 'Discover the top gadgets and tech gifts that will impress everyone this year.',
+      description:
+        'Discover the top gadgets and tech gifts that will impress everyone this year.',
       content: '',
       tags: ['tech', 'gifts', '2025'],
       primaryKeyword: 'tech gifts',
       wordCount: 300,
       status: 'published',
       createdAt: '2024-01-10T10:00:00Z',
-      updatedAt: '2024-01-10T10:00:00Z'
+      updatedAt: '2024-01-10T10:00:00Z',
     },
     {
       id: 3,
       slug: 'gamer-desk-setup-guide',
       title: 'Gamer Desk Setup Guide',
-      description: 'Learn how to create the perfect gaming workspace with our comprehensive setup guide.',
+      description:
+        'Learn how to create the perfect gaming workspace with our comprehensive setup guide.',
       content: '',
       tags: ['gaming', 'setup', 'desk'],
       primaryKeyword: 'gaming setup',
       wordCount: 350,
       status: 'published',
       createdAt: '2024-01-05T10:00:00Z',
-      updatedAt: '2024-01-05T10:00:00Z'
+      updatedAt: '2024-01-05T10:00:00Z',
     },
     {
       id: 4,
       slug: 'affordable-vr-gear',
       title: 'Affordable VR Gear',
-      description: 'Get into VR without breaking the bank with these budget-friendly options.',
+      description:
+        'Get into VR without breaking the bank with these budget-friendly options.',
       content: '',
       tags: ['vr', 'budget', 'gaming'],
       primaryKeyword: 'affordable vr',
       wordCount: 280,
       status: 'published',
       createdAt: '2024-01-01T10:00:00Z',
-      updatedAt: '2024-01-01T10:00:00Z'
-    }
+      updatedAt: '2024-01-01T10:00:00Z',
+    },
   ];
 
   const previousPost = {
     slug: 'previous-gaming-post',
-    title: 'Previous Gaming Post'
+    title: 'Previous Gaming Post',
   };
 
   const nextPost = {
     slug: 'next-gaming-post',
-    title: 'Next Gaming Post'
+    title: 'Next Gaming Post',
   };
 
   return (
-    <BlogPost 
+    <BlogPost
       blog={sampleBlog}
       relatedPosts={relatedPosts}
       previousPost={previousPost}

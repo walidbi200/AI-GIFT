@@ -1,24 +1,24 @@
 // FILE: src/components/ThemeToggle.tsx
 // This is the final, corrected version with proper z-index and theme-aware colors.
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     // On component mount, set the theme based on localStorage or system preference
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
+      '(prefers-color-scheme: dark)'
     ).matches;
 
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
       setIsDark(true);
-      document.documentElement.classList.add("dark");
+      document.documentElement.classList.add('dark');
     } else {
       setIsDark(false);
-      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
@@ -26,11 +26,11 @@ const ThemeToggle = () => {
     setIsDark((prevIsDark) => {
       const newIsDark = !prevIsDark;
       if (newIsDark) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("theme", "dark");
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
       } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("theme", "light");
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
       }
       return newIsDark;
     });
@@ -40,12 +40,12 @@ const ThemeToggle = () => {
     <button
       onClick={toggleTheme}
       className="fixed top-4 right-4 z-[60] p-2 rounded-full bg-light-surface dark:bg-dark-surface border border-light-border dark:border-dark-border shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-light-primary/50 dark:focus:ring-dark-primary/50"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <div className="w-6 h-6 relative">
         {/* Sun Icon */}
         <svg
-          className={`absolute inset-0 w-6 h-6 text-light-accent transition-all duration-300 ${isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"}`}
+          className={`absolute inset-0 w-6 h-6 text-light-accent transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -60,7 +60,7 @@ const ThemeToggle = () => {
 
         {/* Moon Icon */}
         <svg
-          className={`absolute inset-0 w-6 h-6 text-dark-primary transition-all duration-300 ${isDark ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"}`}
+          className={`absolute inset-0 w-6 h-6 text-dark-primary transition-all duration-300 ${isDark ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
 interface FormInputProps {
   label: string;
-  type: "text" | "number" | "select" | "range";
+  type: 'text' | 'number' | 'select' | 'range';
   value: string | number;
   onChange: (value: string | number) => void;
   placeholder?: string;
@@ -28,7 +28,7 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
   min,
   max,
   icon,
-  className = "",
+  className = '',
   onKeyDown,
   id,
   index,
@@ -36,11 +36,11 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
   // Generate a unique ID: use provided id, or label + random string
   const inputId =
     id ||
-    `input-${label.toLowerCase().replace(/\s+/g, "-")}-${Math.random().toString(36).substr(2, 6)}`;
+    `input-${label.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2, 6)}`;
   const hasError = !!error;
 
   const handleChange = (newValue: string | number) => {
-    if (type === "range") {
+    if (type === 'range') {
       onChange(Number(newValue));
     } else {
       onChange(newValue);
@@ -49,7 +49,7 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
 
   const renderInput = () => {
     switch (type) {
-      case "select":
+      case 'select':
         return (
           <div className="relative">
             {icon && (
@@ -65,16 +65,16 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                ${icon ? "pl-10" : ""}
+                ${icon ? 'pl-10' : ''}
                 ${
                   hasError
-                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
                 }
                 ${className}
               `}
             >
-              <option value="">{placeholder || "Select an option"}</option>
+              <option value="">{placeholder || 'Select an option'}</option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -100,7 +100,7 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
           </div>
         );
 
-      case "range":
+      case 'range':
         return (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -140,11 +140,11 @@ const FormInput: React.FC<FormInputProps & { id?: string; index?: number }> = ({
               className={`
                 w-full px-4 py-3 border rounded-lg transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                ${icon ? "pl-10" : ""}
+                ${icon ? 'pl-10' : ''}
                 ${
                   hasError
-                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
                 }
                 ${className}
               `}

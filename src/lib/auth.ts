@@ -3,9 +3,14 @@ function jwtDecode(token: string): any {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
     return JSON.parse(jsonPayload);
   } catch (error) {
     // For our simple base64 tokens, just decode directly
@@ -72,7 +77,7 @@ class AuthClient {
           this.session = {
             user: decoded.user,
             expires: new Date(decoded.exp * 1000).toISOString(),
-            accessToken: token
+            accessToken: token,
           };
         } else {
           this.signOut();
@@ -87,36 +92,40 @@ class AuthClient {
   private generateToken(user: User): string {
     const payload = {
       user,
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
-      iat: Math.floor(Date.now() / 1000)
+      exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
+      iat: Math.floor(Date.now() / 1000),
     };
-    
+
     // Simple base64 encoding (in production, use proper JWT library)
     return btoa(JSON.stringify(payload));
   }
 
-  async signIn(credentials: { username: string; password: string }): Promise<{ success: boolean; error?: string }> {
+  async signIn(credentials: {
+    username: string;
+    password: string;
+  }): Promise<{ success: boolean; error?: string }> {
     try {
-      const user = await this.config.providers.credentials.authorize(credentials);
-      
+      const user =
+        await this.config.providers.credentials.authorize(credentials);
+
       if (user) {
         const token = this.generateToken(user);
         this.session = {
           user,
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          accessToken: token
+          accessToken: token,
         };
-        
+
         localStorage.setItem('nextauth.session-token', token);
-        
+
         if (this.callbacks.onSignIn) {
           this.callbacks.onSignIn(user);
         }
-        
+
         if (this.callbacks.onSessionChange) {
           this.callbacks.onSessionChange(this.session);
         }
-        
+
         return { success: true };
       } else {
         return { success: false, error: 'Invalid credentials' };
@@ -130,11 +139,11 @@ class AuthClient {
   signOut(): void {
     this.session = null;
     localStorage.removeItem('nextauth.session-token');
-    
+
     if (this.callbacks.onSignOut) {
       this.callbacks.onSignOut();
     }
-    
+
     if (this.callbacks.onSessionChange) {
       this.callbacks.onSessionChange(null);
     }
@@ -144,7 +153,10 @@ class AuthClient {
     return this.session;
   }
 
-  useSession(): { data: Session | null; status: 'loading' | 'authenticated' | 'unauthenticated' } {
+  useSession(): {
+    data: Session | null;
+    status: 'loading' | 'authenticated' | 'unauthenticated';
+  } {
     if (this.session) {
       return { data: this.session, status: 'authenticated' };
     }
@@ -171,15 +183,15 @@ export const auth = new AuthClient({
       name: 'Admin Login',
       credentials: {
         username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         // Debug logging
-        console.log('Auth attempt:', { 
+        console.log('Auth attempt:', {
           username: credentials?.username,
           hasPassword: !!credentials?.password,
           envUser: import.meta.env.VITE_ADMIN_USER,
-          envPass: import.meta.env.VITE_ADMIN_PASS ? '***' : 'NOT_SET'
+          envPass: import.meta.env.VITE_ADMIN_PASS ? '***' : 'NOT_SET',
         });
 
         const isValid =
@@ -192,20 +204,21 @@ export const auth = new AuthClient({
           return { id: 'admin', name: 'Admin' };
         }
         return null;
-      }
-    }
+      },
+    },
   },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
   },
   secret: import.meta.env.VITE_NEXTAUTH_SECRET || 'your-secret-key',
   pages: {
-    signIn: '/login'
-  }
+    signIn: '/login',
+  },
 });
 
 // Export NextAuth-like hooks and functions
 export const useSession = () => auth.useSession();
-export const signIn = (credentials: { username: string; password: string }) => auth.signIn(credentials);
+export const signIn = (credentials: { username: string; password: string }) =>
+  auth.signIn(credentials);
 export const signOut = () => auth.signOut();
 export const getSession = () => auth.getSession();

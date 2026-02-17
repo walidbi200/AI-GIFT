@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const GiftBoxLoader: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-12 animate-fade-in-up">
@@ -11,7 +11,7 @@ const GiftBoxLoader: React.FC = () => (
       {/* Gift box lid */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-8 bg-pink-500 rounded-t-lg shadow-md animate-gift-lid"
-        style={{ animationDelay: "0.2s" }}
+        style={{ animationDelay: '0.2s' }}
       />
       {/* Ribbon vertical */}
       <div className="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-24 bg-yellow-400 rounded-full z-20 animate-pulse-slow" />

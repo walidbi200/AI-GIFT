@@ -1,5 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const NotFound = () => (
   <main className="min-h-screen flex flex-col items-center justify-center p-8">

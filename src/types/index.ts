@@ -26,4 +26,4 @@ export interface FormData {
   budget: string;
 }
 
-export type ToastType = "success" | "error";
+export type ToastType = 'success' | 'error';

@@ -1,6 +1,6 @@
 // FILE: src/components/RecentSearches.tsx
 
-import React from "react";
+import React from 'react';
 
 interface RecentSearch {
   age: number;
@@ -13,7 +13,7 @@ interface RecentSearch {
 
 interface RecentSearchesProps {
   searches: RecentSearch[];
-  onSelectSearch: (search: Omit<RecentSearch, "timestamp">) => void;
+  onSelectSearch: (search: Omit<RecentSearch, 'timestamp'>) => void;
   onClearSearches: () => void;
 }
 
@@ -30,7 +30,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
     if (diffInHours < 1) {
-      return "Just now";
+      return 'Just now';
     } else if (diffInHours < 24) {
       return `${Math.floor(diffInHours)}h ago`;
     } else {

@@ -28,7 +28,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           />
         </div>
       )}
-      
+
       <div className="blog-content p-6">
         <div className="blog-meta flex items-center gap-4 text-sm text-gray-500 mb-3">
           <span className="reading-time">{blog.readingTime} min read</span>
@@ -37,15 +37,15 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
             {new Date(blog.createdAt).toLocaleDateString()}
           </span>
         </div>
-        
+
         <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
           {blog.title}
         </h3>
-        
+
         <p className="excerpt text-gray-600 mb-4 line-clamp-3">
           {blog.excerpt}
         </p>
-        
+
         <div className="blog-tags flex flex-wrap gap-2 mb-4">
           <span className="primary-keyword px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
             {blog.primaryKeyword}
@@ -56,14 +56,24 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
             </span>
           )}
         </div>
-        
-        <Link 
+
+        <Link
           to={`/blog/${blog.slug}`}
           className="read-more inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors"
         >
-          Read More 
-          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          Read More
+          <svg
+            className="w-4 h-4 ml-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </Link>
       </div>

@@ -4,10 +4,7 @@ import bcrypt from 'bcryptjs';
 
 import { checkRateLimit, authRateLimit } from '../middleware/rateLimit';
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle OPTIONS first (before POST check)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -33,7 +30,11 @@ export default async function handler(
     }
 
     // Check environment variables are configured
-    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD_HASH || !process.env.JWT_SECRET) {
+    if (
+      !process.env.ADMIN_USERNAME ||
+      !process.env.ADMIN_PASSWORD_HASH ||
+      !process.env.JWT_SECRET
+    ) {
       console.error('Missing required environment variables');
       return res.status(500).json({ error: 'Server configuration error' });
     }
@@ -58,7 +59,7 @@ export default async function handler(
     const token = await new SignJWT({
       username,
       role: 'admin',
-      iat: Math.floor(Date.now() / 1000)
+      iat: Math.floor(Date.now() / 1000),
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')
@@ -70,9 +71,8 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       token,
-      expiresIn: 86400 // 24 hours in seconds
+      expiresIn: 86400, // 24 hours in seconds
     });
-
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ error: 'Internal server error' });

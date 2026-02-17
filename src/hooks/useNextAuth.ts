@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, Session, User } from '../lib/auth';
+import { auth, Session } from '../lib/auth';
 
 export interface UseSessionReturn {
   data: Session | null;
@@ -9,7 +9,9 @@ export interface UseSessionReturn {
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<Session | null>(null);
-  const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const [status, setStatus] = useState<
+    'loading' | 'authenticated' | 'unauthenticated'
+  >('loading');
 
   useEffect(() => {
     // Load initial session

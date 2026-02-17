@@ -23,7 +23,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
@@ -39,7 +39,9 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Something went wrong
+            </h2>
             <p className="text-gray-600 mb-4">
               An unexpected error occurred. Please try refreshing the page.
             </p>

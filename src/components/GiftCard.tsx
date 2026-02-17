@@ -1,6 +1,6 @@
 // FILE: src/components/GiftCard.tsx
-import type { GiftSuggestion } from "../types";
-import React from "react";
+import type { GiftSuggestion } from '../types';
+import React from 'react';
 
 // Define the props that the GiftCard component will accept
 interface GiftCardProps {
@@ -25,7 +25,9 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">Gift Idea</span>
+              <span className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                Gift Idea
+              </span>
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
               {suggestion.name}
@@ -51,7 +53,7 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
             </span>
           </div>
         )}
-        
+
         {suggestion.reason && (
           <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
             <p className="text-sm text-blue-800 italic">
@@ -69,17 +71,27 @@ const GiftCard = ({ suggestion, index }: GiftCardProps) => {
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-semibold text-center shadow-sm hover:shadow-md"
           >
             <span className="flex items-center justify-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
               </svg>
               Find on Amazon
             </span>
           </a>
-          
+
           <button
             onClick={() =>
               navigator.clipboard.writeText(
-                `${suggestion.name} - ${suggestion.description}`,
+                `${suggestion.name} - ${suggestion.description}`
               )
             }
             className="p-3 text-gray-500 hover:text-blue-600 transition-colors duration-200 rounded-lg hover:bg-blue-50 border border-gray-200 hover:border-blue-200"

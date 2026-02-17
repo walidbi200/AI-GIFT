@@ -37,27 +37,60 @@ interface ContentCalendarEvent {
 export function BulkContentGenerator() {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState('');
-  const [generationRequest, setGenerationRequest] = useState<BulkGenerationRequest>({
-    keywords: [],
-    template: 'gift-guide',
-    count: 5,
-    audience: 'general',
-    tone: 'friendly',
-    scheduleType: 'immediate',
-  });
+  const [generationRequest, setGenerationRequest] =
+    useState<BulkGenerationRequest>({
+      keywords: [],
+      template: 'gift-guide',
+      count: 5,
+      audience: 'general',
+      tone: 'friendly',
+      scheduleType: 'immediate',
+    });
   const [activeJobs, setActiveJobs] = useState<GenerationJob[]>([]);
-  const [contentCalendar, setContentCalendar] = useState<ContentCalendarEvent[]>([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [contentCalendar, setContentCalendar] = useState<
+    ContentCalendarEvent[]
+  >([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
   const [isGenerating, setIsGenerating] = useState(false);
 
   const templates = [
-    { id: 'gift-guide', name: 'Gift Guide', description: 'Comprehensive gift recommendations for specific occasions' },
-    { id: 'trending', name: 'Trending Topics', description: 'Current trending gift ideas and popular items' },
-    { id: 'problem-solving', name: 'Problem Solving', description: 'How-to guides and gift selection advice' },
-    { id: 'seasonal', name: 'Seasonal/Holiday', description: 'Holiday-specific gift guides and recommendations' },
-    { id: 'demographic', name: 'Demographic Specific', description: 'Gift guides tailored to specific audiences' },
-    { id: 'budget', name: 'Budget Focused', description: 'Affordable gift options and money-saving tips' },
-    { id: 'luxury', name: 'Luxury Premium', description: 'High-end and premium gift recommendations' },
+    {
+      id: 'gift-guide',
+      name: 'Gift Guide',
+      description: 'Comprehensive gift recommendations for specific occasions',
+    },
+    {
+      id: 'trending',
+      name: 'Trending Topics',
+      description: 'Current trending gift ideas and popular items',
+    },
+    {
+      id: 'problem-solving',
+      name: 'Problem Solving',
+      description: 'How-to guides and gift selection advice',
+    },
+    {
+      id: 'seasonal',
+      name: 'Seasonal/Holiday',
+      description: 'Holiday-specific gift guides and recommendations',
+    },
+    {
+      id: 'demographic',
+      name: 'Demographic Specific',
+      description: 'Gift guides tailored to specific audiences',
+    },
+    {
+      id: 'budget',
+      name: 'Budget Focused',
+      description: 'Affordable gift options and money-saving tips',
+    },
+    {
+      id: 'luxury',
+      name: 'Luxury Premium',
+      description: 'High-end and premium gift recommendations',
+    },
   ];
 
   const audiences = [
@@ -117,15 +150,15 @@ export function BulkContentGenerator() {
     if (newKeyword.trim() && !keywords.includes(newKeyword.trim())) {
       const updatedKeywords = [...keywords, newKeyword.trim()];
       setKeywords(updatedKeywords);
-      setGenerationRequest(prev => ({ ...prev, keywords: updatedKeywords }));
+      setGenerationRequest((prev) => ({ ...prev, keywords: updatedKeywords }));
       setNewKeyword('');
     }
   };
 
   const removeKeyword = (keywordToRemove: string) => {
-    const updatedKeywords = keywords.filter(k => k !== keywordToRemove);
+    const updatedKeywords = keywords.filter((k) => k !== keywordToRemove);
     setKeywords(updatedKeywords);
-    setGenerationRequest(prev => ({ ...prev, keywords: updatedKeywords }));
+    setGenerationRequest((prev) => ({ ...prev, keywords: updatedKeywords }));
   };
 
   const generateBulkContent = async () => {
@@ -136,7 +169,7 @@ export function BulkContentGenerator() {
 
     setIsGenerating(true);
     const jobId = `job_${Date.now()}`;
-    
+
     const newJob: GenerationJob = {
       id: jobId,
       status: 'pending',
@@ -146,24 +179,33 @@ export function BulkContentGenerator() {
       posts: [],
     };
 
-    setActiveJobs(prev => [...prev, newJob]);
+    setActiveJobs((prev) => [...prev, newJob]);
 
     try {
       // Simulate bulk generation
       for (let i = 0; i < generationRequest.count; i++) {
         // Update job status
-        setActiveJobs(prev => prev.map(job => 
-          job.id === jobId 
-            ? { ...job, status: 'generating', progress: ((i + 1) / generationRequest.count) * 100 }
-            : job
-        ));
+        setActiveJobs((prev) =>
+          prev.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  status: 'generating',
+                  progress: ((i + 1) / generationRequest.count) * 100,
+                }
+              : job
+          )
+        );
 
         // Simulate API call for each post
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        const keyword = generationRequest.keywords[i % generationRequest.keywords.length];
-        const template = templates.find(t => t.id === generationRequest.template);
-        
+        const keyword =
+          generationRequest.keywords[i % generationRequest.keywords.length];
+        const template = templates.find(
+          (t) => t.id === generationRequest.template
+        );
+
         const generatedPost: Post = {
           slug: `${keyword.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
           title: `${keyword} Gift Guide - Complete Recommendations`,
@@ -180,16 +222,21 @@ export function BulkContentGenerator() {
         };
 
         // Update job with generated post
-        setActiveJobs(prev => prev.map(job => 
-          job.id === jobId 
-            ? { 
-                ...job, 
-                completedPosts: i + 1,
-                posts: [...job.posts, generatedPost],
-                status: i === generationRequest.count - 1 ? 'completed' : 'generating'
-              }
-            : job
-        ));
+        setActiveJobs((prev) =>
+          prev.map((job) =>
+            job.id === jobId
+              ? {
+                  ...job,
+                  completedPosts: i + 1,
+                  posts: [...job.posts, generatedPost],
+                  status:
+                    i === generationRequest.count - 1
+                      ? 'completed'
+                      : 'generating',
+                }
+              : job
+          )
+        );
 
         // Add to content calendar if scheduled
         if (generationRequest.scheduleType !== 'immediate') {
@@ -198,11 +245,13 @@ export function BulkContentGenerator() {
         }
       }
     } catch (error) {
-      setActiveJobs(prev => prev.map(job => 
-        job.id === jobId 
-          ? { ...job, status: 'failed', error: 'Generation failed' }
-          : job
-      ));
+      setActiveJobs((prev) =>
+        prev.map((job) =>
+          job.id === jobId
+            ? { ...job, status: 'failed', error: 'Generation failed' }
+            : job
+        )
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -212,7 +261,7 @@ export function BulkContentGenerator() {
     const baseDate = new Date(generationRequest.startDate || new Date());
     const interval = generationRequest.publishInterval || 1;
     const publishDate = new Date(baseDate);
-    publishDate.setDate(publishDate.getDate() + (index * interval));
+    publishDate.setDate(publishDate.getDate() + index * interval);
     return publishDate.toISOString().split('T')[0];
   };
 
@@ -225,46 +274,56 @@ export function BulkContentGenerator() {
       type: 'blog',
       tags: post.tags,
     };
-    setContentCalendar(prev => [...prev, calendarEvent]);
+    setContentCalendar((prev) => [...prev, calendarEvent]);
   };
 
   const publishAllPosts = async (jobId: string) => {
-    const job = activeJobs.find(j => j.id === jobId);
+    const job = activeJobs.find((j) => j.id === jobId);
     if (!job) return;
 
     // Simulate publishing all posts
     for (const post of job.posts) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       console.log(`Publishing: ${post.title}`);
     }
 
     // Update content calendar status
-    setContentCalendar(prev => prev.map(event => 
-      job.posts.some(post => post.title === event.title)
-        ? { ...event, status: 'published' as const }
-        : event
-    ));
+    setContentCalendar((prev) =>
+      prev.map((event) =>
+        job.posts.some((post) => post.title === event.title)
+          ? { ...event, status: 'published' as const }
+          : event
+      )
+    );
   };
 
   const getEventsForDate = (date: string) => {
-    return contentCalendar.filter(event => event.date === date);
+    return contentCalendar.filter((event) => event.date === date);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'published':
+        return 'bg-green-100 text-green-800';
+      case 'scheduled':
+        return 'bg-blue-100 text-blue-800';
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getJobStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'generating': return 'bg-blue-100 text-blue-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'generating':
+        return 'bg-blue-100 text-blue-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -275,7 +334,9 @@ export function BulkContentGenerator() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Bulk Content Generator</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Bulk Content Generator
+              </h1>
               <p className="mt-2 text-gray-600">
                 Generate multiple blog posts from keywords and templates
               </p>
@@ -294,8 +355,10 @@ export function BulkContentGenerator() {
           <div className="space-y-6">
             {/* Keywords */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Keywords</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Keywords
+              </h2>
+
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <input
@@ -335,8 +398,10 @@ export function BulkContentGenerator() {
 
             {/* Generation Settings */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Generation Settings</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Generation Settings
+              </h2>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -344,7 +409,12 @@ export function BulkContentGenerator() {
                   </label>
                   <select
                     value={generationRequest.template}
-                    onChange={(e) => setGenerationRequest(prev => ({ ...prev, template: e.target.value }))}
+                    onChange={(e) =>
+                      setGenerationRequest((prev) => ({
+                        ...prev,
+                        template: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {templates.map((template) => (
@@ -364,7 +434,12 @@ export function BulkContentGenerator() {
                     min="1"
                     max="20"
                     value={generationRequest.count}
-                    onChange={(e) => setGenerationRequest(prev => ({ ...prev, count: parseInt(e.target.value) }))}
+                    onChange={(e) =>
+                      setGenerationRequest((prev) => ({
+                        ...prev,
+                        count: parseInt(e.target.value),
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -375,7 +450,12 @@ export function BulkContentGenerator() {
                   </label>
                   <select
                     value={generationRequest.audience}
-                    onChange={(e) => setGenerationRequest(prev => ({ ...prev, audience: e.target.value }))}
+                    onChange={(e) =>
+                      setGenerationRequest((prev) => ({
+                        ...prev,
+                        audience: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {audiences.map((audience) => (
@@ -392,7 +472,12 @@ export function BulkContentGenerator() {
                   </label>
                   <select
                     value={generationRequest.tone}
-                    onChange={(e) => setGenerationRequest(prev => ({ ...prev, tone: e.target.value }))}
+                    onChange={(e) =>
+                      setGenerationRequest((prev) => ({
+                        ...prev,
+                        tone: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {tones.map((tone) => (
@@ -409,7 +494,12 @@ export function BulkContentGenerator() {
                   </label>
                   <select
                     value={generationRequest.scheduleType}
-                    onChange={(e) => setGenerationRequest(prev => ({ ...prev, scheduleType: e.target.value as any }))}
+                    onChange={(e) =>
+                      setGenerationRequest((prev) => ({
+                        ...prev,
+                        scheduleType: e.target.value as any,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="immediate">Publish Immediately</option>
@@ -427,7 +517,12 @@ export function BulkContentGenerator() {
                       <input
                         type="date"
                         value={generationRequest.startDate || ''}
-                        onChange={(e) => setGenerationRequest(prev => ({ ...prev, startDate: e.target.value }))}
+                        onChange={(e) =>
+                          setGenerationRequest((prev) => ({
+                            ...prev,
+                            startDate: e.target.value,
+                          }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -442,7 +537,12 @@ export function BulkContentGenerator() {
                           min="1"
                           max="30"
                           value={generationRequest.publishInterval || 1}
-                          onChange={(e) => setGenerationRequest(prev => ({ ...prev, publishInterval: parseInt(e.target.value) }))}
+                          onChange={(e) =>
+                            setGenerationRequest((prev) => ({
+                              ...prev,
+                              publishInterval: parseInt(e.target.value),
+                            }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -455,7 +555,9 @@ export function BulkContentGenerator() {
                   disabled={isGenerating || keywords.length === 0}
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isGenerating ? 'Generating...' : `Generate ${generationRequest.count} Posts`}
+                  {isGenerating
+                    ? 'Generating...'
+                    : `Generate ${generationRequest.count} Posts`}
                 </button>
               </div>
             </div>
@@ -465,23 +567,32 @@ export function BulkContentGenerator() {
           <div className="space-y-6">
             {/* Active Jobs */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Jobs</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Active Jobs
+              </h2>
+
               {activeJobs.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No active generation jobs</p>
+                <p className="text-gray-500 text-center py-4">
+                  No active generation jobs
+                </p>
               ) : (
                 <div className="space-y-4">
                   {activeJobs.map((job) => (
-                    <div key={job.id} className="border border-gray-200 rounded-lg p-4">
+                    <div
+                      key={job.id}
+                      className="border border-gray-200 rounded-lg p-4"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobStatusColor(job.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getJobStatusColor(job.status)}`}
+                        >
                           {job.status}
                         </span>
                         <span className="text-sm text-gray-600">
                           {job.completedPosts}/{job.totalPosts} posts
                         </span>
                       </div>
-                      
+
                       <div className="mb-2">
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
@@ -518,8 +629,10 @@ export function BulkContentGenerator() {
 
             {/* Content Calendar */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Content Calendar</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Content Calendar
+              </h2>
+
               <div className="mb-4">
                 <input
                   type="date"
@@ -531,28 +644,40 @@ export function BulkContentGenerator() {
 
               <div className="space-y-2">
                 {getEventsForDate(selectedDate).map((event) => (
-                  <div key={event.id} className="border border-gray-200 rounded-lg p-3">
+                  <div
+                    key={event.id}
+                    className="border border-gray-200 rounded-lg p-3"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-medium text-gray-900">{event.title}</h3>
+                        <h3 className="font-medium text-gray-900">
+                          {event.title}
+                        </h3>
                         <p className="text-sm text-gray-600">{event.type}</p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}
+                      >
                         {event.status}
                       </span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {event.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                        >
                           {tag}
                         </span>
                       ))}
                     </div>
                   </div>
                 ))}
-                
+
                 {getEventsForDate(selectedDate).length === 0 && (
-                  <p className="text-gray-500 text-center py-4">No events scheduled for this date</p>
+                  <p className="text-gray-500 text-center py-4">
+                    No events scheduled for this date
+                  </p>
                 )}
               </div>
             </div>

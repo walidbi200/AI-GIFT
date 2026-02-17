@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   onSubmit,
 }) => {
   const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +24,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       await onSubmit(rating, feedback);
       onClose();
       setRating(0);
-      setFeedback("");
+      setFeedback('');
     } catch (error) {
       // Removed console.error
     } finally {
@@ -62,7 +62,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   type="button"
                   onClick={() => setRating(star)}
                   className={`text-2xl transition-colors ${
-                    star <= rating ? "text-yellow-400" : "text-gray-300"
+                    star <= rating ? 'text-yellow-400' : 'text-gray-300'
                   } hover:text-yellow-400`}
                 >
                   ★
@@ -103,7 +103,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
               disabled={rating === 0 || isSubmitting}
               className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? "Submitting..." : "Submit Feedback"}
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </button>
           </div>
         </form>

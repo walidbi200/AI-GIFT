@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import emailjs from "@emailjs/browser";
-import Button from "../components/Button";
-import Toast from "../components/Toast";
-import type { ToastType } from "../types";
-import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
+import Button from '../components/Button';
+import Toast from '../components/Toast';
+import type { ToastType } from '../types';
+import { analytics } from '../services/analytics';
 
 const Contact: React.FC = () => {
-  const { trackFormSubmission } = useGoogleAnalytics();
+  const trackFormSubmission = analytics.emailSignupStarted; // Using emailSignupStarted as a proxy for form contact
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+    name: '',
+    email: '',
+    message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<ToastType>("success");
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<ToastType>('success');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     // Update document title for SEO
-    document.title = "Contact Us - Smart Gift Finder | Get in Touch";
+    document.title = 'Contact Us - Smart Gift Finder | Get in Touch';
 
     // Update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
-        "content",
-        "Get in touch with the Smart Gift Finder team. We'd love to hear from you - whether you have feedback, questions, or just want to say hello. Contact us today!",
+        'content',
+        "Get in touch with the Smart Gift Finder team. We'd love to hear from you - whether you have feedback, questions, or just want to say hello. Contact us today!"
       );
     }
   }, []);
@@ -40,7 +40,7 @@ const Contact: React.FC = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -51,23 +51,23 @@ const Contact: React.FC = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      showToastMessage("Please enter your name", "error");
+      showToastMessage('Please enter your name', 'error');
       return false;
     }
     if (!formData.email.trim()) {
-      showToastMessage("Please enter your email", "error");
+      showToastMessage('Please enter your email', 'error');
       return false;
     }
-    if (!formData.email.includes("@")) {
-      showToastMessage("Please enter a valid email address", "error");
+    if (!formData.email.includes('@')) {
+      showToastMessage('Please enter a valid email address', 'error');
       return false;
     }
     if (!formData.message.trim()) {
-      showToastMessage("Please enter your message", "error");
+      showToastMessage('Please enter your message', 'error');
       return false;
     }
     if (formData.message.trim().length < 10) {
-      showToastMessage("Message must be at least 10 characters long", "error");
+      showToastMessage('Message must be at least 10 characters long', 'error');
       return false;
     }
     return true;
@@ -89,8 +89,8 @@ const Contact: React.FC = () => {
 
     if (!serviceId || !templateId || !publicKey) {
       showToastMessage(
-        "Contact form is not configured. Please contact us directly.",
-        "error",
+        'Contact form is not configured. Please contact us directly.',
+        'error'
       );
       setIsSubmitting(false);
       return;
@@ -109,15 +109,15 @@ const Contact: React.FC = () => {
 
       showToastMessage(
         "Thank you for your message! We'll get back to you soon.",
-        "success",
+        'success'
       );
       setIsSubmitted(true);
-      setFormData({ name: "", email: "", message: "" });
-      trackFormSubmission("contact");
+      setFormData({ name: '', email: '', message: '' });
+      trackFormSubmission('contact');
     } catch (error) {
       showToastMessage(
-        "Failed to send message. Please try again or email us directly at Bichriwalid1@gmail.com",
-        "error",
+        'Failed to send message. Please try again or email us directly at Bichriwalid1@gmail.com',
+        'error'
       );
     } finally {
       setIsSubmitting(false);
@@ -265,7 +265,7 @@ const Contact: React.FC = () => {
                   <span>Sending Message...</span>
                 </div>
               ) : (
-                "📧 Send Message"
+                '📧 Send Message'
               )}
             </Button>
           </form>

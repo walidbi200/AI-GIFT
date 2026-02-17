@@ -20,79 +20,102 @@ import GiftBoxLoader from './components/GiftBoxLoader';
 import GiftLoadingScreen from './components/GiftLoadingScreen';
 
 // --- Lazy-loaded Components ---
-const About = React.lazy(() => import("./pages/About"));
-const Contact = React.lazy(() => import("./pages/Contact"));
-const BlogIndex = React.lazy(() => import("./pages/BlogIndex"));
-const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
-const Login = React.lazy(() => import("./pages/Login"));
-const AdminDashboard = React.lazy(() => import("./components/admin/AdminDashboard"));
-const AdminSimple = React.lazy(() => import("./pages/AdminSimple"));
-const BlogGenerator = React.lazy(() => import("./components/admin/BlogGenerator"));
-const ProtectedRoute = React.lazy(() => import("./components/auth/ProtectedRoute"));
-const SimpleProtectedRoute = React.lazy(() => import("./components/auth/SimpleProtectedRoute"));
-const GiftsForMom = React.lazy(() => import("./pages/GiftsForMom"));
-const GiftsForDad = React.lazy(() => import("./pages/GiftsForDad"));
-const BirthdayGifts = React.lazy(() => import("./pages/BirthdayGifts"));
-const AnniversaryGifts = React.lazy(() => import("./pages/AnniversaryGifts"));
-const GiftsForBoyfriend = React.lazy(() => import("./pages/GiftsForBoyfriend"));
-const GiftsForGirlfriend = React.lazy(() => import("./pages/GiftsForGirlfriend"));
-const UniqueGifts = React.lazy(() => import("./pages/UniqueGifts"));
-const UltimateGiftGivingGuide = React.lazy(() => import("./pages/blog/UltimateGiftGivingGuide"));
-const GiftGivingPsychology = React.lazy(() => import("./pages/blog/GiftGivingPsychology"));
+const About = React.lazy(() => import('./pages/About'));
+const Contact = React.lazy(() => import('./pages/Contact'));
+const BlogIndex = React.lazy(() => import('./pages/BlogIndex'));
+const BlogPostPage = React.lazy(() => import('./pages/BlogPostPage'));
+const Login = React.lazy(() => import('./pages/Login'));
+const AdminDashboard = React.lazy(
+  () => import('./components/admin/AdminDashboard')
+);
+const AdminSimple = React.lazy(() => import('./pages/AdminSimple'));
+const BlogGenerator = React.lazy(
+  () => import('./components/admin/BlogGenerator')
+);
+const ProtectedRoute = React.lazy(
+  () => import('./components/auth/ProtectedRoute')
+);
+const SimpleProtectedRoute = React.lazy(
+  () => import('./components/auth/SimpleProtectedRoute')
+);
+const GiftsForMom = React.lazy(() => import('./pages/GiftsForMom'));
+const GiftsForDad = React.lazy(() => import('./pages/GiftsForDad'));
+const BirthdayGifts = React.lazy(() => import('./pages/BirthdayGifts'));
+const AnniversaryGifts = React.lazy(() => import('./pages/AnniversaryGifts'));
+const GiftsForBoyfriend = React.lazy(() => import('./pages/GiftsForBoyfriend'));
+const GiftsForGirlfriend = React.lazy(
+  () => import('./pages/GiftsForGirlfriend')
+);
+const UniqueGifts = React.lazy(() => import('./pages/UniqueGifts'));
+const UltimateGiftGivingGuide = React.lazy(
+  () => import('./pages/blog/UltimateGiftGivingGuide')
+);
+const GiftGivingPsychology = React.lazy(
+  () => import('./pages/blog/GiftGivingPsychology')
+);
+const AIGiftFinderBirthday = React.lazy(
+  () => import('./pages/blog/AIGiftFinderBirthday')
+);
+const SmartGiftIdeas = React.lazy(
+  () => import('./pages/blog/SmartGiftIdeas')
+);
+const HowAIGiftFindersWork = React.lazy(
+  () => import('./pages/blog/HowAIGiftFindersWork')
+);
 
 // --- Your Actual Hook and Service Imports ---
-import type { GiftSuggestion, FormErrors, ToastType } from "./types";
-import { GiftService } from "./services/giftService";
-import { useRecentSearches } from "./hooks/useLocalStorage";
-import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
-import { analytics } from "./services/analytics";
+import type { GiftSuggestion, FormErrors, ToastType } from './types';
+import { GiftService } from './services/giftService';
+import { useRecentSearches } from './hooks/useLocalStorage';
+import { useGoogleAnalytics } from './hooks/useGoogleAnalytics';
+import { analytics } from './services/analytics';
 import ExitIntentPopup from './components/ExitIntentPopup';
 import StickyEmailBar from './components/StickyEmailBar';
-const ThankYou = React.lazy(() => import("./pages/ThankYou"));
+const ThankYou = React.lazy(() => import('./pages/ThankYou'));
 
 // --- Constants ---
 const REFINE_OPTIONS = [
-  { label: "More Fun", value: "fun" },
-  { label: "More Practical", value: "practical" },
-  { label: "Less Expensive", value: "cheap" },
-  { label: "More Unique", value: "unique" },
-  { label: "More Luxurious", value: "luxury" },
+  { label: 'More Fun', value: 'fun' },
+  { label: 'More Practical', value: 'practical' },
+  { label: 'Less Expensive', value: 'cheap' },
+  { label: 'More Unique', value: 'unique' },
+  { label: 'More Luxurious', value: 'luxury' },
 ];
 const SURPRISE_PERSONAS = [
   {
     age: 45,
-    relationship: "Parent",
-    occasion: "Birthday",
-    interests: ["astronomy", "baking"],
-    budget: "100",
-    negativeKeywords: "socks, mugs",
+    relationship: 'Parent',
+    occasion: 'Birthday',
+    interests: ['astronomy', 'baking'],
+    budget: '100',
+    negativeKeywords: 'socks, mugs',
   },
   {
     age: 22,
-    relationship: "Friend",
-    occasion: "Graduation",
-    interests: ["gaming", "travel"],
-    budget: "50",
-    negativeKeywords: "books",
+    relationship: 'Friend',
+    occasion: 'Graduation',
+    interests: ['gaming', 'travel'],
+    budget: '50',
+    negativeKeywords: 'books',
   },
 ];
 const POPULAR_TAGS = [
-  "tech",
-  "gaming",
-  "reading",
-  "cooking",
-  "travel",
-  "movies",
-  "music",
-  "sports",
-  "fitness",
-  "fashion",
-  "art",
-  "photography",
-  "gardening",
-  "diy crafts",
-  "hiking",
-  "makeup",
+  'tech',
+  'gaming',
+  'reading',
+  'cooking',
+  'travel',
+  'movies',
+  'music',
+  'sports',
+  'fitness',
+  'fashion',
+  'art',
+  'photography',
+  'gardening',
+  'diy crafts',
+  'hiking',
+  'makeup',
 ];
 
 // This is the component for your main gift finder page
@@ -101,24 +124,26 @@ function HomePage() {
   const TOTAL_STEPS = 6;
   const [step, setStep] = useState(1);
   const [age, setAge] = useState(25);
-  const [occasion, setOccasion] = useState("");
+  const [occasion, setOccasion] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
-  const [currentInterest, setCurrentInterest] = useState("");
-  const [budget, setBudget] = useState("");
-  const [relationship, setRelationship] = useState("");
-  const [negativeKeywords, setNegativeKeywords] = useState("");
+  const [currentInterest, setCurrentInterest] = useState('');
+  const [budget, setBudget] = useState('');
+  const [relationship, setRelationship] = useState('');
+  const [negativeKeywords, setNegativeKeywords] = useState('');
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<ToastType>("success");
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<ToastType>('success');
   const [isUsingMockData, setIsUsingMockData] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [hasGeneratedSuggestions, setHasGeneratedSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<GiftSuggestion[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<
+    GiftSuggestion[]
+  >([]);
   const [isCachedResult, setIsCachedResult] = useState(false);
 
   // Update filtered suggestions when suggestions or activeFilters change
@@ -128,9 +153,12 @@ function HomePage() {
     } else {
       setFilteredSuggestions(
         suggestions.filter((s) =>
-          activeFilters.every((filter) =>
-            (s.reason && s.reason.toLowerCase().includes(filter.toLowerCase())) ||
-            (s.description && s.description.toLowerCase().includes(filter.toLowerCase()))
+          activeFilters.every(
+            (filter) =>
+              (s.reason &&
+                s.reason.toLowerCase().includes(filter.toLowerCase())) ||
+              (s.description &&
+                s.description.toLowerCase().includes(filter.toLowerCase()))
           )
         )
       );
@@ -149,35 +177,35 @@ function HomePage() {
   const { recentSearches, addSearch, clearSearches } = useRecentSearches();
 
   const occasions = [
-    { value: "Birthday", label: "🎂 Birthday" },
-    { value: "Anniversary", label: "💕 Anniversary" },
-    { value: "Christmas", label: "🎄 Christmas" },
-    { value: "Graduation", label: "🎓 Graduation" },
-    { value: "Wedding", label: "💒 Wedding" },
-    { value: "Baby Shower", label: "👶 Baby Shower" },
-    { value: "Housewarming", label: "🏠 Housewarming" },
+    { value: 'Birthday', label: '🎂 Birthday' },
+    { value: 'Anniversary', label: '💕 Anniversary' },
+    { value: 'Christmas', label: '🎄 Christmas' },
+    { value: 'Graduation', label: '🎓 Graduation' },
+    { value: 'Wedding', label: '💒 Wedding' },
+    { value: 'Baby Shower', label: '👶 Baby Shower' },
+    { value: 'Housewarming', label: '🏠 Housewarming' },
     { value: "Valentine's Day", label: "💝 Valentine's Day" },
     { value: "Mother's Day", label: "🌷 Mother's Day" },
     { value: "Father's Day", label: "👨‍👧‍👦 Father's Day" },
-    { value: "Other", label: "🎁 Other" },
+    { value: 'Other', label: '🎁 Other' },
   ];
   const relationships = [
-    { value: "Friend", label: "👥 Friend" },
-    { value: "Partner", label: "💑 Partner" },
-    { value: "Parent", label: "👨‍👩‍👧‍👦 Parent" },
-    { value: "Sibling", label: "👫 Sibling" },
-    { value: "Coworker", label: "💼 Coworker" },
-    { value: "Child", label: "👶 Child" },
-    { value: "Other", label: "👤 Other" },
+    { value: 'Friend', label: '👥 Friend' },
+    { value: 'Partner', label: '💑 Partner' },
+    { value: 'Parent', label: '👨‍👩‍👧‍👦 Parent' },
+    { value: 'Sibling', label: '👫 Sibling' },
+    { value: 'Coworker', label: '💼 Coworker' },
+    { value: 'Child', label: '👶 Child' },
+    { value: 'Other', label: '👤 Other' },
   ];
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     if (!relationship.trim())
-      newErrors.relationship = "Please select a relationship";
-    if (!occasion.trim()) newErrors.occasion = "Please select an occasion";
+      newErrors.relationship = 'Please select a relationship';
+    if (!occasion.trim()) newErrors.occasion = 'Please select an occasion';
     if (interests.length === 0)
-      newErrors.interests = "Please enter at least one interest";
+      newErrors.interests = 'Please enter at least one interest';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -191,7 +219,7 @@ function HomePage() {
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validateForm()) {
-      showToastMessage("Please fix the errors in the form", "error");
+      showToastMessage('Please fix the errors in the form', 'error');
       return;
     }
     setLoading(true);
@@ -201,7 +229,7 @@ function HomePage() {
         age,
         relationship,
         occasion,
-        interests: interests.join(", "),
+        interests: interests.join(', '),
         budget,
         negativeKeywords,
       };
@@ -214,12 +242,13 @@ function HomePage() {
       });
 
       addSearch(formData);
-      const response = await fetch("/api/generate-gifts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/generate-gifts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
 
       // Handle new response format with cache status
@@ -233,7 +262,7 @@ function HomePage() {
           isCached
             ? `⚡ Found ${giftsArray.length} gift suggestions instantly (cached)!`
             : `🎉 Found ${giftsArray.length} gift suggestions!`,
-          "success",
+          'success'
         );
         // trackGiftGeneration(occasion, relationship, interests.length); // Disabled - API removed
 
@@ -244,23 +273,24 @@ function HomePage() {
           cached: isCached,
           responseTime: Date.now() - startTime,
         });
-
       } else {
-        throw new Error("Invalid data format received from API.");
+        throw new Error('Invalid data format received from API.');
       }
     } catch (error) {
       // Track failure event
-      analytics.giftFinderFailed(error instanceof Error ? error.message : "Unknown error");
+      analytics.giftFinderFailed(
+        error instanceof Error ? error.message : 'Unknown error'
+      );
 
       showToastMessage(
-        "Failed to generate suggestions. Please try again.",
-        "error",
+        'Failed to generate suggestions. Please try again.',
+        'error'
       );
       const mockSuggestions = await GiftService.generateMockSuggestions({
         age,
         relationship,
         occasion,
-        interests: interests.join(", "),
+        interests: interests.join(', '),
         budget,
       });
       setSuggestions(mockSuggestions);
@@ -294,21 +324,21 @@ function HomePage() {
     try {
       const text = suggestions
         .map((s: GiftSuggestion) => `${s.name} – ${s.description}`)
-        .join("\n");
+        .join('\n');
       await navigator.clipboard.writeText(text);
-      showToastMessage("Gift list copied to clipboard!", "success");
+      showToastMessage('Gift list copied to clipboard!', 'success');
     } catch (error) {
-      showToastMessage("Failed to copy to clipboard", "error");
+      showToastMessage('Failed to copy to clipboard', 'error');
     }
   };
   const clearForm = () => {
     setAge(25);
-    setOccasion("");
+    setOccasion('');
     setInterests([]);
-    setCurrentInterest("");
-    setBudget("");
-    setRelationship("");
-    setNegativeKeywords("");
+    setCurrentInterest('');
+    setBudget('');
+    setRelationship('');
+    setNegativeKeywords('');
     setSuggestions([]);
     setErrors({});
     setIsUsingMockData(false);
@@ -316,18 +346,18 @@ function HomePage() {
   };
   const handleSelectRecentSearch = (search: any) => {
     setAge(search.age);
-    setRelationship(search.relationship || "");
+    setRelationship(search.relationship || '');
     setOccasion(search.occasion);
-    setInterests(search.interests.split(", ").filter(Boolean));
+    setInterests(search.interests.split(', ').filter(Boolean));
     setBudget(search.budget);
-    setNegativeKeywords(search.negativeKeywords || "");
+    setNegativeKeywords(search.negativeKeywords || '');
     setErrors({});
   };
   const handleFeedbackSubmit = async (rating: number, feedback: string) => {
     try {
-      showToastMessage("Thank you for your feedback!", "success");
+      showToastMessage('Thank you for your feedback!', 'success');
     } catch (error) {
-      showToastMessage("Failed to submit feedback", "error");
+      showToastMessage('Failed to submit feedback', 'error');
     }
   };
 
@@ -335,13 +365,27 @@ function HomePage() {
   const progressPercent = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
   // Fade-in animation class
-  const fadeInClass = 'transition-all duration-500 opacity-0 translate-y-4 animate-fade-in-up';
+  const fadeInClass =
+    'transition-all duration-500 opacity-0 translate-y-4 animate-fade-in-up';
 
   // Popular interests for step 4
   const popularInterests = [
-    'Tech', 'Gaming', 'Reading', 'Cooking', 'Travel', 'Movies',
-    'Music', 'Sports', 'Fitness', 'Fashion', 'Art', 'Photography',
-    'Gardening', 'DIY Crafts', 'Hiking', 'Makeup'
+    'Tech',
+    'Gaming',
+    'Reading',
+    'Cooking',
+    'Travel',
+    'Movies',
+    'Music',
+    'Sports',
+    'Fitness',
+    'Fashion',
+    'Art',
+    'Photography',
+    'Gardening',
+    'DIY Crafts',
+    'Hiking',
+    'Makeup',
   ];
 
   // Render loading screen if loading
@@ -356,7 +400,10 @@ function HomePage() {
         <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
           <div
             className="h-3 bg-primary rounded-full transition-all"
-            style={{ width: `${progressPercent}%`, transition: 'width 0.4s ease-in-out' }}
+            style={{
+              width: `${progressPercent}%`,
+              transition: 'width 0.4s ease-in-out',
+            }}
           />
         </div>
         <div className="text-center mt-2 text-sm font-medium text-text-secondary">
@@ -365,8 +412,13 @@ function HomePage() {
       </div>
       <header className="text-center mb-10">
         <Helmet>
-          <title>Smart Gift Finder - AI-Powered Gift Ideas for Everyone [2025]</title>
-          <meta name="description" content="🎁 Find perfect gifts in seconds! AI-powered recommendations for birthdays, weddings, & more. 25+ categories. Free to use ⚡" />
+          <title>
+            Smart Gift Finder - AI-Powered Gift Ideas for Everyone [2025]
+          </title>
+          <meta
+            name="description"
+            content="🎁 Find perfect gifts in seconds! AI-powered recommendations for birthdays, weddings, & more. 25+ categories. Free to use ⚡"
+          />
           <link rel="canonical" href="https://www.smartgiftfinder.xyz/" />
           {/* Organization Schema */}
           <script type="application/ld+json">
@@ -378,14 +430,19 @@ function HomePage() {
           </script>
         </Helmet>
         <h1 className="text-4xl sm:text-5xl font-display font-bold text-light-text-primary dark:text-dark-text-primary">
-          <span role="img" aria-label="Gift box icon">🎁</span> Smart Gift Finder
+          <span role="img" aria-label="Gift box icon">
+            🎁
+          </span>{' '}
+          Smart Gift Finder
         </h1>
         <p className="text-light-text-muted dark:text-dark-text-muted mt-2">
           Find the perfect gift with AI-powered suggestions
         </p>
       </header>
       <section className="mb-6 text-center animate-fade-in-up">
-        <h2 className="font-display text-3xl font-bold text-text-primary">Let's find the perfect gift!</h2>
+        <h2 className="font-display text-3xl font-bold text-text-primary">
+          Let's find the perfect gift!
+        </h2>
       </section>
       <section>
         <RecentSearches
@@ -395,7 +452,12 @@ function HomePage() {
         />
       </section>
       <section className="bg-surface rounded-lg shadow-lg p-8 mb-8 border border-border mx-4 sm:mx-0">
-        <form onSubmit={handleSubmit} className="space-y-6" role="search" aria-label="Gift recommendation form">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          role="search"
+          aria-label="Gift recommendation form"
+        >
           {Object.keys(errors).length > 0 && (
             <div className="mb-4 p-3 rounded-lg text-white text-center font-bold animate-fade-in-up bg-error dark:bg-dark-error">
               Please fill in all required fields.
@@ -404,69 +466,176 @@ function HomePage() {
           {/* Step 1: Recipient Age */}
           {step === 1 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="age" className="block text-base font-medium text-text-secondary mb-2">
-                Recipient Age: <span className="text-primary font-bold">{age}</span>
+              <label
+                htmlFor="age"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
+                Recipient Age:{' '}
+                <span className="text-primary font-bold">{age}</span>
               </label>
-              <input type="range" id="age" min="1" max="100" value={age} onChange={(e) => setAge(parseInt(e.target.value))} className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer" />
+              <input
+                type="range"
+                id="age"
+                min="1"
+                max="100"
+                value={age}
+                onChange={(e) => setAge(parseInt(e.target.value))}
+                className="w-full h-3 bg-border rounded-lg appearance-none cursor-pointer"
+              />
             </div>
           )}
           {/* Step 2: Who is this for? */}
           {step === 2 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="relationship" className="block text-base font-medium text-text-secondary mb-2">
+              <label
+                htmlFor="relationship"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
                 Who is this for? <span className="text-error">*</span>
               </label>
-              <select id="relationship" value={relationship} onChange={(e) => setRelationship(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? 'border-error' : ''}`} aria-describedby={errors.relationship ? 'relationship-error' : undefined}>
+              <select
+                id="relationship"
+                value={relationship}
+                onChange={(e) => setRelationship(e.target.value)}
+                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.relationship ? 'border-error' : ''}`}
+                aria-describedby={
+                  errors.relationship ? 'relationship-error' : undefined
+                }
+              >
                 <option value="">Select relationship</option>
                 {relationships.map((rel) => (
-                  <option key={rel.value} value={rel.value}>{rel.label}</option>
+                  <option key={rel.value} value={rel.value}>
+                    {rel.label}
+                  </option>
                 ))}
               </select>
               {errors.relationship && (
-                <p id="relationship-error" className="text-error text-sm mt-1" role="alert">{errors.relationship}</p>
+                <p
+                  id="relationship-error"
+                  className="text-error text-sm mt-1"
+                  role="alert"
+                >
+                  {errors.relationship}
+                </p>
               )}
             </div>
           )}
           {/* Step 3: Occasion */}
           {step === 3 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="occasion" className="block text-base font-medium text-text-secondary mb-2">
+              <label
+                htmlFor="occasion"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
                 Occasion <span className="text-error">*</span>
               </label>
-              <select id="occasion" value={occasion} onChange={(e) => setOccasion(e.target.value)} className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? 'border-error' : ''}`} aria-describedby={errors.occasion ? 'occasion-error' : undefined}>
+              <select
+                id="occasion"
+                value={occasion}
+                onChange={(e) => setOccasion(e.target.value)}
+                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.occasion ? 'border-error' : ''}`}
+                aria-describedby={
+                  errors.occasion ? 'occasion-error' : undefined
+                }
+              >
                 <option value="">Select an occasion</option>
                 {occasions.map((occ) => (
-                  <option key={occ.value} value={occ.value}>{occ.label}</option>
+                  <option key={occ.value} value={occ.value}>
+                    {occ.label}
+                  </option>
                 ))}
               </select>
               {errors.occasion && (
-                <p id="occasion-error" className="text-error text-sm mt-1" role="alert">{errors.occasion}</p>
+                <p
+                  id="occasion-error"
+                  className="text-error text-sm mt-1"
+                  role="alert"
+                >
+                  {errors.occasion}
+                </p>
               )}
             </div>
           )}
           {/* Step 4: Interests */}
           {step === 4 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="interests" className="block text-base font-medium text-text-secondary mb-2">
+              <label
+                htmlFor="interests"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
                 Interests <span className="text-error">*</span>
               </label>
-              <input type="text" id="interests" value={currentInterest} onChange={(e) => setCurrentInterest(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && currentInterest.trim()) { e.preventDefault(); const newInterest = currentInterest.trim().toLowerCase(); if (!interests.includes(newInterest)) { setInterests([...interests, newInterest]); } setCurrentInterest(''); } }} placeholder="Type an interest and press Enter" className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? 'border-error' : ''}`} aria-describedby={errors.interests ? 'interests-error' : undefined} />
+              <input
+                type="text"
+                id="interests"
+                value={currentInterest}
+                onChange={(e) => setCurrentInterest(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && currentInterest.trim()) {
+                    e.preventDefault();
+                    const newInterest = currentInterest.trim().toLowerCase();
+                    if (!interests.includes(newInterest)) {
+                      setInterests([...interests, newInterest]);
+                    }
+                    setCurrentInterest('');
+                  }
+                }}
+                placeholder="Type an interest and press Enter"
+                className={`w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base ${errors.interests ? 'border-error' : ''}`}
+                aria-describedby={
+                  errors.interests ? 'interests-error' : undefined
+                }
+              />
               {interests.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {interests.map((interest, index) => (
-                    <span key={index} className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" style={{ margin: '4px' }}>
+                    <span
+                      key={index}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-white text-primary border border-secondary rounded-full text-sm font-semibold capitalize min-w-[40px] min-h-[40px] transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
+                      style={{ margin: '4px' }}
+                    >
                       {interest}
-                      <button type="button" onClick={e => { if (window.navigator.vibrate) window.navigator.vibrate([50]); setInterests(interests.filter((_, i) => i !== index)); }} className="ml-1 text-primary hover:opacity-70 focus:outline-none" aria-label={`Remove ${interest} interest`}>&times;</button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          if (window.navigator.vibrate)
+                            window.navigator.vibrate([50]);
+                          setInterests(interests.filter((_, i) => i !== index));
+                        }}
+                        className="ml-1 text-primary hover:opacity-70 focus:outline-none"
+                        aria-label={`Remove ${interest} interest`}
+                      >
+                        &times;
+                      </button>
                     </span>
                   ))}
                 </div>
               )}
-              <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">Add 1-3 interests</div>
+              <div className="mt-1 mb-2 text-xs text-text-secondary font-medium">
+                Add 1-3 interests
+              </div>
               <div className="mt-4">
-                <p className="text-xs text-text-secondary mb-2">Or select from popular interests:</p>
+                <p className="text-xs text-text-secondary mb-2">
+                  Or select from popular interests:
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {popularInterests.map((quickInterest) => (
-                    <button key={quickInterest} type="button" onClick={e => { if (window.navigator.vibrate) window.navigator.vibrate([50]); const lowerCaseInterest = quickInterest.toLowerCase(); if (!interests.includes(lowerCaseInterest)) { setInterests([...interests, lowerCaseInterest]); } }} className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary" aria-label={`Interest: ${quickInterest}`}>{quickInterest}</button>
+                    <button
+                      key={quickInterest}
+                      type="button"
+                      onClick={(e) => {
+                        if (window.navigator.vibrate)
+                          window.navigator.vibrate([50]);
+                        const lowerCaseInterest = quickInterest.toLowerCase();
+                        if (!interests.includes(lowerCaseInterest)) {
+                          setInterests([...interests, lowerCaseInterest]);
+                        }
+                      }}
+                      className="interest-button bg-white text-primary border border-secondary rounded-full px-4 py-2 m-1 min-w-[40px] min-h-[40px] font-semibold text-sm transition-transform duration-150 hover:bg-background active:scale-105 focus:outline-none focus:ring-2 focus:ring-primary"
+                      aria-label={`Interest: ${quickInterest}`}
+                    >
+                      {quickInterest}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -475,31 +644,80 @@ function HomePage() {
           {/* Step 5: Things to avoid */}
           {step === 5 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="negativeKeywords" className="block text-base font-medium text-text-secondary mb-2">Things to avoid <span className="text-text-secondary">(optional)</span></label>
-              <input type="text" id="negativeKeywords" value={negativeKeywords} onChange={(e) => setNegativeKeywords(e.target.value)} placeholder="e.g. socks, mugs, books" className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base" />
+              <label
+                htmlFor="negativeKeywords"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
+                Things to avoid{' '}
+                <span className="text-text-secondary">(optional)</span>
+              </label>
+              <input
+                type="text"
+                id="negativeKeywords"
+                value={negativeKeywords}
+                onChange={(e) => setNegativeKeywords(e.target.value)}
+                placeholder="e.g. socks, mugs, books"
+                className="w-full p-3 min-h-[48px] border rounded-lg bg-surface border-border text-text-primary focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-secondary text-base"
+              />
             </div>
           )}
           {/* Step 6: Budget */}
           {step === 6 && (
             <div className="fade-in animate-fade-in-up">
-              <label htmlFor="budget" className="block text-base font-medium text-text-secondary mb-2">Budget (optional)</label>
-              <input type="number" id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="Enter maximum budget" className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? 'border-error' : 'border-border'}`} aria-describedby={errors.budget ? 'budget-error' : undefined} />
+              <label
+                htmlFor="budget"
+                className="block text-base font-medium text-text-secondary mb-2"
+              >
+                Budget (optional)
+              </label>
+              <input
+                type="number"
+                id="budget"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                placeholder="Enter maximum budget"
+                className={`w-full p-3 min-h-[48px] border rounded-lg bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:outline-none focus:ring-2 focus:ring-primary transition-colors ${errors.budget ? 'border-error' : 'border-border'}`}
+                aria-describedby={errors.budget ? 'budget-error' : undefined}
+              />
               {errors.budget && (
-                <p id="budget-error" className="text-error text-sm mt-1" role="alert">{errors.budget}</p>
+                <p
+                  id="budget-error"
+                  className="text-error text-sm mt-1"
+                  role="alert"
+                >
+                  {errors.budget}
+                </p>
               )}
             </div>
           )}
           {/* Navigation Controls */}
           <div className="flex justify-between items-center mt-8">
             {step > 1 && (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Back</button>
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                className="px-6 py-3 rounded-lg border border-border bg-gray-200 text-text-primary font-bold text-lg hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              >
+                Back
+              </button>
             )}
             <div className="flex-1" />
             {step < TOTAL_STEPS && (
-              <button type="button" onClick={() => setStep(step + 1)} className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Next</button>
+              <button
+                type="button"
+                onClick={() => setStep(step + 1)}
+                className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              >
+                Next
+              </button>
             )}
             {step === TOTAL_STEPS && (
-              <button type="submit" className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">Find My Gift</button>
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-lg bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              >
+                Find My Gift
+              </button>
             )}
           </div>
         </form>
@@ -515,9 +733,15 @@ function HomePage() {
           {isCachedResult && (
             <div className="flex items-center justify-center gap-2 text-sm text-green-600 dark:text-green-400 mb-4 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
               </svg>
-              <span className="font-medium">⚡ Instant results (from cache) - Saved API cost!</span>
+              <span className="font-medium">
+                ⚡ Instant results (from cache) - Saved API cost!
+              </span>
             </div>
           )}
           <nav
@@ -527,9 +751,15 @@ function HomePage() {
             {REFINE_OPTIONS.map((option) => (
               <Button
                 key={option.value}
-                variant={activeFilters.includes(option.label) ? 'primary' : 'outline'}
+                variant={
+                  activeFilters.includes(option.label) ? 'primary' : 'outline'
+                }
                 size="sm"
-                className={activeFilters.includes(option.label) ? 'bg-primary text-white' : ''}
+                className={
+                  activeFilters.includes(option.label)
+                    ? 'bg-primary text-white'
+                    : ''
+                }
                 onClick={() => toggleFilter(option.label)}
               >
                 {option.label}
@@ -539,14 +769,24 @@ function HomePage() {
           {filteredSuggestions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 animate-fade-in-up">
               <span className="text-5xl mb-4">🤔</span>
-              <div className="text-xl font-bold mb-2 text-text-primary">Our AI is stumped!</div>
-              <div className="text-text-secondary mb-4">We couldn't find any gifts that match your filters.</div>
+              <div className="text-xl font-bold mb-2 text-text-primary">
+                Our AI is stumped!
+              </div>
+              <div className="text-text-secondary mb-4">
+                We couldn't find any gifts that match your filters.
+              </div>
               <ul className="text-sm text-text-secondary mb-4 list-disc list-inside">
                 <li>Try using broader interests or fewer filters.</li>
                 <li>Go back and adjust your search criteria.</li>
                 <li>Regenerate to get a new set of ideas.</li>
               </ul>
-              <Button onClick={() => setActiveFilters([])} variant="outline" className="font-bold">Clear Filters</Button>
+              <Button
+                onClick={() => setActiveFilters([])}
+                variant="outline"
+                className="font-bold"
+              >
+                Clear Filters
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -588,14 +828,18 @@ function HomePage() {
       )}
 
       <section className="mt-16 w-full max-w-6xl px-4 animate-fade-in-up">
-        <h2 className="text-3xl font-bold mb-8 text-center text-text-primary font-display">Browse Gift Ideas by Category</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center text-text-primary font-display">
+          Browse Gift Ideas by Category
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
             to="/gifts-for-mom"
             className="group p-6 bg-surface border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👩</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-600 transition-colors">Gifts for Mom</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-600 transition-colors">
+              Gifts for Mom
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Thoughtful ideas she'll love.
             </p>
@@ -609,7 +853,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-green-200 rounded-lg hover:border-green-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👨</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-green-600 transition-colors">Gifts for Dad</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-green-600 transition-colors">
+              Gifts for Dad
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Practical gifts he'll use.
             </p>
@@ -623,7 +869,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">🎂</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-purple-600 transition-colors">Birthday Gifts</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-purple-600 transition-colors">
+              Birthday Gifts
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Perfect for any age.
             </p>
@@ -637,7 +885,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-red-200 rounded-lg hover:border-red-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">💑</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-red-600 transition-colors">Anniversary Gifts</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-red-600 transition-colors">
+              Anniversary Gifts
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Romantic gift ideas.
             </p>
@@ -651,7 +901,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-blue-800 rounded-lg hover:border-blue-900 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👦</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-800 transition-colors">Gifts for Boyfriend</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-blue-800 transition-colors">
+              Gifts for Boyfriend
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Ideas he'll actually love.
             </p>
@@ -665,7 +917,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-pink-200 rounded-lg hover:border-pink-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">👧</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-pink-600 transition-colors">Gifts for Girlfriend</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-pink-600 transition-colors">
+              Gifts for Girlfriend
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Romantic & thoughtful.
             </p>
@@ -679,7 +933,9 @@ function HomePage() {
             className="group p-6 bg-surface border-2 border-teal-200 rounded-lg hover:border-teal-500 hover:shadow-lg transition flex flex-col items-center text-center"
           >
             <div className="text-4xl mb-3">✨</div>
-            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-teal-600 transition-colors">Unique Gifts</h3>
+            <h3 className="text-xl font-semibold mb-2 text-text-primary group-hover:text-teal-600 transition-colors">
+              Unique Gifts
+            </h3>
             <p className="text-text-secondary text-sm mb-4">
               Creative & memorable.
             </p>
@@ -739,8 +995,26 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/blog" element={<BlogIndex />} />
-              <Route path="/blog/ultimate-gift-giving-guide" element={<UltimateGiftGivingGuide />} />
-              <Route path="/blog/gift-giving-psychology" element={<GiftGivingPsychology />} />
+              <Route
+                path="/blog/ultimate-gift-giving-guide"
+                element={<UltimateGiftGivingGuide />}
+              />
+              <Route
+                path="/blog/gift-giving-psychology"
+                element={<GiftGivingPsychology />}
+              />
+              <Route
+                path="/blog/ai-gift-finder-birthday"
+                element={<AIGiftFinderBirthday />}
+              />
+              <Route
+                path="/blog/smart-gift-ideas"
+                element={<SmartGiftIdeas />}
+              />
+              <Route
+                path="/blog/how-ai-gift-finders-work"
+                element={<HowAIGiftFindersWork />}
+              />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/login" element={<Login />} />
               <Route
@@ -764,8 +1038,14 @@ function App() {
               <Route path="/gifts-for-dad" element={<GiftsForDad />} />
               <Route path="/birthday-gifts" element={<BirthdayGifts />} />
               <Route path="/anniversary-gifts" element={<AnniversaryGifts />} />
-              <Route path="/gifts-for-boyfriend" element={<GiftsForBoyfriend />} />
-              <Route path="/gifts-for-girlfriend" element={<GiftsForGirlfriend />} />
+              <Route
+                path="/gifts-for-boyfriend"
+                element={<GiftsForBoyfriend />}
+              />
+              <Route
+                path="/gifts-for-girlfriend"
+                element={<GiftsForGirlfriend />}
+              />
               <Route path="/unique-gifts" element={<UniqueGifts />} />
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="*" element={<NotFound />} />

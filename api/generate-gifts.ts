@@ -5,7 +5,10 @@ import { OpenAI } from 'openai';
 // Initialize Redis for caching (graceful degradation if not configured)
 let redis: Redis | null = null;
 try {
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (
+    process.env.UPSTASH_REDIS_REST_URL &&
+    process.env.UPSTASH_REDIS_REST_TOKEN
+  ) {
     redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -20,8 +23,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-
-
 interface GiftSuggestion {
   id?: string;
   name: string;
@@ -33,12 +34,13 @@ interface GiftSuggestion {
 }
 
 import { checkRateLimit, giftRateLimit } from './middleware/rateLimit';
-import { GiftRequestSchema, validateAndSanitize, formatValidationErrors } from '../src/utils/validation';
+import {
+  GiftRequestSchema,
+  validateAndSanitize,
+  formatValidationErrors,
+} from '../src/utils/validation';
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   const origin = req.headers.origin || '';
   const allowedOrigins = [
@@ -77,7 +79,8 @@ export default async function handler(
       });
     }
 
-    const { recipient, occasion, budget, interests, negativeKeywords } = validation.data;
+    const { recipient, occasion, budget, interests, negativeKeywords } =
+      validation.data;
 
     // Create cache key (data is already sanitized by Zod transforms)
     const cacheKey = `gifts:v1:${recipient}:${occasion}:${budget}:${interests}:${negativeKeywords}`;
@@ -104,7 +107,8 @@ export default async function handler(
     }
 
     // Build optimized prompt
-    const systemPrompt = 'You are a professional gift recommendation expert. Provide thoughtful, creative gift ideas in valid JSON format only. Do not include markdown formatting or code blocks.';
+    const systemPrompt =
+      'You are a professional gift recommendation expert. Provide thoughtful, creative gift ideas in valid JSON format only. Do not include markdown formatting or code blocks.';
 
     const userPrompt = `Generate exactly 5 unique and thoughtful gift suggestions for:
 
@@ -138,7 +142,7 @@ Requirements:
       model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+        { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
       max_tokens: 800,
@@ -162,7 +166,10 @@ Requirements:
         throw new Error('No JSON array found in response');
       }
 
-      const jsonString = cleanContent.substring(jsonStartIndex, jsonEndIndex + 1);
+      const jsonString = cleanContent.substring(
+        jsonStartIndex,
+        jsonEndIndex + 1
+      );
       gifts = JSON.parse(jsonString);
 
       // Validate response structure
@@ -175,35 +182,35 @@ Requirements:
       gifts = gifts.map((gift, index) => ({
         ...gift,
         id: gift.id || String(index + 1),
-        link: `https://www.amazon.com/s?k=${encodeURIComponent(gift.name)}&tag=${affiliateTag || ''}`
+        link: `https://www.amazon.com/s?k=${encodeURIComponent(gift.name)}&tag=${affiliateTag || ''}`,
       }));
-
     } catch (parseError) {
       console.error('[PARSE ERROR]', content.substring(0, 200));
 
       // Fallback to mock data if parsing fails
       gifts = [
         {
-          id: "1",
-          name: "🎁 Personalized Gift",
-          description: "A thoughtful personalized item perfect for the occasion",
-          reason: "Personalized gifts show extra thought and care",
-          link: `https://www.amazon.com/s?k=personalized+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`
+          id: '1',
+          name: '🎁 Personalized Gift',
+          description:
+            'A thoughtful personalized item perfect for the occasion',
+          reason: 'Personalized gifts show extra thought and care',
+          link: `https://www.amazon.com/s?k=personalized+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`,
         },
         {
-          id: "2",
-          name: "✨ Experience Gift",
-          description: "Create lasting memories with an experience gift",
-          reason: "Experiences often mean more than physical items",
-          link: `https://www.amazon.com/s?k=experience+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`
+          id: '2',
+          name: '✨ Experience Gift',
+          description: 'Create lasting memories with an experience gift',
+          reason: 'Experiences often mean more than physical items',
+          link: `https://www.amazon.com/s?k=experience+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`,
         },
         {
-          id: "3",
-          name: "🎯 Practical Gift",
+          id: '3',
+          name: '🎯 Practical Gift',
           description: "Something useful they'll appreciate every day",
-          reason: "Practical gifts provide lasting value",
-          link: `https://www.amazon.com/s?k=practical+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`
-        }
+          reason: 'Practical gifts provide lasting value',
+          link: `https://www.amazon.com/s?k=practical+gifts&tag=${process.env.AMAZON_AFFILIATE_TAG || ''}`,
+        },
       ];
     }
 
@@ -211,7 +218,11 @@ Requirements:
     if (redis && gifts.length > 0) {
       try {
         await redis.setex(cacheKey, 604800, gifts);
-        console.log('[CACHED]', cacheKey, `(${gifts.length} gifts, 7 days TTL)`);
+        console.log(
+          '[CACHED]',
+          cacheKey,
+          `(${gifts.length} gifts, 7 days TTL)`
+        );
       } catch (cacheError) {
         console.error('[CACHE WRITE ERROR]', cacheError);
         // Don't fail the request if caching fails
@@ -223,14 +234,14 @@ Requirements:
       cached: false,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error: any) {
     console.error('[API ERROR]', error);
 
     // Check if it's an OpenAI API error
     if (error.status === 401) {
       return res.status(500).json({
-        error: 'OpenAI API authentication failed. Please check API key configuration.',
+        error:
+          'OpenAI API authentication failed. Please check API key configuration.',
       });
     }
 
@@ -242,7 +253,10 @@ Requirements:
 
     return res.status(500).json({
       error: 'Failed to generate gift recommendations',
-      message: process.env.NODE_ENV === 'development' ? String(error.message) : 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development'
+          ? String(error.message)
+          : 'Internal server error',
     });
   }
 }

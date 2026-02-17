@@ -21,12 +21,12 @@ class BlogErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('BlogErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Log to console for debugging
     console.error('Blog system error:', {
       message: error.message,
       stack: error.stack,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack,
     });
   }
 
@@ -36,9 +36,12 @@ class BlogErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
             <div className="text-orange-500 text-6xl mb-4">📝</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Blog System Error</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              Blog System Error
+            </h2>
             <p className="text-gray-600 mb-4">
-              Something went wrong with the blog system. Please try refreshing the page or contact support if the problem persists.
+              Something went wrong with the blog system. Please try refreshing
+              the page or contact support if the problem persists.
             </p>
             {this.state.error && (
               <details className="text-left">
@@ -51,7 +54,12 @@ class BlogErrorBoundary extends Component<Props, State> {
                   {this.state.error.stack && (
                     <>
                       <div className="font-semibold mt-2 mb-1">Stack:</div>
-                      <div className="text-xs">{this.state.error.stack.split('\n').slice(0, 5).join('\n')}</div>
+                      <div className="text-xs">
+                        {this.state.error.stack
+                          .split('\n')
+                          .slice(0, 5)
+                          .join('\n')}
+                      </div>
                     </>
                   )}
                 </div>
@@ -65,7 +73,9 @@ class BlogErrorBoundary extends Component<Props, State> {
                 Refresh Page
               </button>
               <button
-                onClick={() => this.setState({ hasError: false, error: undefined })}
+                onClick={() =>
+                  this.setState({ hasError: false, error: undefined })
+                }
                 className="flex-1 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
               >
                 Try Again

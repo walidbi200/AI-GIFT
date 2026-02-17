@@ -39,13 +39,13 @@ const AdminDashboard: React.FC = () => {
     totalPosts: 0,
     totalViews: 0,
     averageReadingTime: 0,
-    topPerformingPosts: []
+    topPerformingPosts: [],
   });
   const [aiStats, setAiStats] = useState<AIGenerationStats>({
     totalGenerated: 0,
     averageQuality: 0,
     totalTokens: 0,
-    estimatedCost: 0
+    estimatedCost: 0,
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -67,8 +67,8 @@ const AdminDashboard: React.FC = () => {
         topPerformingPosts: [
           { title: 'Sample Blog Post 1', views: 450, readingTime: 5 },
           { title: 'Sample Blog Post 2', views: 320, readingTime: 3 },
-          { title: 'Sample Blog Post 3', views: 280, readingTime: 4 }
-        ]
+          { title: 'Sample Blog Post 3', views: 280, readingTime: 4 },
+        ],
       };
 
       // Mock AI stats
@@ -76,7 +76,7 @@ const AdminDashboard: React.FC = () => {
         totalGenerated: 12,
         averageQuality: 87,
         totalTokens: 45000,
-        estimatedCost: 0.45
+        estimatedCost: 0.45,
       };
 
       setBlogStats(stats);
@@ -109,7 +109,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'ai-generator', label: 'AI Generator', icon: '🤖' },
     { id: 'analytics', label: 'Analytics', icon: '📈' },
     { id: 'seo', label: 'SEO Monitor', icon: '🔍' },
-    { id: 'blog-list', label: 'Blog List', icon: '📋' }
+    { id: 'blog-list', label: 'Blog List', icon: '📋' },
   ];
 
   const renderOverview = () => (
@@ -123,7 +123,9 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Posts</p>
-              <p className="text-2xl font-bold text-gray-900">{blogStats.totalPosts}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {blogStats.totalPosts}
+              </p>
             </div>
           </div>
         </div>
@@ -135,7 +137,9 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Views</p>
-              <p className="text-2xl font-bold text-gray-900">{blogStats.totalViews.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {blogStats.totalViews.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -147,7 +151,9 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">AI Generated</p>
-              <p className="text-2xl font-bold text-gray-900">{aiStats.totalGenerated}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {aiStats.totalGenerated}
+              </p>
             </div>
           </div>
         </div>
@@ -159,7 +165,9 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg Quality</p>
-              <p className="text-2xl font-bold text-gray-900">{aiStats.averageQuality}%</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {aiStats.averageQuality}%
+              </p>
             </div>
           </div>
         </div>
@@ -168,26 +176,41 @@ const AdminDashboard: React.FC = () => {
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Posts</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Top Performing Posts
+          </h3>
           <div className="space-y-3">
             {blogStats.topPerformingPosts.map((post, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 truncate">{post.title}</p>
-                  <p className="text-sm text-gray-600">{post.views} views • {post.readingTime} min read</p>
+                  <p className="font-medium text-gray-900 truncate">
+                    {post.title}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {post.views} views • {post.readingTime} min read
+                  </p>
                 </div>
-                <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                <span className="text-sm font-medium text-gray-500">
+                  #{index + 1}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Generation Stats</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            AI Generation Stats
+          </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Tokens Used:</span>
-              <span className="font-medium">{aiStats.totalTokens.toLocaleString()}</span>
+              <span className="font-medium">
+                {aiStats.totalTokens.toLocaleString()}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Estimated Cost:</span>
@@ -195,7 +218,9 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Average Quality Score:</span>
-              <span className="font-medium text-green-600">{aiStats.averageQuality}%</span>
+              <span className="font-medium text-green-600">
+                {aiStats.averageQuality}%
+              </span>
             </div>
             <div className="pt-4">
               <Button
@@ -214,7 +239,9 @@ const AdminDashboard: React.FC = () => {
   const renderContentManagement = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900">Content Management</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Content Management
+        </h2>
         <Button
           onClick={() => setActiveTab('ai-generator')}
           className="bg-blue-600 text-white hover:bg-blue-700"
@@ -253,8 +280,12 @@ const AdminDashboard: React.FC = () => {
               {[1, 2, 3].map((i) => (
                 <tr key={i} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">Sample Post {i}</div>
-                    <div className="text-sm text-gray-500">Description for Sample Post {i}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      Sample Post {i}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Description for Sample Post {i}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date().toLocaleDateString()}
@@ -269,8 +300,12 @@ const AdminDashboard: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">Edit</button>
-                      <button className="text-red-600 hover:text-red-900">Delete</button>
+                      <button className="text-blue-600 hover:text-blue-900">
+                        Edit
+                      </button>
+                      <button className="text-red-600 hover:text-red-900">
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -284,11 +319,13 @@ const AdminDashboard: React.FC = () => {
 
   const renderAnalytics = () => {
     const analytics = useGoogleAnalytics();
-    
+
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900">Analytics Dashboard</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Analytics Dashboard
+          </h2>
           <Button
             onClick={analytics.refreshData}
             disabled={analytics.isLoading}
@@ -297,16 +334,18 @@ const AdminDashboard: React.FC = () => {
             {analytics.isLoading ? 'Loading...' : 'Refresh Data'}
           </Button>
         </div>
-        
+
         {analytics.error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-800">{analytics.error}</p>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Traffic Overview
+            </h3>
             {analytics.isLoading ? (
               <div className="space-y-4">
                 <div className="animate-pulse">
@@ -326,19 +365,28 @@ const AdminDashboard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Page Views (30 days)</span>
-                  <span className="font-medium">{analytics.pageViews.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {analytics.pageViews.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Unique Visitors</span>
-                  <span className="font-medium">{analytics.uniqueVisitors.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {analytics.uniqueVisitors.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Avg. Session Duration</span>
-                  <span className="font-medium">{Math.floor(analytics.sessionDuration / 60)}m {analytics.sessionDuration % 60}s</span>
+                  <span className="font-medium">
+                    {Math.floor(analytics.sessionDuration / 60)}m{' '}
+                    {analytics.sessionDuration % 60}s
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Bounce Rate</span>
-                  <span className={`font-medium ${analytics.bounceRate < 30 ? 'text-green-600' : analytics.bounceRate < 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  <span
+                    className={`font-medium ${analytics.bounceRate < 30 ? 'text-green-600' : analytics.bounceRate < 50 ? 'text-yellow-600' : 'text-red-600'}`}
+                  >
                     {analytics.bounceRate}%
                   </span>
                 </div>
@@ -347,10 +395,12 @@ const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Pages</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Top Pages
+            </h3>
             {analytics.isLoading ? (
               <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map(i => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="animate-pulse">
                     <div className="h-4 bg-gray-200 rounded w-full"></div>
                   </div>
@@ -359,12 +409,19 @@ const AdminDashboard: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {analytics.topPages.map((page, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                  >
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 truncate">{page.title}</p>
+                      <p className="font-medium text-gray-900 truncate">
+                        {page.title}
+                      </p>
                       <p className="text-sm text-gray-600">{page.path}</p>
                     </div>
-                    <span className="text-sm font-medium text-gray-500">{page.views.toLocaleString()} views</span>
+                    <span className="text-sm font-medium text-gray-500">
+                      {page.views.toLocaleString()} views
+                    </span>
                   </div>
                 ))}
               </div>
@@ -375,9 +432,7 @@ const AdminDashboard: React.FC = () => {
     );
   };
 
-  const renderSEOMonitor = () => (
-    <SEODashboard />
-  );
+  const renderSEOMonitor = () => <SEODashboard />;
 
   const renderBlogEditor = () => (
     <BlogErrorBoundary>
@@ -443,20 +498,36 @@ const AdminDashboard: React.FC = () => {
         {/* Header */}
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage your blog content and AI generation</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Manage your blog content and AI generation
+            </p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">Welcome, {user}</p>
+              <p className="text-sm font-medium text-gray-900">
+                Welcome, {user}
+              </p>
               <p className="text-xs text-gray-500">Administrator</p>
             </div>
             <button
               onClick={handleLogout}
               className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
               Logout
             </button>
@@ -467,7 +538,7 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md mb-8">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

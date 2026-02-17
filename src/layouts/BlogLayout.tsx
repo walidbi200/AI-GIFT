@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 // This component provides a consistent header and footer for all blog pages.
 const BlogLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

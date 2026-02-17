@@ -10,7 +10,11 @@ interface WishlistPageProps {
   onClearWishlist: () => void;
 }
 
-const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onRemoveFromWishlist, onClearWishlist }) => {
+const WishlistPage: React.FC<WishlistPageProps> = ({
+  wishlist,
+  onRemoveFromWishlist,
+  onClearWishlist,
+}) => {
   return (
     <div>
       {wishlist.length > 0 ? (
@@ -37,7 +41,9 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onRemoveFromWishl
         </>
       ) : (
         <div className="text-center bg-light-surface dark:bg-dark-surface rounded-lg p-8">
-          <p className="text-light-text-muted dark:text-dark-text-muted mb-4">Your wishlist is currently empty.</p>
+          <p className="text-light-text-muted dark:text-dark-text-muted mb-4">
+            Your wishlist is currently empty.
+          </p>
           <Link to="/">
             <Button variant="primary">Find Gifts</Button>
           </Link>
@@ -47,4 +53,4 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ wishlist, onRemoveFromWishl
   );
 };
 
-export default WishlistPage; 
+export default WishlistPage;
